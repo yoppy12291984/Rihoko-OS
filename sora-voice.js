@@ -34,11 +34,22 @@ async function startSora({ onTranscript, onStatus, onError } = {}) {
   _transcriptChild = "";
   try {
     onStatus && onStatus("せつぞく中…");
-    const tokenData = await callBackend_({ action: "token" });
-    const ephemeralKey = tokenData.value || (tokenData.client_secret && tokenData.client_secret.value);
-    if (!ephemeralKey) throw new Error("ephemeral key not found in response: " + JSON.stringify(tokenData));
 
-    _micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    var tokenData;
+    try {
+      tokenData = await callBackend_({ action: "token" });
+    } catch (err) {
+      throw new Error("[トークン取得] " + (err && err.message || err));
+    }
+    const ephemeralKey = tokenData.value || (tokenData.client_secret && tokenData.client_secret.value);
+    if (!ephemeralKey) throw new Error("[トークン取得] ephemeral key not found: " + JSON.stringify(tokenData));
+
+    try {
+      _micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      throw new Error("[マイク取得] " + (err && err.message || err));
+    }
+
     _pc = new RTCPeerConnection();
 
     const audioEl = document.getElementById("soraAudio");
@@ -63,13 +74,26 @@ async function startSora({ onTranscript, onStatus, onError } = {}) {
     const offer = await _pc.createOffer();
     await _pc.setLocalDescription(offer);
 
-    const sdpRes = await fetch("https://api.openai.com/v1/realtime/calls?model=gpt-realtime-2.1", {
-      method: "POST",
-      body: offer.sdp,
-      headers: { Authorization: `Bearer ${ephemeralKey}`, "Content-Type": "application/sdp" }
-    });
-    const answerSdp = await sdpRes.text();
-    await _pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
+    var sdpRes, answerSdp;
+    try {
+      sdpRes = await fetch("https://api.openai.com/v1/realtime/calls?model=gpt-realtime-2.1", {
+        method: "POST",
+        body: offer.sdp,
+        headers: { Authorization: `Bearer ${ephemeralKey}`, "Content-Type": "application/sdp" }
+      });
+      answerSdp = await sdpRes.text();
+    } catch (err) {
+      throw new Error("[SDP交換] " + (err && err.message || err));
+    }
+    if (!sdpRes.ok) {
+      throw new Error("[SDP交換] HTTP " + sdpRes.status + ": " + answerSdp.slice(0, 200));
+    }
+
+    try {
+      await _pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
+    } catch (err) {
+      throw new Error("[WebRTC接続] " + (err && err.message || err));
+    }
 
     onStatus && onStatus("おはなしできます");
   } catch (err) {
