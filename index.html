@@ -64,20 +64,20 @@
   .app--parent { max-width: 620px; }
 
   .mascot-corner {
-    position: fixed; right: -18px; bottom: 78px; width: 118px; height: 118px;
-    pointer-events: none; z-index: 0; filter: drop-shadow(0 6px 10px rgba(60,50,70,0.18));
+    position: fixed; right: -14px; bottom: 96px; width: 84px; height: 84px;
+    pointer-events: none; z-index: -1; opacity: 0.9;
+    filter: drop-shadow(0 6px 10px rgba(60,50,70,0.15));
   }
-  .home-body { position: relative; z-index: 1; }
 
   /* ---------- top bar ---------- */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding: 18px 20px 6px; }
   .topbar h1 { font-size: 15px; font-weight:700; color: var(--ink-soft); margin:0; letter-spacing:.02em; }
   .icon-btn {
-    border:none; background: linear-gradient(145deg, var(--coral-soft), var(--yellow-soft));
+    border:none; background: linear-gradient(145deg, #FFFFFF, var(--teal-soft));
     box-shadow: var(--shadow); border-radius: 50%;
     width:42px; height:42px; display:flex; align-items:center; justify-content:center; cursor:pointer;
   }
-  .icon-btn svg { width:20px; height:20px; }
+  .icon-btn svg { width:21px; height:21px; }
   .icon-btn:active { transform: scale(0.92); }
 
   /* ---------- child home ---------- */
@@ -256,8 +256,9 @@
     parentDarkMode: false,
     calendarEvents: null, calendarLoading: false,
     weeklyReport: null, weeklyReportLoading: false,
-    calMonth: null, calSelectedDate: null, // 保護者用カレンダータブ
-    routineDaysSelected: [0,1,2,3,4,5,6]
+    calMonth: null, calSelectedDate: null, // カレンダー(保護者・こども共通)
+    routineDaysSelected: [0,1,2,3,4,5,6],
+    tabOrder: null // 保護者が並び替えたタブ順(nullならデフォルト)
   };
   var db = null;
 
@@ -273,6 +274,8 @@
         state.routineDone = parsed.routineDone || {};
       }
       state.parentDarkMode = localStorage.getItem("riho-study-parent-dark") === "1";
+      var savedOrder = localStorage.getItem("riho-study-tab-order");
+      if (savedOrder) { try { state.tabOrder = JSON.parse(savedOrder); } catch(e2) {} }
     } catch(e) { /* ignore */ }
   }
   function saveLocal(){
@@ -410,24 +413,39 @@
     bindEvents();
   }
 
+  var TAB_DEFS = {
+    home:     { icon: "🏠", label: "きょう" },
+    manabu:   { icon: "📚", label: "まなぶ" },
+    dekita:   { icon: "🌟", label: "できた" },
+    sora:     { icon: "☁️", label: "空" },
+    calendar: { icon: "📅", label: "カレンダー" }
+  };
+  var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","calendar"];
+
+  function getTabOrder(){
+    var order = state.tabOrder && state.tabOrder.length === DEFAULT_TAB_ORDER.length ? state.tabOrder : DEFAULT_TAB_ORDER;
+    return order;
+  }
+
   function renderChild(){
     var body = "";
     if (state.view === "home") body = renderHome();
     else if (state.view === "manabu") body = renderManabu();
     else if (state.view === "dekita") body = renderDekita();
+    else if (state.view === "sora") body = renderSoraTab();
+    else if (state.view === "calendar") body = renderParentCalendar();
 
+    var order = getTabOrder();
     return (
       '<div class="topbar"><h1>Rihoko Study</h1>' +
       '<button class="icon-btn" id="gotoParent" title="保護者用">' +
         '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="#8A5A45" stroke-width="1.8"/>' +
-        '<path d="M19.4 13.5c.04-.5.04-1 0-1.5l1.6-1.2-1.5-2.6-1.9.6a7.6 7.6 0 0 0-1.3-.75L15.9 6h-3l-.4 2.05c-.47.19-.9.44-1.3.75l-1.9-.6-1.5 2.6 1.6 1.2c-.04.5-.04 1 0 1.5l-1.6 1.2 1.5 2.6 1.9-.6c.4.31.83.56 1.3.75L12.9 20h3l.4-2.05c.47-.19.9-.44 1.3-.75l1.9.6 1.5-2.6-1.6-1.2Z" stroke="#8A5A45" stroke-width="1.6" stroke-linejoin="round"/>' +
+        '<circle cx="12" cy="12" r="3.2" stroke="#2F8F86" stroke-width="1.8"/>' +
+        '<path d="M12 3.5v2.1M12 18.4v2.1M20.5 12h-2.1M5.6 12H3.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5M17.7 17.7l-1.5-1.5M7.8 7.8L6.3 6.3" stroke="#2F8F86" stroke-width="1.8" stroke-linecap="round"/>' +
         '</svg></button></div>' +
       body +
       '<div class="tabbar"><div class="tabbar-inner">' +
-        tabBtn("home","🏠","きょう") +
-        tabBtn("manabu","📚","まなぶ") +
-        tabBtn("dekita","🌟","できた") +
+        order.map(function(id){ return tabBtn(id, TAB_DEFS[id].icon, TAB_DEFS[id].label); }).join("") +
       '</div></div>'
     );
   }
@@ -444,21 +462,15 @@
   function renderHome(){
     var today = todayStr();
     var todays = combinedItemsForDate(today);
-    var shown = todays.slice(0,3);
-    var overflow = todays.length > 3;
 
-    var html = '<div class="home-body">';
-    html += '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
+    var html = '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
       '<p class="date">' + fmtDateLong(today) + '</p></div>';
 
-    html += '<div class="section-label">きょうの3つ</div>';
-    if (shown.length === 0) {
+    html += '<div class="section-label">きょうやること</div>';
+    if (todays.length === 0) {
       html += '<div class="empty-state">きょうの予定はまだ登録されていません。<br>保護者の方に聞いてみてね。</div>';
     } else {
-      html += '<div class="todo-list">' + shown.map(renderTodoCard).join("") + '</div>';
-    }
-    if (overflow) {
-      html += '<div class="warn-note" style="margin-top:10px;">きょうの予定が3件をこえています。保護者画面で調整してね。</div>';
+      html += '<div class="todo-list">' + todays.map(renderTodoCard).join("") + '</div>';
     }
 
     var next = nextEvent();
@@ -469,10 +481,14 @@
     } else {
       html += '<div class="empty-state">つぎの予定はまだありません。</div>';
     }
+    return html;
+  }
 
+  function renderSoraTab(){
+    var html = '<div class="greeting"><p class="hello">空(そら)とおはなし</p><p class="date">えいごで話してみよう</p></div>';
     var talking = state.soraState === "talking" || state.soraState === "connecting";
     html += '<button class="sora-btn ' + (talking?"talking":"") + '" id="soraBtn">🎙️ ' +
-      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "Soraに話す") +
+      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "空に話す") +
       '</button>';
     html += '<div class="sora-status">' + escapeHtml(state.soraStatus || "") + '</div>';
     html += '<div class="sora-transcript ' + (state.soraTranscript ? "show" : "") + '">' + escapeHtml(state.soraTranscript || "") + '</div>';
@@ -987,6 +1003,21 @@
     }).join("");
   }
 
+  function renderTabOrderPanel(){
+    var order = getTabOrder();
+    var rows = order.map(function(id, i){
+      return '<div class="row-item" style="justify-content:space-between;">' +
+        '<div class="ri-title">' + TAB_DEFS[id].icon + ' ' + TAB_DEFS[id].label + '</div>' +
+        '<div style="display:flex;gap:6px;">' +
+        '<button class="del-btn" data-tabmove="' + i + ':up" ' + (i===0?"disabled":"") + ' style="color:var(--ink-soft);">▲</button>' +
+        '<button class="del-btn" data-tabmove="' + i + ':down" ' + (i===order.length-1?"disabled":"") + ' style="color:var(--ink-soft);">▼</button>' +
+        '</div></div>';
+    }).join("");
+    return '<div class="panel"><h2>タブの並び順</h2>' +
+      '<div class="ri-sub" style="margin-bottom:8px;">こども画面の下のタブの順番を変えられます。</div>' +
+      '<div class="row-list">' + rows + '</div></div>';
+  }
+
   function renderParentMore(){
     var html = renderUsagePanel();
     html += '<div class="panel"><h2>表示設定</h2>' +
@@ -994,6 +1025,7 @@
       '<label style="margin:0;">保護者画面をダークモードにする</label>' +
       '<input type="checkbox" id="darkModeToggle" ' + (state.parentDarkMode ? "checked" : "") + ' style="width:20px;height:20px;">' +
       '</div><div class="ri-sub">こどもの画面には影響しません。</div></div>';
+    html += renderTabOrderPanel();
     html += '<div class="panel"><h2>今後追加する機能</h2>' +
       '<div class="future-note">・ お直し（写真で撮影した答案のAI採点とヒント）<br>' +
       '・ 学習履歴のより詳しいグラフ表示</div>' +
@@ -1246,6 +1278,20 @@
       });
     };
 
+    app.querySelectorAll("[data-tabmove]").forEach(function(b){
+      b.onclick = function(){
+        var parts = b.getAttribute("data-tabmove").split(":");
+        var i = parseInt(parts[0], 10), dir = parts[1];
+        var order = getTabOrder().slice();
+        var j = dir === "up" ? i - 1 : i + 1;
+        if (j < 0 || j >= order.length) return;
+        var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+        state.tabOrder = order;
+        try { localStorage.setItem("riho-study-tab-order", JSON.stringify(order)); } catch(e){}
+        render();
+      };
+    });
+
     var darkModeToggle = document.getElementById("darkModeToggle");
     if (darkModeToggle) darkModeToggle.onchange = function(){
       state.parentDarkMode = darkModeToggle.checked;
@@ -1463,7 +1509,6 @@
     };
   }
 
-  var CHILD_TABS_ORDER = ["home", "manabu", "dekita"];
   function setupSwipeNav_(){
     var appEl = document.getElementById("app");
     var startX = null, startY = null;
@@ -1477,10 +1522,11 @@
       var dy = e.changedTouches[0].clientY - startY;
       startX = null;
       if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      var idx = CHILD_TABS_ORDER.indexOf(state.view);
+      var order = getTabOrder();
+      var idx = order.indexOf(state.view);
       if (idx === -1) return;
-      if (dx < 0 && idx < CHILD_TABS_ORDER.length - 1) { state.view = CHILD_TABS_ORDER[idx + 1]; render(); }
-      else if (dx > 0 && idx > 0) { state.view = CHILD_TABS_ORDER[idx - 1]; render(); }
+      if (dx < 0 && idx < order.length - 1) { state.view = order[idx + 1]; render(); }
+      else if (dx > 0 && idx > 0) { state.view = order[idx - 1]; render(); }
     }, { passive: true });
   }
 
