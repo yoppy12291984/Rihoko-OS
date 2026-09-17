@@ -236,6 +236,15 @@ async function logQuizResult(subject, score, total) {
   catch (err) { /* 記録の失敗はUIをブロックしない */ }
 }
 
+/**
+ * 印刷用プリント(書き込み式問題+解答)を取得する。
+ * 戻り値: { title, questions: [{question, answer}] }
+ */
+async function fetchWorksheet(subject, context, count) {
+  const data = await callBackend_({ action: "worksheet", subject: subject, context: context || "", count: count || 8 });
+  return data.worksheet || { title: subject + "のプリント", questions: [] };
+}
+
 /* ---------------- 学習履歴 ---------------- */
 
 async function fetchLearningLogs(limit) {
