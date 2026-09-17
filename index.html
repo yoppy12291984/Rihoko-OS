@@ -937,9 +937,12 @@
         onError: function(err){
           state.soraState = "idle";
           var msg = String(err && err.message || err || "");
-          state.soraStatus = msg.indexOf("usage_limit_reached") >= 0
-            ? "今月のAIりようは上限に達したよ。保護者の方に伝えてね。"
-            : "せつぞくできませんでした。保護者の方に伝えてね。";
+          if (msg.indexOf("usage_limit_reached") >= 0) {
+            state.soraStatus = "今月のAIりようは上限に達したよ。保護者の方に伝えてね。";
+          } else {
+            // デバッグ用: 原因を特定するため、実際のエラー内容をそのまま表示する
+            state.soraStatus = "せつぞくエラー: " + msg;
+          }
           render();
         }
       });
