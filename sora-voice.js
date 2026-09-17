@@ -16,10 +16,22 @@ let _dataChannel = null;
 let _transcriptSora = "";
 let _transcriptChild = "";
 
+// iOS Safariでは fetch() の POST + GAS側リダイレクトの組み合わせで
+// 「Load failed」になる既知の問題があるため、通常のやり取りはGET(クエリパラメータ)で行う。
+// 画像や長文などペイロードが大きいものだけ callBackendPost_ (POST) を使う。
 async function callBackend_(payload) {
+  const url = SORA_TOKEN_ENDPOINT + "?data=" + encodeURIComponent(JSON.stringify(payload));
+  const res = await fetch(url, { method: "GET" });
+  const data = await res.json();
+  if (data.error) throw new Error(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
+  return data;
+}
+
+async function callBackendPost_(payload) {
   const res = await fetch(SORA_TOKEN_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" }, // preflight回避のためtext/plainで送る
+    credentials: "omit",
     body: JSON.stringify(payload)
   });
   const data = await res.json();
@@ -114,7 +126,7 @@ async function stopSoraAndSummarize({ onSummary, onError } = {}) {
   stopSora();
   if (_transcriptSora.length < 5 && _transcriptChild.length < 5) return;
   try {
-    const data = await callBackend_({ action: "log", transcript: transcript });
+    const data = await callBackendPost_({ action: "log", transcript: transcript });
     onSummary && onSummary(data.summary || {});
   } catch (err) {
     onError && onError(err);
@@ -165,7 +177,7 @@ function fileToBase64_(file) {
  */
 async function extractPrintFromFile(file) {
   const base64 = await fileToBase64_(file);
-  const data = await callBackend_({ action: "extractPrint", imageBase64: base64, mimeType: file.type || "image/jpeg" });
+  const data = await callBackendPost_({ action: "extractPrint", imageBase64: base64, mimeType: file.type || "image/jpeg" });
   return data.extracted || {};
 }
 
