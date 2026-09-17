@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Riho Study</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Riho Study">
+<meta name="theme-color" content="#2F8F86">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F1F8F4;
+    --bg-parent: #F4F5F3;
+    --card: #FFFFFF;
+    --border: #DCE8E1;
+    --ink: #234D4A;
+    --ink-soft: #5B6B68;
+    --coral: #FF7A5C;
+    --coral-soft: #FFE3DB;
+    --yellow: #FFC94A;
+    --yellow-soft: #FFF3D6;
+    --teal: #2F8F86;
+    --teal-soft: #DCF1EE;
+    --danger: #E0574B;
+    --shadow: 0 2px 10px rgba(35,77,74,0.08);
+    color-scheme: light;
+  }
+  /* ダークモードは保護者画面限定・手動トグル(こども画面は常に明るい配色) */
+  .app--parent.dark-mode {
+    --bg: #16211F;
+    --bg-parent: #191B1A;
+    --card: #1E2B29;
+    --border: #2C3E3B;
+    --ink: #EAF3F0;
+    --ink-soft: #A8BDB8;
+    --coral-soft: #3A2723;
+    --yellow-soft: #3A331C;
+    --teal-soft: #1D3634;
+    color-scheme: dark;
+  }
+  body.parent-dark-bg { background: #14201e; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "M PLUS Rounded 1c", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    transition: background 0.2s ease;
+  }
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 84px; }
+  .app--parent { max-width: 620px; }
+
+  /* ---------- top bar ---------- */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding: 18px 20px 6px; }
+  .topbar h1 { font-size: 15px; font-weight:700; color: var(--ink-soft); margin:0; letter-spacing:.02em; }
+  .icon-btn {
+    border:none; background: var(--card); box-shadow: var(--shadow); border-radius: 14px;
+    width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px;
+  }
+  .icon-btn:active { transform: scale(0.94); }
+
+  /* ---------- child home ---------- */
+  .greeting { padding: 6px 20px 18px; }
+  .greeting .hello { font-size: 22px; font-weight: 800; margin: 0 0 2px; }
+  .greeting .date { font-size: 13px; color: var(--ink-soft); margin:0; }
+
+  .section-label { font-size: 13px; font-weight:700; color: var(--ink-soft); margin: 22px 20px 10px; }
+
+  .todo-list { display:flex; flex-direction:column; gap:10px; padding: 0 20px; }
+  .todo-card {
+    background: var(--card); border-radius: 20px; box-shadow: var(--shadow);
+    display:flex; align-items:center; gap:14px; padding: 16px; border: 1px solid var(--border);
+  }
+  .todo-card.done { opacity: 0.55; }
+  .check {
+    width:34px; height:34px; border-radius:50%; border:2.5px solid var(--teal); flex:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; background:none; font-size:16px; color:var(--teal);
+  }
+  .todo-card.done .check { background: var(--teal); color:#fff; }
+  .todo-body { flex:1; min-width:0; }
+  .todo-title { font-size: 16px; font-weight:700; margin:0 0 2px; }
+  .todo-meta { font-size:12px; color: var(--ink-soft); margin:0; }
+  .todo-card.done .todo-title { text-decoration: line-through; }
+  .tag {
+    display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px;
+    background: var(--teal-soft); color: var(--teal); margin-right:6px;
+  }
+
+  .empty-state {
+    margin: 0 20px; padding: 26px 18px; text-align:center; border-radius:20px;
+    background: var(--card); border: 1.5px dashed var(--border); color: var(--ink-soft); font-size:13.5px; line-height:1.7;
+  }
+
+  .next-card {
+    margin: 0 20px; padding: 16px 18px; border-radius:20px; background: var(--yellow-soft);
+    display:flex; align-items:center; gap:12px; border:1px solid var(--border);
+  }
+  .next-card .dot { width:10px; height:10px; border-radius:50%; background: var(--yellow); flex:none; }
+  .next-card .txt { font-size:14px; }
+  .next-card .txt b { font-weight:800; }
+
+  .sora-btn {
+    margin: 22px 20px 0; padding: 16px; border-radius: 20px; border:none; width: calc(100% - 40px);
+    background: var(--coral-soft); color: var(--coral); font-family: inherit; font-weight:800; font-size:15px;
+    display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;
+  }
+  .sora-btn:active { transform: scale(0.98); }
+  .sora-btn.talking { background: var(--coral); color:#fff; }
+  .sora-btn[disabled] { opacity:0.5; cursor:default; }
+  .sora-status { text-align:center; font-size:12.5px; color: var(--ink-soft); margin: 8px 20px 0; min-height:16px; }
+  .sora-transcript {
+    margin: 10px 20px 0; padding: 14px 16px; border-radius:16px; background: var(--card);
+    border:1px solid var(--border); font-size:13.5px; line-height:1.7; min-height: 20px; display:none;
+  }
+  .sora-transcript.show { display:block; }
+
+  .summary-card {
+    margin: 10px 20px 0; padding: 14px 16px; border-radius:16px; background: var(--yellow-soft);
+    border:1px solid var(--border); font-size:13.5px; line-height:1.7;
+  }
+  .summary-card b { display:block; margin-bottom:2px; }
+
+  .quiz-card { margin: 0 20px; background: var(--card); border-radius:20px; box-shadow: var(--shadow); padding:18px; border:1px solid var(--border); }
+  .quiz-q { font-size:15px; font-weight:700; margin: 0 0 14px; line-height:1.6; }
+  .quiz-choice {
+    display:block; width:100%; text-align:left; font-family:inherit; font-size:14px; padding:12px 14px;
+    border-radius:14px; border:1.5px solid var(--border); background: var(--bg); color: var(--ink);
+    margin-bottom:8px; cursor:pointer;
+  }
+  .quiz-choice.correct { background: var(--teal-soft); border-color: var(--teal); font-weight:700; }
+  .quiz-choice.wrong { background: var(--coral-soft); border-color: var(--coral); }
+  .quiz-explain { font-size:13px; color: var(--ink-soft); margin-top:10px; line-height:1.6; }
+  .quiz-next { margin-top:14px; }
+  .quiz-progress { font-size:12px; color: var(--ink-soft); margin: 0 20px 8px; }
+  .quiz-start-btn {
+    margin: 4px 20px 0; padding:14px; border-radius:16px; border:none; width: calc(100% - 40px);
+    background: var(--teal-soft); color: var(--teal); font-family:inherit; font-weight:800; font-size:14px; cursor:pointer;
+  }
+
+  /* ---------- できた ---------- */
+  .badge-row { display:flex; align-items:baseline; gap:6px; padding: 0 20px; color: var(--ink-soft); font-size:12.5px; }
+  .badge-row b { color: var(--ink); font-size: 15px; }
+
+  /* ---------- bottom nav ---------- */
+  .tabbar {
+    position: fixed; bottom:0; left:0; right:0; background: var(--card); border-top:1px solid var(--border);
+    display:flex; justify-content:center; padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.05);
+  }
+  .tabbar-inner { max-width: 480px; width:100%; display:flex; }
+  .tab-item {
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; border:none; background:none;
+    font-family:inherit; color: var(--ink-soft); font-size:11px; font-weight:700; padding:6px 0; cursor:pointer;
+  }
+  .tab-item.active { color: var(--teal); }
+  .tab-item .ic { font-size:20px; }
+
+  /* ---------- parent view ---------- */
+  .app--parent { background: var(--bg-parent); }
+  .parent-header {
+    display:flex; align-items:center; gap:10px; padding: 18px 20px 4px;
+  }
+  .parent-header h1 { font-size:18px; margin:0; font-weight:800; }
+  .parent-tabs { display:flex; gap:8px; padding: 14px 20px 0; overflow-x:auto; }
+  .ptab {
+    border:none; background: var(--card); color: var(--ink-soft); font-family:inherit; font-weight:700;
+    font-size:13px; padding:9px 16px; border-radius:99px; white-space:nowrap; cursor:pointer; border:1px solid var(--border);
+  }
+  .ptab.active { background: var(--teal); color:#fff; border-color: var(--teal); }
+
+  .panel { margin: 16px 20px; background: var(--card); border-radius:16px; border:1px solid var(--border); padding: 16px 16px 18px; }
+  .panel h2 { font-size:14px; margin:0 0 12px; font-weight:800; }
+  .panel h3 { font-size: 12.5px; color: var(--ink-soft); margin: 18px 0 8px; font-weight:700; }
+
+  .form-row { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+  .form-row label { font-size:12px; color: var(--ink-soft); font-weight:700; }
+  .form-row input, .form-row select {
+    font-family:inherit; font-size:14px; padding:9px 11px; border-radius:10px; border:1px solid var(--border);
+    background: var(--bg-parent); color: var(--ink);
+  }
+  .form-grid { display:grid; grid-template-columns: 1fr 1fr; gap:0 10px; }
+  .btn-primary {
+    font-family:inherit; font-weight:800; font-size:14px; padding:11px; border-radius:11px; border:none;
+    background: var(--teal); color:#fff; cursor:pointer; width:100%; margin-top:4px;
+  }
+  .btn-primary:active { opacity:0.85; }
+
+  .row-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+  .row-item {
+    display:flex; align-items:center; gap:10px; padding: 10px 12px; border-radius:12px; background: var(--bg-parent);
+    border:1px solid var(--border); font-size:13px;
+  }
+  .row-item .ri-main { flex:1; min-width:0; }
+  .row-item .ri-title { font-weight:700; }
+  .row-item .ri-sub { font-size:11.5px; color: var(--ink-soft); margin-top:2px; }
+  .del-btn {
+    border:none; background:none; color: var(--danger); font-size:16px; cursor:pointer; padding:4px 6px; font-family:inherit;
+  }
+  .warn-note {
+    font-size:12px; color: var(--coral); background: var(--coral-soft); padding:8px 12px; border-radius:10px; margin: 0 20px 4px;
+  }
+  .future-note {
+    font-size:12px; color: var(--ink-soft); background: var(--bg-parent); border:1px dashed var(--border);
+    padding: 10px 12px; border-radius:10px; margin-top: 10px;
+  }
+  .backlink { border:none; background:none; color: var(--ink-soft); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:6px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<audio id="soraAudio" autoplay style="display:none;"></audio>
+
+<!--
+  Sora(英会話)用の音声接続モジュール。
+  claude.aiのアーティファクトプレビュー上では外部ドメイン(OpenAI)への通信が
+  ブロックされるため動作しない。GitHub Pagesにデプロイした本番環境で使うこと。
+  未デプロイ・未配置の間は読み込みに失敗してもアプリの他の機能には影響しない。
+-->
+<script src="sora-voice.js" onerror="console.warn('sora-voice.js が見つかりません。Sora機能は無効化されたまま動作します。')"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "riho-study-state-v1";
+  var state = {
+    todos: [], events: [], units: [], view: "home", parentTab: "schedule", dbReady: false,
+    soraState: "idle", soraStatus: "", soraTranscript: "", soraLastSummary: null,
+    quiz: null, // { questions, current, score, answered, finished, loading, subject }
+    learningLogs: null, learningLogsLoading: false, quizLogs: null,
+    usage: null, usageLoading: false,
+    printLoading: false, printError: null, printExtract: null,
+    parentDarkMode: false,
+    calendarEvents: null, calendarLoading: false,
+    weeklyReport: null, weeklyReportLoading: false
+  };
+  var db = null;
+
+  function loadLocal(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        state.todos = parsed.todos || [];
+        state.events = parsed.events || [];
+        state.units = parsed.units || [];
+      }
+      state.parentDarkMode = localStorage.getItem("riho-study-parent-dark") === "1";
+    } catch(e) { /* ignore */ }
+  }
+  function saveLocal(){
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ todos: state.todos, events: state.events, units: state.units }));
+    } catch(e) { /* ignore */ }
+  }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function fmtDate(s){
+    if (!s) return "";
+    var p = s.split("-");
+    return p[1] + "/" + p[2];
+  }
+  var WEEK = ["日","月","火","水","木","金","土"];
+  function fmtDateLong(s){
+    var d = new Date(s + "T00:00:00");
+    return (d.getMonth()+1) + "月" + d.getDate() + "日 (" + WEEK[d.getDay()] + ")";
+  }
+
+  var CATS = {
+    "算数": {icon:"🔢", color:"teal"},
+    "国語": {icon:"📖", color:"teal"},
+    "理科": {icon:"🔬", color:"teal"},
+    "社会": {icon:"🌏", color:"teal"},
+    "英語": {icon:"🗣️", color:"teal"},
+    "その他": {icon:"✏️", color:"teal"}
+  };
+  var UNDERSTAND = ["まだ","学習中","できる","復習が必要"];
+  var EVENT_TYPES = { school: "学校", lesson: "習い事", test: "テスト", other: "その他" };
+
+  /* ---------------- persistence layer (db capability, fallback to localStorage) ---------------- */
+
+  function persistAdd(col, data){
+    data.id = uid();
+    state[col].push(data);
+    render();
+    saveLocal();
+    if (db) {
+      db.collection(col).doc(data.id).set(data).catch(function(){});
+    }
+  }
+  function persistUpdate(col, id, patch){
+    var arr = state[col];
+    for (var i=0;i<arr.length;i++){
+      if (arr[i].id === id) { Object.assign(arr[i], patch); break; }
+    }
+    render();
+    saveLocal();
+    if (db) {
+      db.collection(col).doc(id).update(patch).catch(function(){});
+    }
+  }
+  function persistDelete(col, id){
+    state[col] = state[col].filter(function(x){ return x.id !== id; });
+    render();
+    saveLocal();
+    if (db) {
+      db.collection(col).doc(id).delete().catch(function(){});
+    }
+  }
+
+  function initDb(){
+    if (!window.claude || !window.claude.use) return;
+    window.claude.use("db").then(function(ns){
+      if (!ns) return;
+      db = ns;
+      ["todos","events","units"].forEach(function(col){
+        db.collection(col).onSnapshot(function(snap){
+          state[col] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+          saveLocal();
+          render();
+        }, function(){ /* fall back silently to local state */ });
+      });
+    }).catch(function(){});
+  }
+
+  /* ---------------- rendering ---------------- */
+
+  function el(html){
+    var t = document.createElement("template");
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
+  function render(){
+    var app = document.getElementById("app");
+    var isParent = state.view === "parent";
+    app.className = isParent ? ("app--parent" + (state.parentDarkMode ? " dark-mode" : "")) : "";
+    document.body.classList.toggle("parent-dark-bg", isParent && state.parentDarkMode);
+    app.innerHTML = isParent ? renderParent() : renderChild();
+    bindEvents();
+  }
+
+  function renderChild(){
+    var body = "";
+    if (state.view === "home") body = renderHome();
+    else if (state.view === "manabu") body = renderManabu();
+    else if (state.view === "dekita") body = renderDekita();
+
+    return (
+      '<div class="topbar"><h1>Riho Study</h1>' +
+      '<button class="icon-btn" id="gotoParent" title="保護者用">⚙️</button></div>' +
+      body +
+      '<div class="tabbar"><div class="tabbar-inner">' +
+        tabBtn("home","🏠","きょう") +
+        tabBtn("manabu","📚","まなぶ") +
+        tabBtn("dekita","🌟","できた") +
+      '</div></div>'
+    );
+  }
+
+  function tabBtn(id, icon, label){
+    return '<button class="tab-item ' + (state.view===id?"active":"") + '" data-tab="' + id + '">' +
+      '<span class="ic">' + icon + '</span>' + label + '</button>';
+  }
+
+  function greetingWord(){
+    var h = new Date().getHours();
+    if (h < 11) return "おはよう、里穂子さん";
+    if (h < 17) return "こんにちは、里穂子さん";
+    return "こんばんは、里穂子さん";
+  }
+
+  function renderHome(){
+    var today = todayStr();
+    var todays = state.todos.filter(function(t){ return t.date === today; })
+      .sort(function(a,b){ return (a.priority||2) - (b.priority||2); });
+    var shown = todays.slice(0,3);
+    var overflow = todays.length > 3;
+
+    var html = '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
+      '<p class="date">' + fmtDateLong(today) + '</p></div>';
+
+    html += '<div class="section-label">きょうの3つ</div>';
+    if (shown.length === 0) {
+      html += '<div class="empty-state">きょうの予定はまだ登録されていません。<br>保護者の方に聞いてみてね。</div>';
+    } else {
+      html += '<div class="todo-list">' + shown.map(renderTodoCard).join("") + '</div>';
+    }
+    if (overflow) {
+      html += '<div class="warn-note" style="margin-top:10px;">きょうの予定が3件をこえています。保護者画面で調整してね。</div>';
+    }
+
+    var next = nextEvent();
+    html += '<div class="section-label">つぎの予定</div>';
+    if (next) {
+      html += '<div class="next-card"><div class="dot"></div><div class="txt"><b>' + escapeHtml(next.title) +
+        '</b><br>' + fmtDateLong(next.date) + (next.time ? " " + next.time : "") + '</div></div>';
+    } else {
+      html += '<div class="empty-state">つぎの予定はまだありません。</div>';
+    }
+
+    var talking = state.soraState === "talking" || state.soraState === "connecting";
+    html += '<button class="sora-btn ' + (talking?"talking":"") + '" id="soraBtn">🎙️ ' +
+      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "Soraに話す") +
+      '</button>';
+    html += '<div class="sora-status">' + escapeHtml(state.soraStatus || "") + '</div>';
+    html += '<div class="sora-transcript ' + (state.soraTranscript ? "show" : "") + '">' + escapeHtml(state.soraTranscript || "") + '</div>';
+    if (state.soraLastSummary && state.soraLastSummary.comment) {
+      html += '<div class="summary-card">🌟 ' + escapeHtml(state.soraLastSummary.comment) + '</div>';
+    }
+    return html;
+  }
+
+  function renderTodoCard(t){
+    var cat = CATS[t.category] || CATS["その他"];
+    return '<div class="todo-card ' + (t.done?"done":"") + '" data-id="' + t.id + '">' +
+      '<button class="check" data-toggle="' + t.id + '">' + (t.done ? "✓" : "") + '</button>' +
+      '<div class="todo-body">' +
+      '<p class="todo-title">' + cat.icon + ' ' + escapeHtml(t.title) + '</p>' +
+      '<p class="todo-meta"><span class="tag">' + escapeHtml(t.category||"その他") + '</span>' + (t.minutes ? t.minutes + "分" : "") + '</p>' +
+      '</div></div>';
+  }
+
+  function nextEvent(){
+    var now = new Date();
+    var upcoming = state.events.filter(function(e){
+      var d = new Date(e.date + "T" + (e.time || "23:59"));
+      return d >= now;
+    }).sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; });
+    return upcoming[0] || null;
+  }
+
+  function renderManabu(){
+    var html = '<div class="greeting"><p class="hello">まなぶ</p><p class="date">きょうの学習</p></div>';
+    var byCat = {};
+    Object.keys(CATS).forEach(function(c){ byCat[c] = state.units.filter(function(u){return u.subject===c;}).length; });
+    html += '<div class="section-label">教科</div><div class="todo-list">';
+    Object.keys(CATS).forEach(function(c){
+      html += '<div class="todo-card"><div style="font-size:22px;">'+CATS[c].icon+'</div><div class="todo-body">' +
+        '<p class="todo-title">'+c+'</p><p class="todo-meta">登録中の単元 '+byCat[c]+'件</p></div></div>';
+    });
+    html += '</div>';
+
+    html += '<div class="section-label">問題にちょうせん</div>';
+    if (!state.quiz) {
+      html += '<div style="padding:0 20px 8px;"><select id="quizSubject" class="quiz-choice" style="cursor:pointer;">' +
+        Object.keys(CATS).map(function(c){
+          return '<option ' + (c==="英語"?"selected":"") + '>' + c + '</option>';
+        }).join("") + '</select></div>';
+    }
+    html += renderQuiz();
+
+    html += '<div class="section-label">テスト対策の問題集・お直し</div>';
+    html += '<div class="empty-state">お直し(AI採点とヒント)は準備中です。<br>まずは上の「問題にちょうせん」で練習してね。</div>';
+    return html;
+  }
+
+  function renderQuiz(){
+    var q = state.quiz;
+    if (!q) {
+      return '<button class="quiz-start-btn" id="quizStart">📝 5問チャレンジする</button>';
+    }
+    if (q.loading) {
+      return '<div class="empty-state">もんだいを作っているよ…</div>';
+    }
+    if (!q.questions || q.questions.length === 0) {
+      return '<div class="empty-state">もんだいが作れませんでした。もう一度ためしてみてね。</div>' +
+        '<button class="quiz-start-btn" id="quizStart">もう一度チャレンジする</button>';
+    }
+    if (q.finished) {
+      return '<div class="quiz-card" style="text-align:center;">' +
+        '<p class="quiz-q">けっか: ' + q.score + ' / ' + q.questions.length + '問 せいかい！</p>' +
+        '</div><button class="quiz-start-btn" id="quizStart">もう一度チャレンジする</button>';
+    }
+    var cur = q.questions[q.current];
+    var html = '<div class="quiz-progress">' + (q.current+1) + ' / ' + q.questions.length + '問</div>';
+    html += '<div class="quiz-card"><p class="quiz-q">' + escapeHtml(cur.question) + '</p>';
+    cur.choices.forEach(function(choice, i){
+      var cls = "quiz-choice";
+      if (q.answered !== null && q.answered !== undefined) {
+        if (i === cur.answerIndex) cls += " correct";
+        else if (i === q.answered) cls += " wrong";
+      }
+      html += '<button class="' + cls + '" data-quizchoice="' + i + '" ' +
+        ((q.answered !== null && q.answered !== undefined) ? "disabled" : "") + '>' + escapeHtml(choice) + '</button>';
+    });
+    if (q.answered !== null && q.answered !== undefined) {
+      html += '<div class="quiz-explain">' + escapeHtml(cur.explanation || "") + '</div>';
+      html += '<button class="btn-primary quiz-next" id="quizNext">' +
+        (q.current + 1 < q.questions.length ? "つぎのもんだい" : "けっかを見る") + '</button>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function renderDekita(){
+    var today = todayStr();
+    var doneToday = state.todos.filter(function(t){ return t.date===today && t.done; });
+    var doneDates = {};
+    state.todos.forEach(function(t){ if (t.done) doneDates[t.date] = true; });
+    var totalDays = Object.keys(doneDates).length;
+
+    var html = '<div class="greeting"><p class="hello">できた</p><p class="date">' + fmtDateLong(today) + '</p></div>';
+    html += '<div class="badge-row">がんばった日 <b>' + totalDays + '</b> 日' + (totalDays >= 5 ? " ⭐" : "") + '</div>';
+    html += '<div class="section-label">きょう終えたこと</div>';
+    if (doneToday.length === 0) {
+      html += '<div class="empty-state">まだないよ。ひとつずつ、いこう。</div>';
+    } else {
+      html += '<div class="todo-list">' + doneToday.map(renderTodoCard).join("") + '</div>';
+    }
+    return html;
+  }
+
+  /* ---------------- parent view ---------------- */
+
+  function renderParent(){
+    var html = '<div class="parent-header"><button class="backlink" id="backToChild">← こどもの画面へ</button></div>';
+    html += '<div class="parent-header" style="padding-top:2px;"><h1>保護者用</h1></div>';
+    html += '<div class="parent-tabs">' +
+      ptab("schedule","予定・ToDo") + ptab("units","教科書・単元") + ptab("dashboard","ダッシュボード") +
+      ptab("history","学習履歴") + ptab("more","その他の設定") +
+      '</div>';
+
+    if (state.parentTab === "schedule") html += renderParentSchedule();
+    else if (state.parentTab === "units") html += renderParentUnits();
+    else if (state.parentTab === "dashboard") html += renderParentDashboard();
+    else if (state.parentTab === "history") html += renderParentHistory();
+    else html += renderParentMore();
+    return html;
+  }
+  function ptab(id,label){
+    return '<button class="ptab ' + (state.parentTab===id?"active":"") + '" data-ptab="' + id + '">' + label + '</button>';
+  }
+
+  var UNDERSTAND_COLOR = { "まだ":"var(--ink-soft)", "学習中":"var(--yellow)", "できる":"var(--teal)", "復習が必要":"var(--coral)" };
+
+  function renderParentDashboard(){
+    var html = '<div class="panel"><h2>単元別 理解度マップ</h2>';
+    if (state.units.length === 0) {
+      html += '<div class="future-note">まだ単元が登録されていません。「教科書・単元」タブから登録してください。</div>';
+    } else {
+      var bySubject = {};
+      state.units.forEach(function(u){ (bySubject[u.subject] = bySubject[u.subject]||[]).push(u); });
+      Object.keys(bySubject).forEach(function(subj){
+        html += '<h3>' + subj + '</h3><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">';
+        bySubject[subj].forEach(function(u){
+          var color = UNDERSTAND_COLOR[u.understand] || "var(--ink-soft)";
+          html += '<span style="display:inline-block;padding:6px 10px;border-radius:99px;font-size:12px;font-weight:700;' +
+            'background:' + color + ';color:#fff;">' + escapeHtml(u.unit) + '</span>';
+        });
+        html += '</div>';
+      });
+    }
+    html += '<div class="ri-sub">まだ:グレー　学習中:黄　できる:緑　復習が必要:オレンジ</div></div>';
+
+    html += '<div class="panel"><h2>今週の学習量（完了したToDoの分数）</h2>';
+    html += renderWeeklyMinutesChart();
+    html += '</div>';
+    return html;
+  }
+
+  function renderWeeklyMinutesChart(){
+    var days = [];
+    var today = new Date();
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(today);
+      d.setDate(d.getDate() - i);
+      var key = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      var mins = state.todos.filter(function(t){ return t.date === key && t.done; })
+        .reduce(function(sum,t){ return sum + (t.minutes||0); }, 0);
+      days.push({ label: WEEK[d.getDay()], mins: mins });
+    }
+    var max = Math.max(10, Math.max.apply(null, days.map(function(d){return d.mins;})));
+    return '<div style="display:flex;align-items:flex-end;gap:8px;height:100px;">' +
+      days.map(function(d){
+        var h = Math.round((d.mins / max) * 80) + 4;
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">' +
+          '<div style="font-size:10px;color:var(--ink-soft);margin-bottom:2px;">' + (d.mins||"") + '</div>' +
+          '<div style="width:100%;background:var(--teal);border-radius:6px 6px 0 0;height:' + h + 'px;"></div>' +
+          '<div style="font-size:11px;color:var(--ink-soft);margin-top:4px;">' + d.label + '</div>' +
+          '</div>';
+      }).join("") + '</div>';
+  }
+
+  function renderParentHistory(){
+    var html = renderWeeklyReportPanel();
+    if (state.learningLogsLoading) {
+      return html + '<div class="panel"><h2>Soraとの英会話 学習履歴</h2><div class="future-note">読み込み中…</div></div>';
+    }
+    var logs = state.learningLogs;
+    if (!logs) {
+      return html + '<div class="panel"><h2>Soraとの英会話 学習履歴</h2>' +
+        '<div class="future-note">まだ読み込んでいません。</div>' +
+        '<button class="btn-primary" id="loadHistory" style="margin-top:10px;">履歴を読み込む</button></div>';
+    }
+    if (logs.length === 0) {
+      return html + '<div class="panel"><h2>Soraとの英会話 学習履歴</h2>' +
+        '<div class="future-note">まだ会話の記録がありません。</div></div>';
+    }
+    var rows = logs.map(function(l){
+      var d = new Date(l.date);
+      var dateLabel = isNaN(d.getTime()) ? String(l.date) : (d.getMonth()+1) + "/" + d.getDate();
+      return '<div class="row-item" style="align-items:flex-start;flex-direction:column;gap:4px;">' +
+        '<div class="ri-title">' + dateLabel + '</div>' +
+        (l.goodExpressions ? '<div class="ri-sub">✅ 使えた表現: ' + escapeHtml(l.goodExpressions) + '</div>' : '') +
+        (l.struggles ? '<div class="ri-sub">⚠️ つまずいた点: ' + escapeHtml(l.struggles) + '</div>' : '') +
+        (l.nextTheme ? '<div class="ri-sub">➡️ 次回テーマ: ' + escapeHtml(l.nextTheme) + '</div>' : '') +
+        '</div>';
+    }).join("");
+    return html + '<div class="panel"><h2>Soraとの英会話 学習履歴</h2><div class="row-list">' + rows + '</div>' +
+      '<button class="btn-primary" id="loadHistory" style="margin-top:10px;">更新する</button></div>' +
+      renderQuizHistoryPanel();
+  }
+
+  function renderWeeklyReportPanel(){
+    if (state.weeklyReportLoading) {
+      return '<div class="panel"><h2>今週のふりかえり</h2><div class="future-note">作成中…</div></div>';
+    }
+    var r = state.weeklyReport;
+    if (!r) {
+      return '<div class="panel"><h2>今週のふりかえり</h2>' +
+        '<div class="future-note">Sora会話とクイズの結果から、今週のようすをAIがまとめます。</div>' +
+        '<button class="btn-primary" id="loadWeeklyReport" style="margin-top:10px;">作成する</button></div>';
+    }
+    return '<div class="panel"><h2>今週のふりかえり</h2>' +
+      '<p style="margin:4px 0;">' + escapeHtml(r.summary||"") + '</p>' +
+      (r.highlight ? '<div class="summary-card" style="margin:10px 0 0;">🌟 ' + escapeHtml(r.highlight) + '</div>' : '') +
+      (r.suggestion ? '<div class="ri-sub" style="margin-top:8px;">💡 来週は: ' + escapeHtml(r.suggestion) + '</div>' : '') +
+      '<button class="btn-primary" id="loadWeeklyReport" style="margin-top:10px;">作り直す</button></div>';
+  }
+
+
+  function renderQuizHistoryPanel(){
+    var quizzes = state.quizLogs;
+    if (!quizzes || quizzes.length === 0) return '';
+    var bars = quizzes.slice(0, 8).map(function(q){
+      var d = new Date(q.date);
+      var dateLabel = isNaN(d.getTime()) ? String(q.date) : (d.getMonth()+1) + "/" + d.getDate();
+      var total = Number(q.total) || 1;
+      var pct = Math.round((Number(q.score) / total) * 100);
+      return '<div style="margin-bottom:10px;">' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-bottom:3px;">' +
+        '<span>' + dateLabel + ' ・ ' + escapeHtml(q.subject || '') + '</span><span>' + q.score + '/' + q.total + '</span></div>' +
+        '<div style="background:var(--bg-parent);border-radius:99px;height:10px;overflow:hidden;">' +
+        '<div style="background:var(--teal);height:100%;width:' + pct + '%;"></div></div></div>';
+    }).join("");
+    return '<div class="panel"><h2>問題にちょうせん 結果の推移</h2>' + bars + '</div>';
+  }
+
+  function renderPrintIntakePanel(){
+    var html = '<div class="panel"><h2>学校プリント・連絡帳を取り込む</h2>' +
+      '<div class="form-row"><label>写真を選ぶ</label><input type="file" id="printFile" accept="image/*" capture="environment"></div>';
+
+    if (state.printLoading) {
+      html += '<div class="future-note">読み取り中…</div></div>';
+      return html;
+    }
+    if (state.printError) {
+      html += '<div class="warn-note">読み取りに失敗しました: ' + escapeHtml(state.printError) + '</div></div>';
+      return html;
+    }
+    var ex = state.printExtract;
+    if (!ex) {
+      html += '<div class="future-note">手書き文字や不鮮明な写真は読み間違えることがあります。登録前に必ず内容を確認してください。</div></div>';
+      return html;
+    }
+
+    html += '<h3>読み取り結果（内容を確認・修正してから登録してください）</h3>' +
+      '<div class="form-row"><label>宿題</label><input id="pxHomework" value="' + escapeHtml(ex.homework||"") + '"></div>' +
+      '<div class="form-row"><label>持ち物</label><input id="pxItems" value="' + escapeHtml(ex.items||"") + '"></div>' +
+      '<div class="form-row"><label>テスト範囲</label><input id="pxTestRange" value="' + escapeHtml(ex.testRange||"") + '"></div>';
+    (ex.events||[]).forEach(function(ev, i){
+      html += '<div class="row-item"><div class="ri-main"><div class="ri-title">' + escapeHtml(ev.title||"") + '</div>' +
+        '<div class="ri-sub">' + escapeHtml(ev.date||"") + '</div></div></div>';
+    });
+    if (ex.note) html += '<div class="future-note">📝 ' + escapeHtml(ex.note) + '</div>';
+    html += '<button class="btn-primary" id="printRegister" style="margin-top:10px;">登録する</button> ' +
+      '<button class="btn-primary" id="printIgnore" style="margin-top:8px;background:var(--ink-soft);">この内容は使わない</button>' +
+      '</div>';
+    return html;
+  }
+
+  function renderCalendarPanel(){
+    if (state.calendarLoading) {
+      return '<div class="panel"><h2>Googleカレンダーの予定（参考）</h2><div class="future-note">読み込み中…</div></div>';
+    }
+    var events = state.calendarEvents;
+    if (!events) {
+      return '<div class="panel"><h2>Googleカレンダーの予定（参考）</h2>' +
+        '<div class="future-note">GASのGoogleアカウントに入っている予定を確認できます。</div>' +
+        '<button class="btn-primary" id="loadCalendar" style="margin-top:10px;">読み込む</button></div>';
+    }
+    if (events.length === 0) {
+      return '<div class="panel"><h2>Googleカレンダーの予定（参考）</h2><div class="future-note">直近の予定は見つかりませんでした。</div></div>';
+    }
+    var rows = events.map(function(ev){
+      var d = new Date(ev.start);
+      var label = isNaN(d.getTime()) ? ev.start : (d.getMonth()+1) + "/" + d.getDate() + (ev.allDay ? "" : " " + d.getHours() + ":" + String(d.getMinutes()).padStart(2,"0"));
+      return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + escapeHtml(ev.title) + '</div>' +
+        '<div class="ri-sub">' + label + '</div></div></div>';
+    }).join("");
+    return '<div class="panel"><h2>Googleカレンダーの予定（参考）</h2><div class="row-list">' + rows + '</div>' +
+      '<button class="btn-primary" id="loadCalendar" style="margin-top:10px;">更新する</button></div>';
+  }
+
+  function renderParentSchedule(){
+    var today = todayStr();
+    var todays = state.todos.filter(function(t){ return t.date === today; });
+    var html = '';
+
+    html += renderPrintIntakePanel();
+
+    if (todays.length > 3) {
+      html += '<div class="warn-note" style="margin:16px 20px 0;">きょうの予定が' + todays.length + '件あります。里穂子さんの画面には3件のみ表示されます。優先度の低い予定は翌日に移すのがおすすめです。</div>';
+    }
+
+    html += '<div class="panel"><h2>ToDoを追加する</h2>' +
+      '<div class="form-row"><label>やること</label><input id="todoTitle" placeholder="例: 算数の見直し"></div>' +
+      '<div class="form-grid">' +
+      '<div class="form-row"><label>教科</label><select id="todoCat">' + Object.keys(CATS).map(function(c){return '<option>'+c+'</option>';}).join("") + '</select></div>' +
+      '<div class="form-row"><label>時間の目安</label><select id="todoMin"><option value="10">10分</option><option value="15" selected>15分</option><option value="20">20分</option></select></div>' +
+      '</div>' +
+      '<div class="form-grid">' +
+      '<div class="form-row"><label>日付</label><input type="date" id="todoDate" value="' + today + '"></div>' +
+      '<div class="form-row"><label>優先度</label><select id="todoPri"><option value="1">高い</option><option value="2" selected>ふつう</option><option value="3">低い</option></select></div>' +
+      '</div>' +
+      '<div class="form-row" style="flex-direction:row;align-items:center;gap:8px;">' +
+      '<input type="checkbox" id="todoRemind" style="width:18px;height:18px;"><label style="margin:0;">前日の夜、Googleカレンダーでお知らせする</label></div>' +
+      '<button class="btn-primary" id="addTodo">追加する</button>' +
+      '<h3>登録済みのToDo（直近）</h3>' +
+      '<div class="row-list">' + renderTodoRows() + '</div>' +
+      '</div>';
+
+    html += '<div class="panel"><h2>予定を追加する（学校行事・習い事・テスト日など）</h2>' +
+      '<div class="form-row"><label>予定の名前</label><input id="evTitle" placeholder="例: 公文"></div>' +
+      '<div class="form-grid">' +
+      '<div class="form-row"><label>日付</label><input type="date" id="evDate" value="' + today + '"></div>' +
+      '<div class="form-row"><label>時刻（任意）</label><input type="time" id="evTime"></div>' +
+      '</div>' +
+      '<div class="form-row"><label>種類</label><select id="evType">' +
+        Object.keys(EVENT_TYPES).map(function(k){return '<option value="'+k+'">'+EVENT_TYPES[k]+'</option>';}).join("") +
+      '</select></div>' +
+      '<div class="form-row" style="flex-direction:row;align-items:center;gap:8px;">' +
+      '<input type="checkbox" id="evSyncCal" style="width:18px;height:18px;" checked><label style="margin:0;">Googleカレンダーにも登録する</label></div>' +
+      '<button class="btn-primary" id="addEvent">追加する</button>' +
+      '<h3>登録済みの予定（直近）</h3>' +
+      '<div class="row-list">' + renderEventRows() + '</div>' +
+      '</div>';
+
+    html += renderCalendarPanel();
+
+    return html;
+  }
+
+  function renderTodoRows(){
+    var list = state.todos.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).slice(0,20);
+    if (list.length === 0) return '<div class="future-note">まだToDoが登録されていません。</div>';
+    return list.map(function(t){
+      return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + (t.done?"✅ ":"") + escapeHtml(t.title) + '</div>' +
+        '<div class="ri-sub">' + fmtDate(t.date) + " ・ " + t.category + " ・ " + (t.minutes||"-") + '分</div></div>' +
+        '<button class="del-btn" data-deltodo="' + t.id + '">✕</button></div>';
+    }).join("");
+  }
+  function renderEventRows(){
+    var list = state.events.slice().sort(function(a,b){ return (a.date+(a.time||"")) < (b.date+(b.time||"")) ? -1 : 1; }).slice(0,20);
+    if (list.length === 0) return '<div class="future-note">まだ予定が登録されていません。</div>';
+    return list.map(function(e){
+      return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + escapeHtml(e.title) + '</div>' +
+        '<div class="ri-sub">' + fmtDate(e.date) + (e.time?" "+e.time:"") + " ・ " + (EVENT_TYPES[e.type]||"その他") + '</div></div>' +
+        '<button class="del-btn" data-delevent="' + e.id + '">✕</button></div>';
+    }).join("");
+  }
+
+  function renderParentUnits(){
+    var html = '<div class="panel"><h2>教科書・単元を登録する</h2>' +
+      '<div class="form-grid">' +
+      '<div class="form-row"><label>教科</label><select id="unitSubject">' + Object.keys(CATS).map(function(c){return '<option>'+c+'</option>';}).join("") + '</select></div>' +
+      '<div class="form-row"><label>理解度</label><select id="unitUnderstand">' + UNDERSTAND.map(function(u){return '<option>'+u+'</option>';}).join("") + '</select></div>' +
+      '</div>' +
+      '<div class="form-row"><label>単元名</label><input id="unitName" placeholder="例: わり算"></div>' +
+      '<div class="form-row"><label>教科書ページ（任意）</label><input id="unitPage" placeholder="例: p.20〜35"></div>' +
+      '<button class="btn-primary" id="addUnit">追加する</button>' +
+      '<h3>登録済みの単元</h3>' +
+      '<div class="row-list">' + renderUnitRows() + '</div>' +
+      '</div>';
+    return html;
+  }
+  function renderUnitRows(){
+    if (state.units.length === 0) return '<div class="future-note">まだ単元が登録されていません。</div>';
+    return state.units.slice().reverse().map(function(u){
+      return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + u.subject + ' ・ ' + escapeHtml(u.unit) + '</div>' +
+        '<div class="ri-sub">' + (u.page?escapeHtml(u.page)+" ・ ":"") + u.understand + '</div></div>' +
+        '<button class="del-btn" data-delunit="' + u.id + '">✕</button></div>';
+    }).join("");
+  }
+
+  function renderParentMore(){
+    var html = renderUsagePanel();
+    html += '<div class="panel"><h2>表示設定</h2>' +
+      '<div class="form-row" style="flex-direction:row;align-items:center;justify-content:space-between;">' +
+      '<label style="margin:0;">保護者画面をダークモードにする</label>' +
+      '<input type="checkbox" id="darkModeToggle" ' + (state.parentDarkMode ? "checked" : "") + ' style="width:20px;height:20px;">' +
+      '</div><div class="ri-sub">こどもの画面には影響しません。</div></div>';
+    html += '<div class="panel"><h2>今後追加する機能</h2>' +
+      '<div class="future-note">・ お直し（写真で撮影した答案のAI採点とヒント）<br>' +
+      '・ 学習履歴のより詳しいグラフ表示</div>' +
+      '<h3>データの保存について</h3>' +
+      '<div class="future-note">予定・ToDo・単元のデータは、このページを開いている端末どうしで共有されます。Sora会話・クイズ結果はGoogleスプレッドシートに保存されます。</div>' +
+      '</div>';
+    return html;
+  }
+
+  function renderUsagePanel(){
+    if (state.usageLoading) {
+      return '<div class="panel"><h2>AI利用額の目安</h2><div class="future-note">読み込み中…</div></div>';
+    }
+    var u = state.usage;
+    if (!u) {
+      return '<div class="panel"><h2>AI利用額の目安</h2>' +
+        '<div class="future-note">まだ読み込んでいません。</div>' +
+        '<button class="btn-primary" id="loadUsage" style="margin-top:10px;">読み込む</button></div>';
+    }
+    return '<div class="panel"><h2>AI利用額の目安（' + escapeHtml(u.monthLabel) + '）</h2>' +
+      '<p style="font-size:22px;font-weight:800;margin:4px 0;">約 ' + Number(u.estimatedCostJpy).toLocaleString() + ' 円</p>' +
+      '<div class="ri-sub">クイズ・プリント読み取り等のテキスト/画像AI呼び出し ' + u.textCalls + '回、Sora会話 ' + u.soraSessions + '回</div>' +
+      '<div class="future-note" style="margin-top:8px;">' + escapeHtml(u.note || '') + '</div>' +
+      '<button class="btn-primary" id="loadUsage" style="margin-top:10px;">更新する</button></div>';
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  /* ---------------- events ---------------- */
+
+  function bindEvents(){
+    var app = document.getElementById("app");
+    var gp = document.getElementById("gotoParent");
+    if (gp) gp.onclick = function(){ state.view = "parent"; render(); };
+    var back = document.getElementById("backToChild");
+    if (back) back.onclick = function(){ state.view = "home"; render(); };
+
+    app.querySelectorAll("[data-tab]").forEach(function(b){
+      b.onclick = function(){ state.view = b.getAttribute("data-tab"); render(); };
+    });
+    app.querySelectorAll("[data-ptab]").forEach(function(b){
+      b.onclick = function(){ state.parentTab = b.getAttribute("data-ptab"); render(); };
+    });
+    app.querySelectorAll("[data-toggle]").forEach(function(b){
+      b.onclick = function(){
+        var id = b.getAttribute("data-toggle");
+        var t = state.todos.find(function(x){ return x.id===id; });
+        persistUpdate("todos", id, { done: !(t && t.done) });
+      };
+    });
+    app.querySelectorAll("[data-deltodo]").forEach(function(b){
+      b.onclick = function(){ persistDelete("todos", b.getAttribute("data-deltodo")); };
+    });
+    app.querySelectorAll("[data-delevent]").forEach(function(b){
+      b.onclick = function(){ persistDelete("events", b.getAttribute("data-delevent")); };
+    });
+    app.querySelectorAll("[data-delunit]").forEach(function(b){
+      b.onclick = function(){ persistDelete("units", b.getAttribute("data-delunit")); };
+    });
+
+    var soraBtn = document.getElementById("soraBtn");
+    if (soraBtn) soraBtn.onclick = function(){
+      if (typeof startSora !== "function") {
+        state.soraStatus = "Sora機能はまだこの環境では使えません（sora-voice.jsが必要です）";
+        render();
+        return;
+      }
+      if (state.soraState === "talking" || state.soraState === "connecting") {
+        state.soraState = "idle";
+        state.soraStatus = "きろくをまとめているよ…";
+        state.soraLastSummary = null;
+        render();
+        if (typeof stopSoraAndSummarize === "function") {
+          stopSoraAndSummarize({
+            onSummary: function(summary){
+              state.soraStatus = "";
+              state.soraLastSummary = summary;
+              render();
+            },
+            onError: function(){
+              state.soraStatus = "";
+              render();
+            }
+          });
+        } else if (typeof stopSora === "function") {
+          stopSora();
+          state.soraStatus = "";
+          render();
+        }
+        return;
+      }
+      state.soraState = "connecting";
+      state.soraStatus = "せつぞく中…";
+      state.soraTranscript = "";
+      render();
+      startSora({
+        onStatus: function(msg){ state.soraStatus = msg; state.soraState = "talking"; render(); },
+        onTranscript: function(delta){ state.soraTranscript = (state.soraTranscript || "") + delta; render(); },
+        onError: function(err){
+          state.soraState = "idle";
+          state.soraStatus = "せつぞくできませんでした。保護者の方に伝えてね。";
+          render();
+        }
+      });
+    };
+
+    var quizStart = document.getElementById("quizStart");
+    if (quizStart) quizStart.onclick = function(){
+      var subjectSelect = document.getElementById("quizSubject");
+      var subject = (subjectSelect ? subjectSelect.value : null) || (state.quiz && state.quiz.subject) || "英語";
+      state.quiz = { loading: true, subject: subject, questions: [], current: 0, score: 0, answered: null, finished: false };
+      render();
+      if (typeof fetchQuiz !== "function") {
+        state.quiz = { loading: false, subject: subject, questions: [], current:0, score:0, answered:null, finished:false };
+        render();
+        return;
+      }
+      var context = "";
+      if (subject === "英語") {
+        context = (state.learningLogs && state.learningLogs[0] && state.learningLogs[0].nextTheme) || "";
+      } else {
+        context = state.units.filter(function(u){ return u.subject === subject; }).map(function(u){ return u.unit; }).join("、");
+      }
+      fetchQuiz(subject, context, 5).then(function(questions){
+        state.quiz = { loading: false, subject: subject, questions: questions || [], current: 0, score: 0, answered: null, finished: false };
+        render();
+      }).catch(function(){
+        state.quiz = { loading: false, subject: subject, questions: [], current: 0, score: 0, answered: null, finished: false };
+        render();
+      });
+    };
+    app.querySelectorAll("[data-quizchoice]").forEach(function(b){
+      b.onclick = function(){
+        var q = state.quiz;
+        if (!q || q.answered !== null && q.answered !== undefined) return;
+        var i = parseInt(b.getAttribute("data-quizchoice"), 10);
+        q.answered = i;
+        if (i === q.questions[q.current].answerIndex) q.score += 1;
+        render();
+      };
+    });
+    var quizNext = document.getElementById("quizNext");
+    if (quizNext) quizNext.onclick = function(){
+      var q = state.quiz;
+      if (q.current + 1 < q.questions.length) {
+        q.current += 1;
+        q.answered = null;
+      } else {
+        q.finished = true;
+        if (typeof logQuizResult === "function") {
+          logQuizResult(q.subject || "", q.score, q.questions.length);
+        }
+      }
+      render();
+    };
+
+    var loadHistory = document.getElementById("loadHistory");
+    if (loadHistory) loadHistory.onclick = function(){
+      state.learningLogsLoading = true;
+      render();
+      if (typeof fetchLearningLogs !== "function") {
+        state.learningLogsLoading = false;
+        state.learningLogs = [];
+        state.quizLogs = [];
+        render();
+        return;
+      }
+      fetchLearningLogs(10).then(function(result){
+        state.learningLogsLoading = false;
+        state.learningLogs = (result && result.logs) || [];
+        state.quizLogs = (result && result.quizzes) || [];
+        render();
+      }).catch(function(){
+        state.learningLogsLoading = false;
+        state.learningLogs = [];
+        state.quizLogs = [];
+        render();
+      });
+    };
+
+    var darkModeToggle = document.getElementById("darkModeToggle");
+    if (darkModeToggle) darkModeToggle.onchange = function(){
+      state.parentDarkMode = darkModeToggle.checked;
+      try { localStorage.setItem("riho-study-parent-dark", state.parentDarkMode ? "1" : "0"); } catch(e){}
+      render();
+    };
+
+    var loadUsage = document.getElementById("loadUsage");
+    if (loadUsage) loadUsage.onclick = function(){
+      state.usageLoading = true;
+      render();
+      if (typeof fetchUsage !== "function") {
+        state.usageLoading = false; state.usage = null; render(); return;
+      }
+      fetchUsage().then(function(u){
+        state.usageLoading = false; state.usage = u; render();
+      }).catch(function(){
+        state.usageLoading = false; render();
+      });
+    };
+
+    var printFile = document.getElementById("printFile");
+    if (printFile) printFile.onchange = function(){
+      var file = printFile.files && printFile.files[0];
+      if (!file) return;
+      state.printLoading = true; state.printError = null; state.printExtract = null;
+      render();
+      if (typeof extractPrintFromFile !== "function") {
+        state.printLoading = false;
+        state.printError = "この環境ではプリント取り込み機能が使えません";
+        render();
+        return;
+      }
+      extractPrintFromFile(file).then(function(extracted){
+        state.printLoading = false;
+        state.printExtract = extracted;
+        render();
+      }).catch(function(err){
+        state.printLoading = false;
+        state.printError = String(err && err.message || err);
+        render();
+      });
+    };
+    var printRegister = document.getElementById("printRegister");
+    if (printRegister) printRegister.onclick = function(){
+      var homework = document.getElementById("pxHomework").value.trim();
+      var items = document.getElementById("pxItems").value.trim();
+      var testRange = document.getElementById("pxTestRange").value.trim();
+      var today = todayStr();
+      if (homework) persistAdd("todos", { title: "宿題: " + homework, category: "その他", minutes: 15, date: today, priority: 2, done: false });
+      if (items) persistAdd("todos", { title: "持ち物: " + items, category: "その他", minutes: 5, date: today, priority: 1, done: false });
+      if (testRange) persistAdd("todos", { title: "テスト範囲確認: " + testRange, category: "その他", minutes: 10, date: today, priority: 2, done: false });
+      var ex = state.printExtract;
+      (ex && ex.events || []).forEach(function(ev){
+        if (ev.title) persistAdd("events", { title: ev.title, date: ev.date || today, time: "", type: ev.type || "school" });
+      });
+      state.printExtract = null;
+      if (printFile) printFile.value = "";
+      render();
+    };
+    var printIgnore = document.getElementById("printIgnore");
+    if (printIgnore) printIgnore.onclick = function(){
+      state.printExtract = null;
+      if (printFile) printFile.value = "";
+      render();
+    };
+
+    var addTodo = document.getElementById("addTodo");
+    if (addTodo) addTodo.onclick = function(){
+      var title = document.getElementById("todoTitle").value.trim();
+      if (!title) return;
+      var dueDate = document.getElementById("todoDate").value || todayStr();
+      persistAdd("todos", {
+        title: title,
+        category: document.getElementById("todoCat").value,
+        minutes: parseInt(document.getElementById("todoMin").value,10),
+        date: dueDate,
+        priority: parseInt(document.getElementById("todoPri").value,10),
+        done: false
+      });
+      var remind = document.getElementById("todoRemind");
+      if (remind && remind.checked && typeof addReminder === "function") {
+        addReminder(title, dueDate).catch(function(){});
+      }
+    };
+    var addEvent = document.getElementById("addEvent");
+    if (addEvent) addEvent.onclick = function(){
+      var title = document.getElementById("evTitle").value.trim();
+      if (!title) return;
+      var date = document.getElementById("evDate").value || todayStr();
+      var time = document.getElementById("evTime").value || "";
+      persistAdd("events", {
+        title: title,
+        date: date,
+        time: time,
+        type: document.getElementById("evType").value
+      });
+      var syncCal = document.getElementById("evSyncCal");
+      if (syncCal && syncCal.checked && typeof addCalendarEvent === "function") {
+        addCalendarEvent(title, date, time).catch(function(){});
+      }
+    };
+    var loadCalendar = document.getElementById("loadCalendar");
+    if (loadCalendar) loadCalendar.onclick = function(){
+      state.calendarLoading = true;
+      render();
+      if (typeof fetchCalendarEvents !== "function") {
+        state.calendarLoading = false; state.calendarEvents = []; render(); return;
+      }
+      fetchCalendarEvents(30).then(function(events){
+        state.calendarLoading = false; state.calendarEvents = events; render();
+      }).catch(function(){
+        state.calendarLoading = false; state.calendarEvents = []; render();
+      });
+    };
+    var loadWeeklyReport = document.getElementById("loadWeeklyReport");
+    if (loadWeeklyReport) loadWeeklyReport.onclick = function(){
+      state.weeklyReportLoading = true;
+      render();
+      if (typeof fetchWeeklyReport !== "function") {
+        state.weeklyReportLoading = false; render(); return;
+      }
+      fetchWeeklyReport().then(function(report){
+        state.weeklyReportLoading = false; state.weeklyReport = report; render();
+      }).catch(function(){
+        state.weeklyReportLoading = false; render();
+      });
+    };
+    var addUnit = document.getElementById("addUnit");
+    if (addUnit) addUnit.onclick = function(){
+      var name = document.getElementById("unitName").value.trim();
+      if (!name) return;
+      persistAdd("units", {
+        subject: document.getElementById("unitSubject").value,
+        unit: name,
+        page: document.getElementById("unitPage").value.trim(),
+        understand: document.getElementById("unitUnderstand").value
+      });
+    };
+  }
+
+  loadLocal();
+  render();
+  initDb();
+})();
+</script>
+</body>
+</html>
