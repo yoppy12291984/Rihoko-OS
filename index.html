@@ -48,6 +48,27 @@
   body.parent-dark-bg { background: #14201e; }
   ruby { ruby-align: center; }
   rt { font-size: 0.55em; color: var(--ink-soft); font-weight: 700; user-select: none; }
+
+  .worksheet-print {
+    margin: 10px 20px; padding: 18px; background: #fff; color: #222; border-radius: 12px;
+    border: 1px solid var(--border); font-family: "M PLUS Rounded 1c", sans-serif;
+  }
+  .worksheet-head { margin-bottom: 14px; }
+  .worksheet-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .worksheet-meta { font-size: 12px; color: #555; }
+  .worksheet-q { display: flex; gap: 8px; margin-bottom: 16px; align-items: flex-start; }
+  .worksheet-qnum { font-weight: 800; flex: none; }
+  .worksheet-qbody { flex: 1; font-size: 14px; line-height: 1.8; }
+  .worksheet-answerline { margin-top: 6px; color: #444; }
+
+  @media print {
+    body { background: #fff !important; }
+    .topbar, .tabbar, .no-print { display: none !important; }
+    #app { max-width: 100%; padding-bottom: 0; }
+    .worksheet-print { border: none; margin: 0; padding: 0; page-break-after: always; }
+  }
+  @page { size: A4; margin: 14mm; }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -62,12 +83,6 @@
   body.app--parent-active { background-image: none; background: var(--bg-parent); }
   #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 84px; position: relative; }
   .app--parent { max-width: 620px; }
-
-  .mascot-corner {
-    position: fixed; right: -14px; bottom: 96px; width: 84px; height: 84px;
-    pointer-events: none; z-index: -1; opacity: 0.9;
-    filter: drop-shadow(0 6px 10px rgba(60,50,70,0.15));
-  }
 
   /* ---------- top bar ---------- */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding: 18px 20px 6px; }
@@ -229,7 +244,6 @@
 </head>
 <body>
 <div id="app"></div>
-<img id="mascotImg" class="mascot-corner" src="mascot.png" alt="" aria-hidden="true">
 <audio id="soraAudio" autoplay style="display:none;"></audio>
 
 <!--
@@ -258,7 +272,10 @@
     weeklyReport: null, weeklyReportLoading: false,
     calMonth: null, calSelectedDate: null, // カレンダー(保護者・こども共通)
     routineDaysSelected: [0,1,2,3,4,5,6],
-    tabOrder: null // 保護者が並び替えたタブ順(nullならデフォルト)
+    tabOrder: null, // 保護者が並び替えたタブ順(nullならデフォルト)
+    editingTodoId: null, editingEventId: null, editingRoutineId: null,
+    eventRecurring: false, eventDaysSelected: [1,2,3,4,5],
+    worksheetSubject: null, worksheet: null, worksheetShowAnswers: false
   };
   var db = null;
 
@@ -407,8 +424,6 @@
     app.className = isParent ? ("app--parent" + (state.parentDarkMode ? " dark-mode" : "")) : "";
     document.body.classList.toggle("parent-dark-bg", isParent && state.parentDarkMode);
     document.body.classList.toggle("app--parent-active", isParent);
-    var mascot = document.getElementById("mascotImg");
-    if (mascot) mascot.style.display = isParent ? "none" : "block";
     app.innerHTML = isParent ? renderParent() : renderChild();
     bindEvents();
   }
@@ -417,7 +432,7 @@
     home:     { icon: "🏠", label: "きょう" },
     manabu:   { icon: "📚", label: "まなぶ" },
     dekita:   { icon: "🌟", label: "できた" },
-    sora:     { icon: "☁️", label: "空" },
+    sora:     { icon: "☁️", label: "Sola" },
     calendar: { icon: "📅", label: "カレンダー" }
   };
   var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","calendar"];
@@ -485,10 +500,10 @@
   }
 
   function renderSoraTab(){
-    var html = '<div class="greeting"><p class="hello">空(そら)とおはなし</p><p class="date">えいごで話してみよう</p></div>';
+    var html = '<div class="greeting"><p class="hello">Solaとおはなし</p><p class="date">えいごで話してみよう</p></div>';
     var talking = state.soraState === "talking" || state.soraState === "connecting";
     html += '<button class="sora-btn ' + (talking?"talking":"") + '" id="soraBtn">🎙️ ' +
-      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "空に話す") +
+      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "Solaに話す") +
       '</button>';
     html += '<div class="sora-status">' + escapeHtml(state.soraStatus || "") + '</div>';
     html += '<div class="sora-transcript ' + (state.soraTranscript ? "show" : "") + '">' + escapeHtml(state.soraTranscript || "") + '</div>';
@@ -508,27 +523,48 @@
       '</div></div>';
   }
 
+  // 予定が指定日に発生するか(単発 or 毎週くり返し)を判定
+  function eventOccursOnDate(ev, dateStr){
+    if (!ev.recurring) return ev.date === dateStr;
+    var dow = new Date(dateStr + "T00:00:00").getDay();
+    if ((ev.days || []).indexOf(dow) === -1) return false;
+    if (ev.startDate && dateStr < ev.startDate) return false;
+    if ((ev.skipDates || []).indexOf(dateStr) !== -1) return false;
+    return true;
+  }
+
   function nextEvent(){
     var now = new Date();
-    var upcoming = state.events.filter(function(e){
-      var d = new Date(e.date + "T" + (e.time || "23:59"));
-      return d >= now;
-    }).sort(function(a,b){ return (a.date+a.time) < (b.date+b.time) ? -1 : 1; });
-    return upcoming[0] || null;
+    var best = null, bestDt = null;
+    for (var i = 0; i < 60; i++) {
+      var d = new Date(); d.setDate(d.getDate() + i);
+      var dateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      state.events.forEach(function(ev){
+        if (!eventOccursOnDate(ev, dateStr)) return;
+        var dt = new Date(dateStr + "T" + (ev.time || "23:59"));
+        if (dt < now) return;
+        if (!bestDt || dt < bestDt) { bestDt = dt; best = Object.assign({}, ev, { date: dateStr }); }
+      });
+      if (best) break;
+    }
+    return best;
   }
 
   function renderManabu(){
+    if (state.worksheetSubject) return renderWorksheetView();
+
     var html = '<div class="greeting"><p class="hello">まなぶ</p><p class="date">きょうの学習</p></div>';
     var byCat = {};
     Object.keys(CATS).forEach(function(c){ byCat[c] = state.units.filter(function(u){return u.subject===c;}).length; });
-    html += '<div class="section-label">教科</div><div class="todo-list">';
+    html += '<div class="section-label">教科(タップでプリント問題)</div><div class="todo-list">';
     Object.keys(CATS).forEach(function(c){
-      html += '<div class="todo-card"><div style="font-size:22px;">'+CATS[c].icon+'</div><div class="todo-body">' +
-        '<p class="todo-title">'+addFurigana(c)+'</p><p class="todo-meta">登録中の単元 '+byCat[c]+'件</p></div></div>';
+      html += '<button class="todo-card" data-subjectcard="'+c+'" style="width:100%;text-align:left;border:none;font-family:inherit;cursor:pointer;">' +
+        '<div style="font-size:22px;">'+CATS[c].icon+'</div><div class="todo-body">' +
+        '<p class="todo-title">'+addFurigana(c)+'</p><p class="todo-meta">登録中の単元 '+byCat[c]+'件</p></div></button>';
     });
     html += '</div>';
 
-    html += '<div class="section-label">問題にちょうせん</div>';
+    html += '<div class="section-label">問題にちょうせん(その場で解く)</div>';
     if (!state.quiz) {
       html += '<div style="padding:0 20px 8px;"><select id="quizSubject" class="quiz-choice" style="cursor:pointer;">' +
         Object.keys(CATS).map(function(c){
@@ -537,8 +573,87 @@
     }
     html += renderQuiz();
 
-    html += '<div class="section-label">テスト対策の問題集・お直し</div>';
-    html += '<div class="empty-state">お直し(AI採点とヒント)は準備中です。<br>まずは上の「問題にちょうせん」で練習してね。</div>';
+    html += '<div class="section-label">お直し</div>';
+    html += '<div class="empty-state">お直し(AI採点とヒント)は準備中です。</div>';
+    return html;
+  }
+
+  function currentUnitContextFor(subject){
+    var list = state.units.filter(function(u){ return u.subject === subject; });
+    if (list.length === 0) return "";
+    var learning = list.filter(function(u){ return u.understand === "学習中"; });
+    var pick = learning.length ? learning[learning.length-1] : list[list.length-1];
+    return pick.unit + (pick.page ? ("(" + pick.page + ")") : "");
+  }
+
+  function startWorksheetGeneration(subject){
+    state.worksheet = { loading: true };
+    render();
+    if (typeof fetchWorksheet !== "function") {
+      state.worksheet = { loading: false, questions: [] };
+      render();
+      return;
+    }
+    var context = currentUnitContextFor(subject);
+    fetchWorksheet(subject, context, 8).then(function(w){
+      state.worksheet = w;
+      render();
+    }).catch(function(err){
+      var msg = String(err && err.message || err || "");
+      state.worksheet = { loading: false, questions: [], limitReached: msg.indexOf("usage_limit_reached") >= 0 };
+      render();
+    });
+  }
+
+  function renderWorksheetView(){
+    var subject = state.worksheetSubject;
+    var w = state.worksheet;
+    var html = '<div class="greeting no-print"><p class="hello">' + addFurigana(subject) + 'のプリント</p>' +
+      '<p class="date">今の単元をもとに作ります</p></div>';
+    html += '<div style="padding:0 20px;" class="no-print"><button class="btn-primary" id="worksheetBack" style="background:var(--ink-soft);">← 教科一覧にもどる</button></div>';
+
+    if (!w || w.loading) {
+      html += '<div class="empty-state" style="margin-top:14px;">' + (w && w.loading ? "プリントを作っているよ…" : "") + '</div>';
+      if (!w) {
+        html += '<button class="quiz-start-btn" id="worksheetStart" style="margin-top:10px;">' + addFurigana(subject) + 'のプリントを作る</button>';
+      }
+      return html;
+    }
+    if (w.limitReached) {
+      html += '<div class="empty-state" style="margin-top:14px;">今月のAIりようは上限に達したよ。<br>保護者の方に伝えてね。</div>';
+      return html;
+    }
+    if (!w.questions || w.questions.length === 0) {
+      html += '<div class="empty-state" style="margin-top:14px;">プリントが作れませんでした。もう一度ためしてね。</div>' +
+        '<button class="quiz-start-btn" id="worksheetStart">もう一度作る</button>';
+      return html;
+    }
+
+    html += '<div class="worksheet-print">' +
+      '<div class="worksheet-head">' +
+      '<div class="worksheet-title">' + furiganaFromParens(w.title || (subject+"のプリント")) + '</div>' +
+      '<div class="worksheet-meta">なまえ：___________________　　日づけ：___________________</div>' +
+      '</div>';
+    html += w.questions.map(function(q, i){
+      return '<div class="worksheet-q"><div class="worksheet-qnum">' + (i+1) + '.</div>' +
+        '<div class="worksheet-qbody"><div>' + furiganaFromParens(q.question) + '</div>' +
+        '<div class="worksheet-answerline">こたえ：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div></div></div>';
+    }).join("");
+    html += '</div>';
+
+    html += '<div class="no-print" style="padding:0 20px 4px;display:flex;gap:8px;">' +
+      '<button class="btn-primary" id="worksheetPrint" style="margin:0;">🖨️ 印刷する</button>' +
+      '<button class="btn-primary" id="worksheetToggleAnswers" style="margin:0;background:var(--ink-soft);">' +
+      (state.worksheetShowAnswers ? "こたえをかくす" : "こたえを見る") + '</button></div>';
+
+    if (state.worksheetShowAnswers) {
+      html += '<div class="worksheet-print" style="margin-top:0;"><div class="worksheet-title" style="font-size:14px;">こたえ</div>';
+      html += w.questions.map(function(q, i){
+        return '<div class="worksheet-q"><div class="worksheet-qnum">' + (i+1) + '.</div>' +
+          '<div class="worksheet-qbody">' + furiganaFromParens(q.answer||"") + '</div></div>';
+      }).join("");
+      html += '</div>';
+    }
     return html;
   }
 
@@ -653,7 +768,7 @@
     for (var day=1; day<=daysInMonth; day++){
       var dateStr = year + "-" + String(month).padStart(2,"0") + "-" + String(day).padStart(2,"0");
       var items = combinedItemsForDate(dateStr);
-      var hasEvent = state.events.some(function(e){ return e.date === dateStr; });
+      var hasEvent = state.events.some(function(e){ return eventOccursOnDate(e, dateStr); });
       var count = items.length;
       var isToday = dateStr === today;
       var isSelected = dateStr === state.calSelectedDate;
@@ -678,7 +793,7 @@
 
   function renderCalendarDayDetail_(dateStr){
     var items = combinedItemsForDate(dateStr);
-    var events = state.events.filter(function(e){ return e.date === dateStr; });
+    var events = state.events.filter(function(e){ return eventOccursOnDate(e, dateStr); });
     var html = '<div class="panel"><h2>' + fmtDateLong(dateStr) + '</h2>';
     if (items.length === 0 && events.length === 0) {
       html += '<div class="future-note">この日の予定・ToDoはありません。</div>';
@@ -881,35 +996,48 @@
       html += '<div class="warn-note" style="margin:16px 20px 0;">きょうの予定が' + todays.length + '件あります。里穂子さんの画面には3件のみ表示されます。優先度の低い予定は翌日に移すのがおすすめです。</div>';
     }
 
-    html += '<div class="panel"><h2>ToDoを追加する</h2>' +
-      '<div class="form-row"><label>やること</label><input id="todoTitle" placeholder="例: 算数の見直し"></div>' +
+    var editingTodo = state.editingTodoId ? state.todos.find(function(t){return t.id===state.editingTodoId;}) : null;
+    html += '<div class="panel"><h2>' + (editingTodo ? "ToDoを編集する" : "ToDoを追加する") + '</h2>' +
+      '<div class="form-row"><label>やること</label><input id="todoTitle" placeholder="例: 算数の見直し" value="' + escapeHtml(editingTodo?editingTodo.title:"") + '"></div>' +
       '<div class="form-grid">' +
-      '<div class="form-row"><label>教科</label><select id="todoCat">' + Object.keys(CATS).map(function(c){return '<option>'+c+'</option>';}).join("") + '</select></div>' +
-      '<div class="form-row"><label>時間の目安</label><select id="todoMin"><option value="10">10分</option><option value="15" selected>15分</option><option value="20">20分</option></select></div>' +
+      '<div class="form-row"><label>教科</label><select id="todoCat">' + Object.keys(CATS).map(function(c){return '<option '+((editingTodo&&editingTodo.category===c)?"selected":"")+'>'+c+'</option>';}).join("") + '</select></div>' +
+      '<div class="form-row"><label>時間の目安</label><select id="todoMin"><option value="10" '+((editingTodo&&editingTodo.minutes==10)?"selected":"")+'>10分</option><option value="15" '+((!editingTodo||editingTodo.minutes==15)?"selected":"")+'>15分</option><option value="20" '+((editingTodo&&editingTodo.minutes==20)?"selected":"")+'>20分</option></select></div>' +
       '</div>' +
       '<div class="form-grid">' +
-      '<div class="form-row"><label>日付</label><input type="date" id="todoDate" value="' + today + '"></div>' +
-      '<div class="form-row"><label>優先度</label><select id="todoPri"><option value="1">高い</option><option value="2" selected>ふつう</option><option value="3">低い</option></select></div>' +
+      '<div class="form-row"><label>日付</label><input type="date" id="todoDate" value="' + (editingTodo?editingTodo.date:today) + '"></div>' +
+      '<div class="form-row"><label>優先度</label><select id="todoPri"><option value="1" '+((editingTodo&&editingTodo.priority==1)?"selected":"")+'>高い</option><option value="2" '+((!editingTodo||editingTodo.priority==2)?"selected":"")+'>ふつう</option><option value="3" '+((editingTodo&&editingTodo.priority==3)?"selected":"")+'>低い</option></select></div>' +
       '</div>' +
       '<div class="form-row" style="flex-direction:row;align-items:center;gap:8px;">' +
       '<input type="checkbox" id="todoRemind" style="width:18px;height:18px;"><label style="margin:0;">前日の夜、Googleカレンダーでお知らせする</label></div>' +
-      '<button class="btn-primary" id="addTodo">追加する</button>' +
+      '<button class="btn-primary" id="addTodo">' + (editingTodo?"更新する":"追加する") + '</button>' +
+      (editingTodo ? '<button class="btn-primary" id="cancelTodoEdit" style="background:var(--ink-soft);margin-top:8px;">編集をやめる</button>' : '') +
       '<h3>登録済みのToDo（直近）</h3>' +
       '<div class="row-list">' + renderTodoRows() + '</div>' +
       '</div>';
 
-    html += '<div class="panel"><h2>予定を追加する（学校行事・習い事・テスト日など）</h2>' +
-      '<div class="form-row"><label>予定の名前</label><input id="evTitle" placeholder="例: 公文"></div>' +
+    var editingEvent = state.editingEventId ? state.events.find(function(e){return e.id===state.editingEventId;}) : null;
+    var evRecurring = editingEvent ? !!editingEvent.recurring : state.eventRecurring;
+    var evDays = editingEvent && editingEvent.days ? editingEvent.days : state.eventDaysSelected;
+    html += '<div class="panel"><h2>' + (editingEvent ? "予定を編集する" : "予定を追加する（学校行事・習い事・テスト日など）") + '</h2>' +
+      '<div class="form-row"><label>予定の名前</label><input id="evTitle" placeholder="例: 公文" value="' + escapeHtml(editingEvent?editingEvent.title:"") + '"></div>' +
+      '<div class="form-row" style="flex-direction:row;align-items:center;gap:8px;">' +
+      '<input type="checkbox" id="evRecurring" style="width:18px;height:18px;" ' + (evRecurring?"checked":"") + '><label style="margin:0;">毎週くり返す(習い事など)</label></div>' +
+      '<div id="evDaysPicker" style="display:' + (evRecurring?"flex":"none") + ';gap:6px;margin-bottom:10px;">' +
+      WEEKDAY_LABELS.map(function(w,i){
+        var active = evDays.indexOf(i) !== -1;
+        return '<button type="button" class="ptab ' + (active?"active":"") + '" data-eventday="'+i+'" style="padding:8px 0;flex:1;">'+w+'</button>';
+      }).join("") + '</div>' +
       '<div class="form-grid">' +
-      '<div class="form-row"><label>日付</label><input type="date" id="evDate" value="' + today + '"></div>' +
-      '<div class="form-row"><label>時刻（任意）</label><input type="time" id="evTime"></div>' +
+      '<div class="form-row"><label>' + (evRecurring?"開始日":"日付") + '</label><input type="date" id="evDate" value="' + (editingEvent?(editingEvent.date||editingEvent.startDate||today):today) + '"></div>' +
+      '<div class="form-row"><label>時刻（任意）</label><input type="time" id="evTime" value="' + (editingEvent?(editingEvent.time||""):"") + '"></div>' +
       '</div>' +
       '<div class="form-row"><label>種類</label><select id="evType">' +
-        Object.keys(EVENT_TYPES).map(function(k){return '<option value="'+k+'">'+EVENT_TYPES[k]+'</option>';}).join("") +
+        Object.keys(EVENT_TYPES).map(function(k){return '<option value="'+k+'" '+((editingEvent&&editingEvent.type===k)?"selected":"")+'>'+EVENT_TYPES[k]+'</option>';}).join("") +
       '</select></div>' +
       '<div class="form-row" style="flex-direction:row;align-items:center;gap:8px;">' +
-      '<input type="checkbox" id="evSyncCal" style="width:18px;height:18px;" checked><label style="margin:0;">Googleカレンダーにも登録する</label></div>' +
-      '<button class="btn-primary" id="addEvent">追加する</button>' +
+      '<input type="checkbox" id="evSyncCal" style="width:18px;height:18px;" ' + (editingEvent?"":"checked") + '><label style="margin:0;">Googleカレンダーにも登録する</label></div>' +
+      '<button class="btn-primary" id="addEvent">' + (editingEvent?"更新する":"追加する") + '</button>' +
+      (editingEvent ? '<button class="btn-primary" id="cancelEventEdit" style="background:var(--ink-soft);margin-top:8px;">編集をやめる</button>' : '') +
       '<h3>登録済みの予定（直近）</h3>' +
       '<div class="row-list">' + renderEventRows() + '</div>' +
       '</div>';
@@ -923,19 +1051,24 @@
   var WEEKDAY_LABELS = ["日","月","火","水","木","金","土"];
 
   function renderRoutinePanel(){
-    var html = '<div class="panel"><h2>ルーチンを追加する</h2>' +
-      '<div class="ri-sub" style="margin-bottom:10px;">毎日/決まった曜日にくり返す予定です(薬を飲む、明日の準備、ピアノの練習など)。「きょうの3つ」にも合わせて表示されます。</div>' +
-      '<div class="form-row"><label>やること</label><input id="routineTitle" placeholder="例: ピアノの練習"></div>' +
+    var editingRoutine = state.editingRoutineId ? state.routines.find(function(r){return r.id===state.editingRoutineId;}) : null;
+    var days = editingRoutine ? (editingRoutine.days||[0,1,2,3,4,5,6]) : state.routineDaysSelected;
+    var html = '<div class="panel"><h2>' + (editingRoutine ? "ルーチンを編集する" : "ルーチンを追加する") + '</h2>' +
+      '<div class="ri-sub" style="margin-bottom:10px;">毎日/決まった曜日にくり返す予定です(薬を飲む、明日の準備、ピアノの練習など)。「きょうやること」にも合わせて表示されます。</div>' +
+      '<div class="form-row"><label>やること</label><input id="routineTitle" placeholder="例: ピアノの練習" value="' + escapeHtml(editingRoutine?editingRoutine.title:"") + '"></div>' +
       '<div class="form-grid">' +
-      '<div class="form-row"><label>教科・分類</label><select id="routineCat">' + Object.keys(CATS).map(function(c){return '<option>'+c+'</option>';}).join("") + '</select></div>' +
-      '<div class="form-row"><label>時間の目安</label><select id="routineMin"><option value="5">5分</option><option value="10" selected>10分</option><option value="15">15分</option><option value="20">20分</option><option value="30">30分</option></select></div>' +
+      '<div class="form-row"><label>教科・分類</label><select id="routineCat">' + Object.keys(CATS).map(function(c){return '<option '+((editingRoutine&&editingRoutine.category===c)?"selected":"")+'>'+c+'</option>';}).join("") + '</select></div>' +
+      '<div class="form-row"><label>時間の目安</label><select id="routineMin">' +
+        [5,10,15,20,30].map(function(m){return '<option value="'+m+'" '+((editingRoutine?editingRoutine.minutes==m:m===10)?"selected":"")+'>'+m+'分</option>';}).join("") +
+      '</select></div>' +
       '</div>' +
       '<div class="form-row"><label>曜日(タップで選択)</label><div id="routineDaysPicker" style="display:flex;gap:6px;">' +
       WEEKDAY_LABELS.map(function(w,i){
-        var active = state.routineDaysSelected.indexOf(i) !== -1;
+        var active = days.indexOf(i) !== -1;
         return '<button type="button" class="ptab ' + (active?"active":"") + '" data-routineday="'+i+'" style="padding:8px 0;flex:1;">'+w+'</button>';
       }).join("") + '</div></div>' +
-      '<button class="btn-primary" id="addRoutine" style="margin-top:10px;">ルーチンを追加する</button>' +
+      '<button class="btn-primary" id="addRoutine" style="margin-top:10px;">' + (editingRoutine?"ルーチンを更新する":"ルーチンを追加する") + '</button>' +
+      (editingRoutine ? '<button class="btn-primary" id="cancelRoutineEdit" style="background:var(--ink-soft);margin-top:8px;">編集をやめる</button>' : '') +
       '<h3>登録済みのルーチン</h3>' +
       '<div class="row-list">' + renderRoutineRows() + '</div>' +
       '</div>';
@@ -946,13 +1079,15 @@
     if (state.routines.length === 0) return '<div class="future-note">まだルーチンが登録されていません。</div>';
     return state.routines.map(function(r){
       var days = r.days || [0,1,2,3,4,5,6];
-      var dayStr = days.length === 7 ? "毎日" : days.sort().map(function(d){return WEEKDAY_LABELS[d];}).join("");
+      var dayStr = days.length === 7 ? "毎日" : days.slice().sort().map(function(d){return WEEKDAY_LABELS[d];}).join("");
       var skip = r.skipDates || [];
       var skipStr = skip.length ? ("除外: " + skip.map(fmtDate).join("、")) : "";
       return '<div class="row-item" style="align-items:flex-start;flex-direction:column;gap:6px;">' +
         '<div style="display:flex;width:100%;justify-content:space-between;">' +
         '<div class="ri-title">' + escapeHtml(r.title) + '</div>' +
-        '<button class="del-btn" data-delroutine="' + r.id + '">✕</button></div>' +
+        '<div style="display:flex;gap:4px;">' +
+        '<button class="del-btn" data-editroutine="' + r.id + '" style="color:var(--teal);">✎</button>' +
+        '<button class="del-btn" data-delroutine="' + r.id + '">✕</button></div></div>' +
         '<div class="ri-sub">' + escapeHtml(r.category) + ' ・ ' + (r.minutes||"-") + '分 ・ ' + dayStr + (skipStr ? " ・ "+skipStr : "") + '</div>' +
         '<div style="display:flex;gap:6px;align-items:center;">' +
         '<input type="date" data-skipdate-input="' + r.id + '" style="font-size:12px;padding:6px;border-radius:8px;border:1px solid var(--border);">' +
@@ -967,6 +1102,7 @@
     return list.map(function(t){
       return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + (t.done?"✅ ":"") + escapeHtml(t.title) + '</div>' +
         '<div class="ri-sub">' + fmtDate(t.date) + " ・ " + t.category + " ・ " + (t.minutes||"-") + '分</div></div>' +
+        '<button class="del-btn" data-edittodo="' + t.id + '" style="color:var(--teal);">✎</button>' +
         '<button class="del-btn" data-deltodo="' + t.id + '">✕</button></div>';
     }).join("");
   }
@@ -974,8 +1110,10 @@
     var list = state.events.slice().sort(function(a,b){ return (a.date+(a.time||"")) < (b.date+(b.time||"")) ? -1 : 1; }).slice(0,20);
     if (list.length === 0) return '<div class="future-note">まだ予定が登録されていません。</div>';
     return list.map(function(e){
+      var recurStr = e.recurring ? ((e.days||[]).slice().sort().map(function(d){return WEEKDAY_LABELS[d];}).join("") + "曜 毎週") : fmtDate(e.date);
       return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + escapeHtml(e.title) + '</div>' +
-        '<div class="ri-sub">' + fmtDate(e.date) + (e.time?" "+e.time:"") + " ・ " + (EVENT_TYPES[e.type]||"その他") + '</div></div>' +
+        '<div class="ri-sub">' + recurStr + (e.time?" "+e.time:"") + " ・ " + (EVENT_TYPES[e.type]||"その他") + '</div></div>' +
+        '<button class="del-btn" data-editevent="' + e.id + '" style="color:var(--teal);">✎</button>' +
         '<button class="del-btn" data-delevent="' + e.id + '">✕</button></div>';
     }).join("");
   }
@@ -1200,6 +1338,28 @@
       });
     };
 
+    app.querySelectorAll("[data-subjectcard]").forEach(function(b){
+      b.onclick = function(){
+        var subject = b.getAttribute("data-subjectcard");
+        state.worksheetSubject = subject;
+        state.worksheetShowAnswers = false;
+        startWorksheetGeneration(subject);
+      };
+    });
+    var worksheetBack = document.getElementById("worksheetBack");
+    if (worksheetBack) worksheetBack.onclick = function(){
+      state.worksheetSubject = null; state.worksheet = null; render();
+    };
+    var worksheetStart = document.getElementById("worksheetStart");
+    if (worksheetStart) worksheetStart.onclick = function(){ startWorksheetGeneration(state.worksheetSubject); };
+    var worksheetPrint = document.getElementById("worksheetPrint");
+    if (worksheetPrint) worksheetPrint.onclick = function(){ window.print(); };
+    var worksheetToggleAnswers = document.getElementById("worksheetToggleAnswers");
+    if (worksheetToggleAnswers) worksheetToggleAnswers.onclick = function(){
+      state.worksheetShowAnswers = !state.worksheetShowAnswers;
+      render();
+    };
+
     var quizStart = document.getElementById("quizStart");
     if (quizStart) quizStart.onclick = function(){
       var subjectSelect = document.getElementById("quizSubject");
@@ -1377,36 +1537,87 @@
       var title = document.getElementById("todoTitle").value.trim();
       if (!title) return;
       var dueDate = document.getElementById("todoDate").value || todayStr();
-      persistAdd("todos", {
+      var data = {
         title: title,
         category: document.getElementById("todoCat").value,
         minutes: parseInt(document.getElementById("todoMin").value,10),
         date: dueDate,
-        priority: parseInt(document.getElementById("todoPri").value,10),
-        done: false
-      });
+        priority: parseInt(document.getElementById("todoPri").value,10)
+      };
+      if (state.editingTodoId) {
+        persistUpdate("todos", state.editingTodoId, data);
+        state.editingTodoId = null;
+      } else {
+        data.done = false;
+        persistAdd("todos", data);
+      }
       var remind = document.getElementById("todoRemind");
       if (remind && remind.checked && typeof addReminder === "function") {
         addReminder(title, dueDate).catch(function(){});
       }
     };
+    var cancelTodoEdit = document.getElementById("cancelTodoEdit");
+    if (cancelTodoEdit) cancelTodoEdit.onclick = function(){ state.editingTodoId = null; render(); };
+    app.querySelectorAll("[data-edittodo]").forEach(function(b){
+      b.onclick = function(){ state.editingTodoId = b.getAttribute("data-edittodo"); render(); };
+    });
+
     var addEvent = document.getElementById("addEvent");
     if (addEvent) addEvent.onclick = function(){
       var title = document.getElementById("evTitle").value.trim();
       if (!title) return;
       var date = document.getElementById("evDate").value || todayStr();
       var time = document.getElementById("evTime").value || "";
-      persistAdd("events", {
-        title: title,
-        date: date,
-        time: time,
-        type: document.getElementById("evType").value
-      });
+      var recurring = document.getElementById("evRecurring").checked;
+      var data = { title: title, time: time, type: document.getElementById("evType").value };
+      if (recurring) {
+        data.recurring = true;
+        data.days = state.eventDaysSelected.slice();
+        data.startDate = date;
+        data.date = null;
+      } else {
+        data.recurring = false;
+        data.date = date;
+        data.days = null;
+        data.startDate = null;
+      }
+      if (state.editingEventId) {
+        persistUpdate("events", state.editingEventId, data);
+        state.editingEventId = null;
+      } else {
+        data.skipDates = [];
+        persistAdd("events", data);
+      }
       var syncCal = document.getElementById("evSyncCal");
-      if (syncCal && syncCal.checked && typeof addCalendarEvent === "function") {
+      if (syncCal && syncCal.checked && typeof addCalendarEvent === "function" && !recurring) {
         addCalendarEvent(title, date, time).catch(function(){});
       }
     };
+    var cancelEventEdit = document.getElementById("cancelEventEdit");
+    if (cancelEventEdit) cancelEventEdit.onclick = function(){ state.editingEventId = null; render(); };
+    app.querySelectorAll("[data-editevent]").forEach(function(b){
+      b.onclick = function(){
+        state.editingEventId = b.getAttribute("data-editevent");
+        var ev = state.events.find(function(x){return x.id===state.editingEventId;});
+        if (ev) state.eventDaysSelected = ev.days ? ev.days.slice() : state.eventDaysSelected;
+        render();
+      };
+    });
+    var evRecurringBox = document.getElementById("evRecurring");
+    if (evRecurringBox) evRecurringBox.onchange = function(){
+      state.eventRecurring = evRecurringBox.checked;
+      render();
+    };
+    app.querySelectorAll("[data-eventday]").forEach(function(b){
+      b.onclick = function(){
+        var day = parseInt(b.getAttribute("data-eventday"), 10);
+        var idx = state.eventDaysSelected.indexOf(day);
+        if (idx === -1) state.eventDaysSelected.push(day);
+        else state.eventDaysSelected.splice(idx, 1);
+        render();
+      };
+    });
+
     var loadCalendar = document.getElementById("loadCalendar");
     if (loadCalendar) loadCalendar.onclick = function(){
       state.calendarLoading = true;
@@ -1447,16 +1658,36 @@
       var title = document.getElementById("routineTitle").value.trim();
       if (!title) return;
       if (state.routineDaysSelected.length === 0) return;
-      persistAdd("routines", {
+      var data = {
         title: title,
         category: document.getElementById("routineCat").value,
         minutes: parseInt(document.getElementById("routineMin").value, 10),
         priority: 2,
-        days: state.routineDaysSelected.slice(),
-        skipDates: []
-      });
+        days: state.routineDaysSelected.slice()
+      };
+      if (state.editingRoutineId) {
+        persistUpdate("routines", state.editingRoutineId, data);
+        state.editingRoutineId = null;
+      } else {
+        data.skipDates = [];
+        persistAdd("routines", data);
+      }
       state.routineDaysSelected = [0,1,2,3,4,5,6];
     };
+    var cancelRoutineEdit = document.getElementById("cancelRoutineEdit");
+    if (cancelRoutineEdit) cancelRoutineEdit.onclick = function(){
+      state.editingRoutineId = null;
+      state.routineDaysSelected = [0,1,2,3,4,5,6];
+      render();
+    };
+    app.querySelectorAll("[data-editroutine]").forEach(function(b){
+      b.onclick = function(){
+        state.editingRoutineId = b.getAttribute("data-editroutine");
+        var r = state.routines.find(function(x){return x.id===state.editingRoutineId;});
+        if (r) state.routineDaysSelected = (r.days||[0,1,2,3,4,5,6]).slice();
+        render();
+      };
+    });
     app.querySelectorAll("[data-delroutine]").forEach(function(b){
       b.onclick = function(){ persistDelete("routines", b.getAttribute("data-delroutine")); };
     });
