@@ -22,13 +22,14 @@ const SORA_MODEL = "gpt-realtime-2.1-mini";
 // Code.gs側のセッション作成時にも同じ値を設定しているので、変更時は両方直すこと。
 const SORA_TURN_DETECTION = {
   type: "server_vad",
-  threshold: 0.6,
-  prefix_padding_ms: 300,
-  silence_duration_ms: 700,
+  threshold: 0.45,
+  prefix_padding_ms: 500,
+  silence_duration_ms: 1200,
   create_response: true,
   interrupt_response: false
 };
 
+let _disconnectTimer = null;
 let _pc = null;
 let _micStream = null;
 let _dataChannel = null;
@@ -122,12 +123,19 @@ async function startSora({ onTranscript, onStatus, onError } = {}) {
     };
 
     // 通話中に接続が切れた場合、分かる形で知らせる
-    _pc.oniceconnectionstatechange = () => {
-      if (!_pc) return;
-      var st = _pc.iceConnectionState;
-      if (st === "failed" || st === "disconnected" || st === "closed") {
-        onError && onError(new Error("[接続] Solaとの接続が切れました"));
+    const activePc = _pc;
+    activePc.oniceconnectionstatechange = () => {
+      if (_pc !== activePc) return;
+      clearTimeout(_disconnectTimer); _disconnectTimer = null;
+      var st = activePc.iceConnectionState;
+      function connectionLost() {
+        if (_pc !== activePc) return;
+        stopSora();
+        onError && onError(new Error("[接続] Solaとの接続が切れました。もう一度つないでね。"));
       }
+      // iPhoneの一時的な通信の揺れは、8秒間復帰を待つ。
+      if (st === "disconnected") _disconnectTimer = setTimeout(connectionLost, 8000);
+      else if (st === "failed" || st === "closed") connectionLost();
     };
 
     _micStream.getTracks().forEach((track) => _pc.addTrack(track, _micStream));
@@ -139,7 +147,7 @@ async function startSora({ onTranscript, onStatus, onError } = {}) {
       try {
         _dataChannel.send(JSON.stringify({
           type: "session.update",
-          session: { audio: { input: { turn_detection: SORA_TURN_DETECTION } } }
+          session: { type: "realtime", audio: { input: { turn_detection: SORA_TURN_DETECTION } } }
         }));
       } catch (err) { /* 失敗しても致命的ではないため無視 */ }
     };
@@ -189,6 +197,8 @@ async function startSora({ onTranscript, onStatus, onError } = {}) {
 }
 
 function stopSora() {
+  clearTimeout(_disconnectTimer); _disconnectTimer = null;
+  if (_pc) _pc.oniceconnectionstatechange = null;
   if (_dataChannel) { try { _dataChannel.close(); } catch (e) {} }
   if (_pc) { try { _pc.close(); } catch (e) {} }
   if (_micStream) { _micStream.getTracks().forEach((t) => t.stop()); }
