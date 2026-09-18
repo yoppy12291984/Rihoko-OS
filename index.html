@@ -341,16 +341,23 @@
     if (db) {
       db.collection(col).doc(data.id).set(data).catch(function(){});
     }
+    if (typeof syncUpsert === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
+      syncUpsert(col, data);
+    }
   }
   function persistUpdate(col, id, patch){
     var arr = state[col];
+    var full = null;
     for (var i=0;i<arr.length;i++){
-      if (arr[i].id === id) { Object.assign(arr[i], patch); break; }
+      if (arr[i].id === id) { Object.assign(arr[i], patch); full = arr[i]; break; }
     }
     render();
     saveLocal();
     if (db) {
       db.collection(col).doc(id).update(patch).catch(function(){});
+    }
+    if (full && typeof syncUpsert === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
+      syncUpsert(col, full);
     }
   }
   function persistDelete(col, id){
@@ -359,6 +366,9 @@
     saveLocal();
     if (db) {
       db.collection(col).doc(id).delete().catch(function(){});
+    }
+    if (typeof syncDeleteItem === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
+      syncDeleteItem(col, id);
     }
   }
 
@@ -377,12 +387,43 @@
     }).catch(function(){});
   }
 
+  // GAS(Googleスプレッドシート)から他端末分のデータを取り込み、この端末の表示にも反映する。
+  // GitHub Pages環境(claude.aiのdb機能が使えない環境)向けの同期経路。
+  // サーバー側がまだ空で、この端末にだけ既存データがある場合(初回移行)は、
+  // ローカルを消さずにサーバーへアップロードして揃える。
+  function pullFromGas(){
+    if (typeof syncPull !== "function") return;
+    var localSnapshot = {
+      todos: state.todos.slice(), events: state.events.slice(),
+      units: state.units.slice(), routines: state.routines.slice()
+    };
+    syncPull().then(function(data){
+      if (!data) return;
+      ["todos","events","units","routines"].forEach(function(col){
+        var serverList = data[col] || [];
+        if (serverList.length === 0 && localSnapshot[col].length > 0) {
+          localSnapshot[col].forEach(function(item){ syncUpsert(col, item); });
+        } else {
+          state[col] = serverList;
+        }
+      });
+      if (data.routineDone) {
+        state.routineDone = Object.assign({}, state.routineDone, data.routineDone);
+      }
+      saveLocal();
+      render();
+    }).catch(function(){ /* 取得できなければローカルのデータのまま */ });
+  }
+
   // ルーチンは「その日やったか」を日付ごとに記録する(ルーチン自体はテンプレートなので使い回す)
   function toggleRoutineDone(routineId, dateStr){
     var key = routineId + "|" + dateStr;
     state.routineDone[key] = !state.routineDone[key];
     render();
     saveLocal();
+    if (typeof syncRoutineDone === "function") {
+      syncRoutineDone(key, state.routineDone[key]);
+    }
   }
   function isRoutineDone(routineId, dateStr){
     return !!state.routineDone[routineId + "|" + dateStr];
@@ -1764,6 +1805,7 @@
   loadLocal();
   render();
   initDb();
+  pullFromGas();
   setupSwipeNav_();
 })();
 </script>
