@@ -245,6 +245,28 @@ async function fetchWorksheet(subject, context, count) {
   return data.worksheet || { title: subject + "のプリント", questions: [] };
 }
 
+/* ---------------- 端末間データ同期(ToDo・予定・単元・ルーチン) ---------------- */
+
+async function syncPull() {
+  const data = await callBackend_({ action: "syncPull" });
+  return data.data || null;
+}
+
+async function syncUpsert(collection, item) {
+  try { await callBackend_({ action: "syncUpsert", collection: collection, item: item }); }
+  catch (err) { /* 同期の失敗はUIをブロックしない(次回のsyncPullで再度揃う想定) */ }
+}
+
+async function syncDeleteItem(collection, id) {
+  try { await callBackend_({ action: "syncDelete", collection: collection, id: id }); }
+  catch (err) { /* 同上 */ }
+}
+
+async function syncRoutineDone(key, done) {
+  try { await callBackend_({ action: "syncRoutineDone", key: key, done: done }); }
+  catch (err) { /* 同上 */ }
+}
+
 /* ---------------- 学習履歴 ---------------- */
 
 async function fetchLearningLogs(limit) {
