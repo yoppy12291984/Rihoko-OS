@@ -244,6 +244,15 @@
 <link rel="stylesheet" href="study-theme.css">
 </head>
 <body>
+<style>
+html:not(.family-authorized) #app {display:none!important}
+#familyAuthGate {max-width:440px;margin:12vh auto;padding:28px;background:white;border-radius:24px;color:#284b48;font:17px/1.8 system-ui;box-shadow:0 10px 40px #365e5718}
+#familyAuthGate[hidden],#familyLogout[hidden] {display:none}
+#familyLogin {padding:14px 22px;border:1px solid #b4ccc8;border-radius:14px;background:#fff;font:inherit;cursor:pointer}
+#familyLogout {position:fixed;bottom:100px;right:12px;z-index:30;border:1px solid #b4ccc8;border-radius:12px;background:white;padding:8px;color:#45635f}
+</style>
+<section id="familyAuthGate" aria-label="家族のログイン"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">おうちの人のGoogleアカウントでログインしてください。</p><button id="familyLogin">Googleでログイン</button></section>
+<button id="familyLogout" hidden>ログアウト</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
 
@@ -257,6 +266,7 @@
 
 <script src="daily-support.js"></script>
 <script src="family-sync.js"></script>
+<script src="family-auth.js"></script>
 <script>
 (function(){
   "use strict";
@@ -401,6 +411,7 @@
   // GitHub Pages環境(claude.aiのdb機能が使えない環境)向けの同期経路。
   // 初回の端末データ移行は保護者が選択し、未送信キューは端末に残す。
   function pullFromGas(){
+    if (!FamilyAuth.isAuthorized()) return Promise.resolve();
     if (familySync) return familySync.refresh();
   }
 
@@ -1964,6 +1975,7 @@
     }, { passive: true });
   }
 
+  function startApp(){
   loadLocal();
   initFamilySync();
   render();
@@ -1979,6 +1991,8 @@
   setInterval(refreshDay, 60000);
   setInterval(function(){ if (!document.hidden && state.view !== 'parent') pullFromGas(); }, 45000);
   window.addEventListener('online', pullFromGas);
+  }
+  FamilyAuth.boot(startApp);
 })();
 </script>
 </body>
