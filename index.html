@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta name="referrer" content="no-referrer">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rihoko Study</title>
@@ -250,9 +251,10 @@ html:not(.family-authorized) #app {display:none!important}
 #familyAuthGate[hidden],#familyLogout[hidden] {display:none}
 #familyLogin {padding:14px 22px;border:1px solid #b4ccc8;border-radius:14px;background:#fff;font:inherit;cursor:pointer}
 #familyLogout {position:fixed;bottom:100px;right:12px;z-index:30;border:1px solid #b4ccc8;border-radius:12px;background:white;padding:8px;color:#45635f}
+body:not(.app--parent-active) #familyLogout {display:none}
 </style>
-<section id="familyAuthGate" aria-label="家族のログイン"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">おうちの人のGoogleアカウントでログインしてください。</p><button id="familyLogin">Googleでログイン</button></section>
-<button id="familyLogout" hidden>ログアウト</button>
+<section id="familyAuthGate" aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">登録を確認しています…</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：里穂子のiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">次からはそのまま開けます。Safariとホーム画面のアイコンで別の登録が必要な場合があります。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
+<button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
 
@@ -819,7 +821,7 @@ html:not(.family-authorized) #app {display:none!important}
   function renderFamily(){
     var date = state.familyDate || todayStr();
     var tasks = combinedItemsForDate(date).filter(function(t){ return t.dailyLife; });
-    var html = '<div class="panel"><h2>家族との共有</h2><p id="familySyncStatus" role="status">' + syncStatusText() + '</p>' +
+    var html = '<div id="familyDevicePanel" class="panel"></div><div class="panel"><h2>家族との共有</h2><p id="familySyncStatus" role="status">' + syncStatusText() + '</p>' +
       (familySync ? '<button class="btn-primary" id="refreshFamilySync">共有を更新</button><details><summary>初めてこの端末を共有するとき</summary><p class="ri-sub">端末だけにある予定を共有に追加します。同じIDの記録は共有側を優先します。別端末で削除した予定を戻したくない場合は、追加せず「共有データを使う」を選びます。</p><button class="btn-primary" id="importFamilySync">この端末の予定も共有に追加</button><button class="backlink" id="adoptFamilySync">共有データを使う（端末の控えを保存）</button></details>' : '') + '</div>';
     html += '<div class="panel family-intro"><h2>毎日の「忘れちゃった」をへらそう</h2><p>やることと曜日を決めるだけ。里穂子さんのホームに、その日の分が出ます。</p>' +
       '<div class="routine-presets"><button data-family-preset="medicine">' + DailySupport.icon('medicine') + '<b>おくすり</b></button><button data-family-preset="school">' + DailySupport.icon('bag') + '<b>学校のじゅんび</b></button><button data-family-preset="custom">' + DailySupport.icon('check') + '<b>ほかの習慣</b></button></div></div>';
@@ -851,6 +853,7 @@ html:not(.family-authorized) #app {display:none!important}
   }
 
   function bindFamilyEvents(app){
+    FamilyAuth.mountDevices();
     var refresh = document.getElementById('refreshFamilySync');
     if (refresh) refresh.onclick = function(){familySync.refresh().then(render);};
     var importButton = document.getElementById('importFamilySync');
