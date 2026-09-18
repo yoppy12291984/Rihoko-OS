@@ -241,6 +241,8 @@
     padding: 10px 12px; border-radius:10px; margin-top: 10px;
   }
   .backlink { border:none; background:none; color: var(--ink-soft); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:6px 0; }
+
+.keepsake-note{margin:14px 20px;font-size:13px;line-height:1.7;color:var(--ink-soft)}.keepsake-actions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px}.keepsake-actions .btn-primary{margin:0;width:auto;font-size:13px}.worksheet-library{margin-bottom:24px}.worksheet-library button{text-align:left;font:inherit;color:inherit;cursor:pointer}.reward-card{margin:18px 20px;padding:24px;border:1px solid #ead89c;border-radius:22px;background:linear-gradient(135deg,#fff9dc,#fff3e7);text-align:center;color:#634d22}.reward-card h2{font-size:21px;margin:10px 0}.reward-card p{line-height:1.7}.reward-eyebrow{font-size:12px;font-weight:bold;letter-spacing:.1em}.reward-sticker{font-size:64px}.reward-total b{font-size:24px}.reward-help{font-size:11px}.sticker-album{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}.sticker-album>div{background:#ffffffb0;border-radius:12px;padding:12px}.sticker-album span{font-size:36px;display:block}.sticker-album small{font-size:10px}.reward-pop .reward-sticker{animation:reward-pop .65s ease-out}@keyframes reward-pop{0%{transform:scale(.4) rotate(-15deg)}70%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1)}}@media(prefers-reduced-motion:reduce){.reward-pop .reward-sticker{animation:none}}
 </style>
 <link rel="stylesheet" href="study-theme.css">
 </head>
@@ -559,6 +561,35 @@ body:not(.app--parent-active) #familyLogout {display:none}
   window.addEventListener('pagehide',()=>VoiceSession.stop());
   window.VoiceStudio={mount};
 })();
+
+</script>
+<script>
+/* プリントとごほうびの端末内保存。成功した書込みだけを保存済みとして扱う。 */
+(function(root){
+  'use strict';
+  function create(storage){
+    var sheetKey='riho-worksheets-v1', rewardKey='riho-rewards-v1';
+    function read(key){var value=JSON.parse(storage.getItem(key)||'[]');if(!Array.isArray(value))throw new Error('保存データを読み込めません');return value;}
+    function worksheets(){return read(sheetKey);}
+    function saveWorksheet(entry){
+      if(!entry.id||!entry.worksheet||!Array.isArray(entry.worksheet.questions)||!entry.worksheet.questions.length)throw new Error('空のプリントは保存できません');
+      var list=worksheets(),i=list.findIndex(function(x){return x.id===entry.id;});
+      if(i<0)list.push(entry);else list[i]=entry;
+      storage.setItem(sheetKey,JSON.stringify(list));return entry;
+    }
+    function rewards(){return read(rewardKey);}
+    function claim(date,items){
+      var list=rewards(),existing=list.find(function(x){return x.date===date;});
+      if(existing)return existing;
+      if(!items.length||!items.every(function(x){return x.done===true;}))return null;
+      var entry={date:date,sticker:list.length%6,completed:items.length};
+      list.push(entry);storage.setItem(rewardKey,JSON.stringify(list));return entry;
+    }
+    return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim};
+  }
+  if(typeof module!=='undefined'&&module.exports)module.exports={create:create};
+  else root.StudyKeepsakes=create(root.localStorage);
+})(typeof window!=='undefined'?window:this);
 
 </script>
 <script src="sora-voice.js" onerror="console.warn('sora-voice.js が見つかりません。Sora機能は無効化されたまま動作します。')"></script>
@@ -935,7 +966,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
         '<button class="hero-start" data-tab="' + (todays.length ? 'dekita' : 'manabu') + '">' + (todays.length ? 'できたことを見る' : 'まなぶを開く →') + '</button>';
     }
     if (todays.length) html += '<div class="daily-progress"><span>' + completed + ' / ' + todays.length + ' できた</span><progress value="' + completed + '" max="' + todays.length + '" aria-label="きょうの完了数"></progress></div>';
-    html += '</section><div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
+    html += '</section>' + renderRewardCard(false) + '<div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
       '<button data-tab="kumi"><span class="shortcut-symbol">K</span><span><b>Kumiと日記</b><small>きょうのことを、日本語で</small></span><span aria-hidden="true">↗</span></button></div>';
     html += '<div class="home-columns"><section><h2 class="section-label">きょうやること</h2>';
     if (todays.length === 0) {
@@ -1001,6 +1032,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     if (state.worksheetSubject) return renderWorksheetView();
 
     var html = '<div class="greeting"><p class="hello">まなぶ</p><p class="date">きょうの学習</p></div>';
+    html += renderWorksheetLibrary();
     var byCat = {};
     Object.keys(CATS).forEach(function(c){ byCat[c] = state.units.filter(function(u){return u.subject===c;}).length; });
     html += '<div class="section-label">教科(タップでプリント問題)</div><div class="todo-list">';
@@ -1033,7 +1065,11 @@ body:not(.app--parent-active) #familyLogout {display:none}
     return pick.unit + (pick.page ? ("(" + pick.page + ")") : "");
   }
 
+  var worksheetRequest = 0, worksheetEntry = null, worksheetSaveError = "", rewardError = "", rewardJustClaimed = false;
+
   function startWorksheetGeneration(subject){
+    var request = ++worksheetRequest;
+    worksheetEntry = null; worksheetSaveError = "";
     state.worksheet = { loading: true };
     render();
     if (typeof fetchWorksheet !== "function") {
@@ -1043,10 +1079,18 @@ body:not(.app--parent-active) #familyLogout {display:none}
     }
     var context = currentUnitContextFor(subject);
     fetchWorksheet(subject, context, 8).then(function(w){
-      state.worksheet = w;
+      var entry = {id:uid(),subject:subject,context:context,date:todayStr(),worksheet:w};
+      var saveError = "";
+      if(w && Array.isArray(w.questions) && w.questions.length){
+        try { StudyKeepsakes.saveWorksheet(entry); } catch(e) { saveError = "この端末に保存できませんでした。ファイルに保存して残してください。"; }
+      }
+      if(request === worksheetRequest && state.worksheetSubject === subject){
+        state.worksheet = w; worksheetEntry = entry; worksheetSaveError = saveError;
+      }
       render();
     }).catch(function(err){
       var msg = String(err && err.message || err || "");
+      if(request !== worksheetRequest || state.worksheetSubject !== subject)return;
       state.worksheet = { loading: false, questions: [], limitReached: msg.indexOf("usage_limit_reached") >= 0 };
       render();
     });
@@ -1076,6 +1120,8 @@ body:not(.app--parent-active) #familyLogout {display:none}
       return html;
     }
 
+    html += '<div class="no-print keepsake-note" role="status">' + escapeHtml(worksheetSaveError || 'この端末に保存しました。「まなぶ」の保存したプリントから開けます。') + '</div>';
+    html += '<div class="no-print keepsake-actions"><button class="btn-primary" id="worksheetDownload">ファイルに保存</button><button class="btn-primary" id="worksheetNew">新しいプリントを作る</button>' + (worksheetSaveError ? '<button class="btn-primary" id="worksheetRetrySave">もう一度保存</button>' : '') + '</div>';
     html += '<div class="worksheet-print">' +
       '<div class="worksheet-head">' +
       '<div class="worksheet-title">' + furiganaFromParens(w.title || (subject+"のプリント")) + '</div>' +
@@ -1102,6 +1148,38 @@ body:not(.app--parent-active) #familyLogout {display:none}
       html += '</div>';
     }
     return html;
+  }
+
+
+  function openSavedWorksheet(entry){
+    ++worksheetRequest; state.worksheetSubject=entry.subject; state.worksheet=entry.worksheet;
+    worksheetEntry=entry; worksheetSaveError=''; state.worksheetShowAnswers=false; render();
+  }
+  function renderWorksheetLibrary(){
+    var list=[];try{list=StudyKeepsakes.worksheets();}catch(e){return '<div class="keepsake-note" role="alert">保存したプリントを読み込めません。ブラウザーの保存設定を確認してください。</div>';}
+    return '<section class="worksheet-library"><h2 class="section-label">保存したプリント</h2><p class="keepsake-note">作ったプリントは、この端末に自動保存します。別の端末では「ファイルに保存」で持ち出してね。</p>'+
+      (!list.length?'<div class="empty-state">これから作るプリントが、ここに並ぶよ。</div>':'<div class="todo-list">'+list.slice().reverse().map(function(e){return '<button class="todo-card" data-saved-sheet="'+escapeHtml(e.id)+'"><div class="todo-body"><p class="todo-title">'+escapeHtml(e.worksheet.title||e.subject+'のプリント')+'</p><p class="todo-meta">'+escapeHtml(e.date+' · '+e.subject+(e.context?' · '+e.context:''))+' · '+e.worksheet.questions.length+'問</p></div><span>ひらく →</span></button>';}).join('')+'</div>')+'</section>';
+  }
+  function downloadWorksheet(){
+    var w=state.worksheet;if(!w||!w.questions)return;
+    var page='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+escapeHtml(w.title||'プリント')+'</title><style>body{max-width:800px;margin:30px auto;padding:20px;font-family:sans-serif;line-height:1.9}li{margin-bottom:24px;white-space:pre-wrap}summary{cursor:pointer}@media print{details{break-before:page}}<'+ '/style><h1>'+escapeHtml(w.title||'プリント')+'</h1><p>なまえ：________________　日づけ：________________</p><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.question)+'<p>こたえ：________________________________</p></li>';}).join('')+'</ol><details><summary>こたえを見る（印刷するときは開いてね）</summary><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.answer)+'</li>';}).join('')+'</ol></details>';
+    var url=URL.createObjectURL(new Blob([page],{type:'text/html;charset=utf-8'}));var a=document.createElement('a');a.href=url;a.download='Rihoko-プリント-'+(worksheetEntry?worksheetEntry.date:todayStr())+'.html';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  function renderRewardCard(collection){
+    var list=[];try{list=StudyKeepsakes.rewards();}catch(e){return '<div class="keepsake-note">ごほうびを読み込めません。ブラウザーの保存設定を確認してね。</div>';}
+    var today=todayStr(), earned=list.find(function(e){return e.date===today;}), tasks=combinedItemsForDate(today);
+    var complete=tasks.length>0&&tasks.every(function(t){return t.done;});
+    if(!collection&&!complete&&!earned)return '';
+    var stickers=['🐨','🌈','🚀','🌸','🐬','👑'];
+    var html='<section class="reward-card '+(rewardJustClaimed?'reward-pop':'')+'"><p class="reward-eyebrow">きょうのごほうび</p>';
+    if(earned)html+='<div class="reward-sticker" aria-label="ごほうびシール">'+stickers[earned.sticker%6]+'</div><h2>ぜんぶできたね！</h2><p>きょうのシールをもらったよ。よくがんばったね。</p>';
+    else if(complete)html+='<div class="reward-sticker">🎉</div><h2>きょうの分、ぜんぶできた！</h2><p>ごほうびシールを1まい、もらえるよ。</p><button class="btn-primary" id="rewardClaim">ごほうびをもらう</button>';
+    else html+='<h2>シールをあつめよう</h2><p>'+(tasks.length?'きょうの分をぜんぶ終えると、シールを1まいもらえるよ。':'やることがある日に、ぜんぶ終えるとシールをもらえるよ。')+'</p>';
+    html+='<p class="reward-total">あつめたシール <b>'+list.length+'</b> まい</p>';
+    if(list.length&&list.length%5===0)html+='<p>🏅 '+list.length+'まい記念！こつこつ続けたね。</p>';
+    if(collection&&list.length)html+='<div class="sticker-album">'+list.slice().reverse().map(function(e){return '<div><span>'+stickers[e.sticker%6]+'</span><small>'+escapeHtml(e.date)+'</small></div>';}).join('')+'</div>';
+    if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
+    return html+'<p class="reward-help">1日1まい。この端末に保存されます。</p></section>';
   }
 
   function renderQuiz(){
@@ -1156,6 +1234,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     var totalDays = Object.keys(doneDates).length;
 
     var html = '<div class="greeting"><p class="hello">できた</p><p class="date">' + fmtDateLong(today) + '</p></div>';
+    html += renderRewardCard(true);
     html += '<div class="badge-row">がんばった日 <b>' + totalDays + '</b> 日' + (totalDays >= 5 ? " ⭐" : "") + '</div>';
     html += '<div class="section-label">きょう終えたこと</div>';
     if (doneToday.length === 0) {
@@ -1909,12 +1988,24 @@ body:not(.app--parent-active) #familyLogout {display:none}
         var subject = b.getAttribute("data-subjectcard");
         state.worksheetSubject = subject;
         state.worksheetShowAnswers = false;
-        startWorksheetGeneration(subject);
+        var saved = []; try { saved = StudyKeepsakes.worksheets().filter(function(e){return e.subject===subject;}); } catch(e) {}
+        if(saved.length){openSavedWorksheet(saved[saved.length-1]);}else{startWorksheetGeneration(subject);}
       };
     });
+    app.querySelectorAll("[data-saved-sheet]").forEach(function(b){b.onclick=function(){
+      try {var e=StudyKeepsakes.worksheets().find(function(e){return e.id===b.getAttribute("data-saved-sheet");});if(e)openSavedWorksheet(e);}catch(e){alert("保存したプリントを読み込めませんでした。");}
+    };});
+    var worksheetNew = document.getElementById("worksheetNew");
+    if(worksheetNew)worksheetNew.onclick=function(){startWorksheetGeneration(state.worksheetSubject);};
+    var worksheetDownload = document.getElementById("worksheetDownload");
+    if(worksheetDownload)worksheetDownload.onclick=downloadWorksheet;
+    var worksheetRetrySave = document.getElementById("worksheetRetrySave");
+    if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
+    var rewardClaim = document.getElementById("rewardClaim");
+    if(rewardClaim)rewardClaim.onclick=function(){try{StudyKeepsakes.claim(todayStr(),combinedItemsForDate(todayStr()));rewardError="";rewardJustClaimed=true;}catch(e){rewardError="ごほうびを保存できませんでした。もう一度ためしてね。";}render();};
     var worksheetBack = document.getElementById("worksheetBack");
     if (worksheetBack) worksheetBack.onclick = function(){
-      state.worksheetSubject = null; state.worksheet = null; render();
+      state.worksheetSubject = null; state.worksheet = null; ++worksheetRequest; render();
     };
     var worksheetStart = document.getElementById("worksheetStart");
     if (worksheetStart) worksheetStart.onclick = function(){ startWorksheetGeneration(state.worksheetSubject); };
