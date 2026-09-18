@@ -243,6 +243,7 @@
   .backlink { border:none; background:none; color: var(--ink-soft); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:6px 0; }
 
 .keepsake-note{margin:14px 20px;font-size:13px;line-height:1.7;color:var(--ink-soft)}.keepsake-actions{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px}.keepsake-actions .btn-primary{margin:0;width:auto;font-size:13px}.worksheet-library{margin-bottom:24px}.worksheet-library button{text-align:left;font:inherit;color:inherit;cursor:pointer}.reward-card{margin:18px 20px;padding:24px;border:1px solid #ead89c;border-radius:22px;background:linear-gradient(135deg,#fff9dc,#fff3e7);text-align:center;color:#634d22}.reward-card h2{font-size:21px;margin:10px 0}.reward-card p{line-height:1.7}.reward-eyebrow{font-size:12px;font-weight:bold;letter-spacing:.1em}.reward-sticker{font-size:64px}.reward-total b{font-size:24px}.reward-help{font-size:11px}.sticker-album{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}.sticker-album>div{background:#ffffffb0;border-radius:12px;padding:12px}.sticker-album span{font-size:36px;display:block}.sticker-album small{font-size:10px}.reward-pop .reward-sticker{animation:reward-pop .65s ease-out}@keyframes reward-pop{0%{transform:scale(.4) rotate(-15deg)}70%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1)}}@media(prefers-reduced-motion:reduce){.reward-pop .reward-sticker{animation:none}}
+.rally-board{margin-top:22px;padding:16px 8px;border:2px solid #e0c780;border-radius:18px;background:#fffdf5}.rally-board h3{font-size:16px;margin:0 0 18px}.rally-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px 6px;position:relative}.rally-track:before{content:"";position:absolute;left:8%;right:8%;top:30px;bottom:30px;border:3px dashed #dfce9c;border-left:0;border-radius:0 20px 20px 0}.rally-stop{position:relative;z-index:1;display:flex;align-items:center;flex-direction:column;gap:3px;min-width:0}.rally-stop span{display:flex;align-items:center;justify-content:center;width:clamp(30px,8vw,54px);height:clamp(30px,8vw,54px);border:2px dashed #d6caa6;border-radius:50%;background:#fffdf5;font-size:20px;color:#aa9a72}.rally-stop small{font-size:9px;background:#fffdf5}.rally-stop.stamped span{border:2px solid #86b2a0;background:#e6f2e8;font-size:27px;transform:rotate(-8deg)}.rally-stop.next span{border:2px solid #d88c39;background:#fff0cd;color:#795319}.rally-stop:nth-child(6){grid-row:2;grid-column:5}.rally-stop:nth-child(7){grid-row:2;grid-column:4}.rally-stop:nth-child(8){grid-row:2;grid-column:3}.rally-stop:nth-child(9){grid-row:2;grid-column:2}.rally-stop:nth-child(10){grid-row:2;grid-column:1}.rally-history summary{cursor:pointer;padding:12px;font-weight:bold}.rally-board p{font-size:13px;margin:16px 0 0}
 </style>
 <link rel="stylesheet" href="study-theme.css">
 </head>
@@ -274,6 +275,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
 .voice-studio label{display:block;font-size:14px;font-weight:700;margin:12px 0}.voice-studio select,.voice-studio textarea,.voice-studio input{display:block;box-sizing:border-box;width:100%;margin-top:8px;font:inherit;font-size:16px;line-height:1.6;padding:12px;border:1px solid #becfca;border-radius:10px;background:#fff;color:#254b49}.voice-studio textarea{resize:vertical}
 .voice-studio button{min-height:46px;cursor:pointer;font:inherit;font-weight:700;border-radius:12px;padding:12px 18px}.voice-primary{background:#28796f;border:0;color:white;width:100%;margin-top:10px}.voice-kumi .voice-primary{background:#95643b}.voice-secondary{background:#f1f6f3;color:#285f57;border:1px solid #cadbd5}.voice-studio button:disabled{opacity:.5;cursor:default}
 .voice-help{font-size:13px;color:#576c67;margin:10px 0}.voice-status{font-weight:700;margin-bottom:4px}.voice-notice{color:#a23a28;font-size:14px;white-space:pre-wrap}.voice-notice:empty{display:none}
+.voice-studio .voice-recording{background:#b84e35;box-shadow:0 0 0 4px #f9e3d9}.voice-studio #voiceToggle.voice-secondary{display:block;margin-top:16px;width:100%}
 .voice-messages{max-height:350px;overflow:auto;overscroll-behavior:contain}.voice-line{background:#f1f5f3;border-radius:12px;padding:12px;margin:10px 16px 10px 0}.voice-line b{font-size:12px;color:#536962}.voice-line p{white-space:pre-wrap;margin:4px 0;overflow-wrap:anywhere}.voice-child{margin:10px 0 10px 16px;background:#e7f2ed}.voice-kumi .voice-child{background:#f7efdf}.diary-review{border-top:1px solid #ddd;padding-top:20px;margin-top:20px}.diary-text{white-space:pre-wrap;overflow-wrap:anywhere}.voice-studio details{padding:14px 0;border-top:1px solid #e3e8e4}.voice-studio summary{cursor:pointer;line-height:1.7;font-weight:700;overflow-wrap:anywhere}
 @media(max-width:480px){.voice-card{padding:16px}.voice-studio h2{font-size:25px}.tabbar-inner .tab-item{min-width:0;font-size:10px;padding-left:2px;padding-right:2px}}
 
@@ -286,7 +288,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   function stop() {
     const s = active; active = null;
     if (!s) return;
-    clearTimeout(s.timer); clearTimeout(s.connectTimer); s.abort.abort();
+    clearTimeout(s.timer); clearTimeout(s.connectTimer); clearTimeout(s.replyTimer); s.abort.abort();
     if (s.dc) { s.dc.onopen = s.dc.onmessage = s.dc.onclose = null; s.dc.close(); }
     if (s.pc) { s.pc.ontrack = s.pc.oniceconnectionstatechange = null; s.pc.close(); }
     if (s.stream) s.stream.getTracks().forEach(t => t.stop());
@@ -295,11 +297,14 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
   async function start(options) {
     stop();
-    const s = {abort:new AbortController(), items:new Map(), order:[], pending:new Set()};
+    const s = {abort:new AbortController(), items:new Map(), order:[], pending:new Set(), turn:'connecting', options};
     active = s;
     const live = () => active === s;
     const status = text => { if (live()) options.onStatus(text); };
     const fail = error => { if (live()) { stop(); options.onError(error); } };
+    s.setTurn = turn => { if(live()) { s.turn=turn; if(options.onTurn)options.onTurn(turn); } };
+    s.fail = fail;
+    s.ready = () => { clearTimeout(s.replyTimer); s.setTurn('ready'); status('「話しはじめる」を押してね。'); };
     const emit = () => {
       if (live()) options.onMessages(s.order.map(id => s.items.get(id)).filter(x => x && x.text));
     };
@@ -325,6 +330,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
       if (!live()) { stream.getTracks().forEach(t => t.stop()); return; }
       s.stream = stream;
       const track = stream.getAudioTracks()[0];
+      track.enabled = false;
       options.onDevice(track.label || '端末が選んだマイク');
       status('音声AIにつないでいます…');
       s.connectTimer = setTimeout(() => fail(new Error('接続に時間がかかっています。通信を確認してもう一度ためしてね。')),45000);
@@ -350,18 +356,23 @@ body:not(.app--parent-active) #familyLogout {display:none}
       const dc = s.dc = pc.createDataChannel('oai-events');
       dc.onopen = () => {
         if (!live()) return;
-        clearTimeout(s.connectTimer); status('話していいよ'); options.onReady();
-        dc.send(JSON.stringify({type:'response.create'}));
+        status('ボタンで話す準備をしています…');
+        dc.send(JSON.stringify({type:'session.update',session:{type:'realtime',audio:{input:{turn_detection:null}}}}));
       };
       dc.onclose = () => fail(new Error('音声の接続が終わりました。もう一度つないでね。'));
       dc.onmessage = event => {
         if (!live()) return;
         let e; try { e = JSON.parse(event.data); } catch (_) { return; }
+        if(e.type==='session.updated' && s.turn==='connecting' && e.session && e.session.audio && e.session.audio.input && e.session.audio.input.turn_detection===null){
+          clearTimeout(s.connectTimer); options.onReady(); s.ready();
+        }
+        if(e.type==='input_audio_buffer.committed'){
+          s.pending.delete('commit'); s.pending.add(e.item_id);
+          if(s.wantReply){s.wantReply=false; dc.send(JSON.stringify({type:'response.create'}));}
+        }
         if (e.type === 'conversation.item.created' || e.type === 'conversation.item.added') {
           if (e.item && ['user','assistant'].includes(e.item.role)) item(e.item.id,e.item.role,e.previous_item_id);
         }
-        if (e.type === 'input_audio_buffer.speech_started') { s.pending.add(e.item_id); status('聞いているよ…'); }
-        if (e.type === 'input_audio_buffer.speech_stopped') status('言葉をたしかめています…');
         if (e.type === 'conversation.item.input_audio_transcription.delta') {
           item(e.item_id,'user').text += e.delta || ''; emit();
         }
@@ -373,8 +384,14 @@ body:not(.app--parent-active) #familyLogout {display:none}
         }
         if (e.type === 'response.output_audio_transcript.delta') { item(e.item_id,'assistant').text += e.delta || ''; emit(); }
         if (e.type === 'response.output_audio_transcript.done') { item(e.item_id,'assistant').text = e.transcript || ''; emit(); }
-        if (e.type === 'output_audio_buffer.started') status('お話ししています…');
-        if (e.type === 'output_audio_buffer.stopped') status('話していいよ');
+        if (e.type === 'output_audio_buffer.started') {s.setTurn('replying'); status('AIの番だよ。聞いてね。');}
+        if (e.type === 'output_audio_buffer.stopped' && s.turn==='replying') s.ready();
+        if(e.type==='response.done'){
+          const r=e.response||{};
+          const hasAudio=(r.output||[]).some(x=>(x.content||[]).some(c=>c.type==='audio'||c.type==='output_audio'));
+          if(r.status==='failed'||r.status==='incomplete'){options.onNotice('返事を最後まで受け取れませんでした。もう一度話してね。');s.ready();}
+          else if(!hasAudio && s.turn==='replying')s.ready();
+        }
         if (e.type === 'error') fail(new Error('音声AIでエラーが起きました。もう一度つないでね。'));
       };
       const offer = await pc.createOffer(); if (!live()) return;
@@ -391,20 +408,36 @@ body:not(.app--parent-active) #familyLogout {display:none}
       fail(err);
     }
   }
+  function beginTurn(){
+    const s=active;if(!s||s.turn!=='ready'||s.dc.readyState!=='open')return;
+    s.dc.send(JSON.stringify({type:'input_audio_buffer.clear'}));
+    s.startedAt=Date.now();s.stream.getAudioTracks().forEach(t=>{t.enabled=true;});
+    s.setTurn('recording');s.options.onStatus('聞いているよ。話し終わったら「話し終わった・送る」を押してね。');
+  }
+  function commitTurn(reply){
+    const s=active;if(!s||s.turn!=='recording')return false;
+    if(Date.now()-s.startedAt<300){s.options.onNotice('少し話してから「話し終わった・送る」を押してね。');return false;}
+    s.stream.getAudioTracks().forEach(t=>{t.enabled=false;});
+    s.wantReply=reply;s.pending.add('commit');s.setTurn(reply?'replying':'finishing');
+    s.options.onStatus(reply?'送ったよ。AIの返事を待っています…':'最後の言葉を受け取っています…');
+    s.dc.send(JSON.stringify({type:'input_audio_buffer.commit'}));
+    if(reply)s.replyTimer=setTimeout(()=>s.fail(new Error('返事に時間がかかっています。もう一度つないでね。')),60000);
+    return true;
+  }
   async function finish() {
     const s = active;
     if (!s) return;
     if (s.stream) s.stream.getAudioTracks().forEach(t => { t.enabled = false; });
-    // 最後の発言のVAD確定・文字起こしを待つ。長引いても画面の文字は編集できる。
-    await new Promise(resolve => setTimeout(resolve,1400));
+    if(s.turn==='recording')commitTurn(false);
+    s.wantReply=false;
     const until = Date.now()+5000;
     while (active === s && s.pending.size && Date.now()<until) await new Promise(resolve => setTimeout(resolve,100));
     if (active === s) {
-      if (s.pending.size && s.dc) s.dc.onmessage = null;
+      if(s.pending.size)s.options.onNotice('最後の言葉を受け取りきれませんでした。日記にする前に文字で足してね。');
       stop();
     }
   }
-  window.VoiceSession = {start,stop,finish};
+  window.VoiceSession = {start,stop,finish,beginTurn,sendTurn:()=>commitTurn(true)};
 })();
 
 </script>
@@ -417,7 +450,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   let root = null, persona = null;
   const esc = value => String(value || '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const today = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-  function initial() { return {phase:'idle',status:'話すボタンを押して、はじめよう。',mode:'speaker',deviceId:'',devices:[],device:'',messages:[],source:'',draft:null,busy:false,notice:'',summary:'',session:0,date:today()}; }
+  function initial() { return {phase:'idle',turn:'connecting',status:'つないでから「話しはじめる」を押してね。',mode:'speaker',deviceId:'',devices:[],device:'',messages:[],source:'',draft:null,busy:false,notice:'',summary:'',session:0,date:today()}; }
   function diaries() {
     const value = JSON.parse(localStorage.getItem(KEY) || '[]');
     if (!Array.isArray(value)) throw new Error('保存した日記を読み込めませんでした。');
@@ -432,7 +465,9 @@ body:not(.app--parent-active) #familyLogout {display:none}
       '<p class="voice-help">'+(s.mode==='headphones'?'先にAirPodsをiPhoneへ接続してね。音が本体から出るときは、コントロールセンターで出力先をAirPodsにしてから話そう。':'静かな場所で、マイクの近くから話してね。考える時間も待つよ。')+'</p>'+
       (s.devices.length?'<label>使うマイク<select id="voiceMic" '+(active?'disabled':'')+'><option value="">端末におまかせ</option>'+s.devices.map(d=>'<option value="'+esc(d.deviceId)+'" '+(s.deviceId===d.deviceId?'selected':'')+'>'+esc(d.label)+'</option>').join('')+'</select></label>':'')+
       (s.device?'<p class="voice-help">マイク：'+esc(s.device)+'</p>':'')+
-      '<button class="voice-primary" id="voiceToggle" '+(s.busy||s.phase==='finishing'?'disabled':'')+'>'+(s.phase==='finishing'?'最後の言葉を受け取っています…':active?'おわる':name+'に話す')+'</button>'+
+      '<p class="voice-help">① 話しはじめる → ② 話し終わった・送る → ③ '+name+'の返事。ボタンを押すまで、AIは話しはじめません。</p>'+
+      (s.phase==='talking'?'<button class="voice-primary '+(s.turn==='recording'?'voice-recording':'')+'" id="voiceTurn" '+(!['ready','recording'].includes(s.turn)?'disabled':'')+'>'+(s.turn==='recording'?'話し終わった・送る':s.turn==='ready'?'🎤 話しはじめる':name+'の返事を聞いてね…')+'</button>':'')+
+      '<button class="'+(active?'voice-secondary':'voice-primary')+'" id="voiceToggle" '+(s.busy||s.phase==='finishing'?'disabled':'')+'>'+(s.phase==='finishing'?'最後の言葉を受け取っています…':active?'会話をおわる':name+'につなぐ')+'</button>'+
       '<p id="voiceStatus" class="voice-status" role="status">'+esc(s.status)+'</p><p id="voiceNotice" class="voice-notice" role="alert">'+esc(s.notice)+'</p></div>'+
       '<div class="voice-card"><h3>話したこと</h3><p class="voice-help">聞き取りが違っていたら、もう一度ゆっくり話してね。</p><div id="voiceMessages" class="voice-messages" aria-label="会話の文字"></div></div>'+
       (kumi?diaryEditor(s,active):s.summary?'<div class="voice-card">'+esc(s.summary)+'</div>':'')+
@@ -440,6 +475,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     root.querySelector('#voiceMode').onchange = e => { s.mode=e.target.value; draw(); };
     const mic=root.querySelector('#voiceMic'); if(mic) mic.onchange=e=>{s.deviceId=e.target.value;};
     root.querySelector('#voiceToggle').onclick = () => active ? end(persona,true) : begin(persona);
+    const turnButton=root.querySelector('#voiceTurn');if(turnButton)turnButton.onclick=()=>{s.notice='';if(s.turn==='recording')VoiceSession.sendTurn();else VoiceSession.beginTurn();};
     paintMessages();
     if (kumi) bindDiary(s);
   }
@@ -458,12 +494,13 @@ body:not(.app--parent-active) #familyLogout {display:none}
   async function begin(p) {
     const s=states[p];
     if(s.phase!=='idle'||s.busy) return;
-    s.phase='connecting';s.notice='';s.session++;
+    s.phase='connecting';s.turn='connecting';s.notice='';s.session++;
     const session=s.session, prior=s.messages.slice();
     draw();
     await VoiceSession.start({persona:p,audioMode:s.mode,deviceId:s.deviceId,
       onStatus:text=>status(p,text),
       onReady:()=>{s.phase='talking'; if(persona===p)draw();},
+      onTurn:turn=>{if(s.session!==session)return;s.turn=turn;if(persona===p)draw();},
       onDevice:label=>{
         s.device=label;
         navigator.mediaDevices.enumerateDevices().then(all=>{
@@ -1173,17 +1210,22 @@ body:not(.app--parent-active) #familyLogout {display:none}
     var list=[];try{list=StudyKeepsakes.rewards();}catch(e){return '<div class="keepsake-note">ごほうびを読み込めません。ブラウザーの保存設定を確認してね。</div>';}
     var today=todayStr(), earned=list.find(function(e){return e.date===today;}), tasks=combinedItemsForDate(today);
     var complete=tasks.length>0&&tasks.every(function(t){return t.done;});
-    if(!collection&&!complete&&!earned)return '';
     var stickers=['🐨','🌈','🚀','🌸','🐬','👑'];
-    var html='<section class="reward-card '+(rewardJustClaimed?'reward-pop':'')+'"><p class="reward-eyebrow">きょうのごほうび</p>';
-    if(earned)html+='<div class="reward-sticker" aria-label="ごほうびシール">'+stickers[earned.sticker%6]+'</div><h2>ぜんぶできたね！</h2><p>きょうのシールをもらったよ。よくがんばったね。</p>';
-    else if(complete)html+='<div class="reward-sticker">🎉</div><h2>きょうの分、ぜんぶできた！</h2><p>ごほうびシールを1まい、もらえるよ。</p><button class="btn-primary" id="rewardClaim">ごほうびをもらう</button>';
-    else html+='<h2>シールをあつめよう</h2><p>'+(tasks.length?'きょうの分をぜんぶ終えると、シールを1まいもらえるよ。':'やることがある日に、ぜんぶ終えるとシールをもらえるよ。')+'</p>';
-    html+='<p class="reward-total">あつめたシール <b>'+list.length+'</b> まい</p>';
-    if(list.length&&list.length%5===0)html+='<p>🏅 '+list.length+'まい記念！こつこつ続けたね。</p>';
-    if(collection&&list.length)html+='<div class="sticker-album">'+list.slice().reverse().map(function(e){return '<div><span>'+stickers[e.sticker%6]+'</span><small>'+escapeHtml(e.date)+'</small></div>';}).join('')+'</div>';
+    var html='<section class="reward-card '+(rewardJustClaimed?'reward-pop':'')+'"><p class="reward-eyebrow">まいにち スタンプラリー</p>';
+    if(earned)html+='<h2>きょうのスタンプ、できた！</h2><p>よくがんばったね。また次の1マスへ。</p>';
+    else if(complete)html+='<h2>きょうの分、ぜんぶできた！ 🎉</h2><p>今日のマスにスタンプを押そう。</p><button class="btn-primary" id="rewardClaim">スタンプをおす</button>';
+    else html+='<h2>10このスタンプでゴール！</h2><p>'+(tasks.length?'きょうの分をぜんぶ終えて、1マス進もう。':'やることがある日に、ぜんぶ終えるとスタンプを押せるよ。')+'</p>';
+    var cardIndex=Math.floor(Math.max(0,list.length-1)/10), progress=list.length-cardIndex*10;
+    function rallyCard(index){
+      var entries=list.slice(index*10,index*10+10);
+      return '<div class="rally-board"><h3>'+(index+1)+'枚目のぼうけん</h3><div class="rally-track" aria-label="スタンプ台紙">'+Array.from({length:10},function(_,i){var e=entries[i];return '<div class="rally-stop '+(e?'stamped':i===entries.length?'next':'')+'" '+(i===entries.length?'aria-current="step"':'')+'><small>'+(i===9?'GOAL':i===0?'START':i+1)+'</small><span aria-label="'+(e?'獲得済み':'未獲得')+'">'+(e?stickers[e.sticker%6]:i===9?'🏁':i+1)+'</span><small>'+(e?escapeHtml(e.date.slice(5).replace('-','/')):i===entries.length?'つぎはここ':'　')+'</small></div>';}).join('')+'</div><p>'+(entries.length===10?'🏆 ゴール！ 10日分のがんばり、すごいね。':entries.length+' / 10 マス・ゴールまであと'+(10-entries.length)+'こ')+'</p></div>';
+    }
+    html+=rallyCard(cardIndex);
+    if(progress===10)html+='<p>次のスタンプから、新しい台紙がはじまるよ。</p>';
+    html+='<p class="reward-total">これまで <b>'+list.length+'</b> こ・ゴール '+Math.floor(list.length/10)+'回</p>';
+    if(collection&&cardIndex>0)html+='<details class="rally-history"><summary>これまでの台紙を見る</summary>'+Array.from({length:cardIndex},function(_,i){return rallyCard(i);}).join('')+'</details>';
     if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
-    return html+'<p class="reward-help">1日1まい。この端末に保存されます。</p></section>';
+    return html+'<p class="reward-help">1日1こ。お休みしてもスタンプは消えないよ。この端末に保存されます。</p></section>';
   }
 
   function renderQuiz(){
