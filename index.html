@@ -1100,7 +1100,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     var subject = state.worksheetSubject;
     var w = state.worksheet;
     var html = '<div class="greeting no-print"><p class="hello">' + addFurigana(subject) + 'のプリント</p>' +
-      '<p class="date">今の単元をもとに作ります</p></div>';
+      '<p class="date">今の単元で三択のプリントを作ります</p></div>';
     html += '<div style="padding:0 20px;" class="no-print"><button class="btn-primary" id="worksheetBack" style="background:var(--ink-soft);">← 教科一覧にもどる</button></div>';
 
     if (!w || w.loading) {
@@ -1130,7 +1130,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     html += w.questions.map(function(q, i){
       return '<div class="worksheet-q"><div class="worksheet-qnum">' + (i+1) + '.</div>' +
         '<div class="worksheet-qbody"><div>' + furiganaFromParens(q.question) + '</div>' +
-        '<div class="worksheet-answerline">こたえ：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div></div></div>';
+        worksheetChoicesHtml(q, true) + '<div class="worksheet-answerline">こたえ：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</div></div></div>';
     }).join("");
     html += '</div>';
 
@@ -1160,9 +1160,13 @@ body:not(.app--parent-active) #familyLogout {display:none}
     return '<section class="worksheet-library"><h2 class="section-label">保存したプリント</h2><p class="keepsake-note">作ったプリントは、この端末に自動保存します。別の端末では「ファイルに保存」で持ち出してね。</p>'+
       (!list.length?'<div class="empty-state">これから作るプリントが、ここに並ぶよ。</div>':'<div class="todo-list">'+list.slice().reverse().map(function(e){return '<button class="todo-card" data-saved-sheet="'+escapeHtml(e.id)+'"><div class="todo-body"><p class="todo-title">'+escapeHtml(e.worksheet.title||e.subject+'のプリント')+'</p><p class="todo-meta">'+escapeHtml(e.date+' · '+e.subject+(e.context?' · '+e.context:''))+' · '+e.worksheet.questions.length+'問</p></div><span>ひらく →</span></button>';}).join('')+'</div>')+'</section>';
   }
+  function worksheetChoicesHtml(q, ruby){
+    if(!Array.isArray(q.choices))return '';
+    return '<div style="margin:8px 0">'+q.choices.map(function(c,i){return '<div>'+['①','②','③'][i]+' '+(ruby?furiganaFromParens(c):escapeHtml(c))+'</div>';}).join('')+'</div>';
+  }
   function downloadWorksheet(){
     var w=state.worksheet;if(!w||!w.questions)return;
-    var page='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+escapeHtml(w.title||'プリント')+'</title><style>body{max-width:800px;margin:30px auto;padding:20px;font-family:sans-serif;line-height:1.9}li{margin-bottom:24px;white-space:pre-wrap}summary{cursor:pointer}@media print{details{break-before:page}}<'+ '/style><h1>'+escapeHtml(w.title||'プリント')+'</h1><p>なまえ：________________　日づけ：________________</p><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.question)+'<p>こたえ：________________________________</p></li>';}).join('')+'</ol><details><summary>こたえを見る（印刷するときは開いてね）</summary><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.answer)+'</li>';}).join('')+'</ol></details>';
+    var page='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+escapeHtml(w.title||'プリント')+'</title><style>body{max-width:800px;margin:30px auto;padding:20px;font-family:sans-serif;line-height:1.9}li{margin-bottom:24px;white-space:pre-wrap}summary{cursor:pointer}@media print{details{break-before:page}}<'+ '/style><h1>'+escapeHtml(w.title||'プリント')+'</h1><p>なまえ：________________　日づけ：________________</p><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.question)+worksheetChoicesHtml(q,false)+'<p>こたえ：________________________________</p></li>';}).join('')+'</ol><details><summary>こたえを見る（印刷するときは開いてね）</summary><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.answer)+'</li>';}).join('')+'</ol></details>';
     var url=URL.createObjectURL(new Blob([page],{type:'text/html;charset=utf-8'}));var a=document.createElement('a');a.href=url;a.download='Rihoko-プリント-'+(worksheetEntry?worksheetEntry.date:todayStr())+'.html';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
   }
   function renderRewardCard(collection){
