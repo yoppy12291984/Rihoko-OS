@@ -35,27 +35,14 @@ let _dataChannel = null;
 let _transcriptSora = "";
 let _transcriptChild = "";
 
-// iOS Safariでは fetch() の POST + GAS側リダイレクトの組み合わせで
-// 「Load failed」になる既知の問題があるため、通常のやり取りはGET(クエリパラメータ)で行う。
-// 画像や長文などペイロードが大きいものだけ callBackendPost_ (POST) を使う。
+// 認証情報や家族データをURLに載せないため、全通信を認証付きPOSTへ統一。
+// iOS SafariのGASリダイレクトは実機確認が必要。失敗時もGETへの迂回は行わない。
 async function callBackend_(payload) {
-  const url = SORA_TOKEN_ENDPOINT + "?data=" + encodeURIComponent(JSON.stringify(payload));
-  const res = await fetch(url, { method: "GET" });
-  const data = await res.json();
-  if (data.error) throw new Error(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
-  return data;
+  return FamilyAuth.request(payload);
 }
 
 async function callBackendPost_(payload) {
-  const res = await fetch(SORA_TOKEN_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" }, // preflight回避のためtext/plainで送る
-    credentials: "omit",
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(typeof data.error === "string" ? data.error : JSON.stringify(data.error));
-  return data;
+  return FamilyAuth.request(payload);
 }
 
 /* ---------------- Sora（音声会話） ---------------- */
