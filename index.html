@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rihoko Study</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -241,6 +241,7 @@
   }
   .backlink { border:none; background:none; color: var(--ink-soft); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:6px 0; }
 </style>
+<link rel="stylesheet" href="study-theme.css">
 </head>
 <body>
 <div id="app"></div>
@@ -254,6 +255,8 @@
 -->
 <script src="sora-voice.js" onerror="console.warn('sora-voice.js が見つかりません。Sora機能は無効化されたまま動作します。')"></script>
 
+<script src="daily-support.js"></script>
+<script src="family-sync.js"></script>
 <script>
 (function(){
   "use strict";
@@ -261,13 +264,15 @@
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
     todos: [], events: [], units: [], routines: [], routineDone: {},
-    view: "home", parentTab: "schedule", dbReady: false,
+    view: "home", parentTab: "family", dbReady: false,
+    familyDraft: null, familyMessage: "", familyDate: null, parentAdvanced: false,
     soraState: "idle", soraStatus: "", soraTranscript: "", soraLastSummary: null,
     quiz: null, // { questions, current, score, answered, finished, loading, subject }
     learningLogs: null, learningLogsLoading: false, quizLogs: null,
     usage: null, usageLoading: false,
     printLoading: false, printError: null, printExtract: null,
     parentDarkMode: false,
+    childTheme: "gentle", showReading: true, focusedTaskId: null,
     calendarEvents: null, calendarLoading: false,
     weeklyReport: null, weeklyReportLoading: false,
     calMonth: null, calSelectedDate: null, // カレンダー(保護者・こども共通)
@@ -278,6 +283,7 @@
     worksheetSubject: null, worksheet: null, worksheetShowAnswers: false
   };
   var db = null;
+  var familySync = null, syncStatus = 'local';
 
   function loadLocal(){
     try {
@@ -291,6 +297,10 @@
         state.routineDone = parsed.routineDone || {};
       }
       state.parentDarkMode = localStorage.getItem("riho-study-parent-dark") === "1";
+      var appearance = {};
+      try { appearance = JSON.parse(localStorage.getItem("riho-study-appearance-v1") || "{}") || {}; } catch(e3) { /* 表示設定が壊れていても学習データの読み込みを続ける */ }
+      if (["gentle", "calm", "planner"].indexOf(appearance.theme) !== -1) state.childTheme = appearance.theme;
+      state.showReading = appearance.showReading !== false;
       var savedOrder = localStorage.getItem("riho-study-tab-order");
       if (savedOrder) { try { state.tabOrder = JSON.parse(savedOrder); } catch(e2) {} }
     } catch(e) { /* ignore */ }
@@ -342,7 +352,7 @@
       db.collection(col).doc(data.id).set(data).catch(function(){});
     }
     if (typeof syncUpsert === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
-      syncUpsert(col, data);
+      if (familySync) familySync.enqueue({type:'upsert',collection:col,item:data});
     }
   }
   function persistUpdate(col, id, patch){
@@ -357,7 +367,7 @@
       db.collection(col).doc(id).update(patch).catch(function(){});
     }
     if (full && typeof syncUpsert === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
-      syncUpsert(col, full);
+      if (familySync) familySync.enqueue({type:'upsert',collection:col,item:full});
     }
   }
   function persistDelete(col, id){
@@ -368,7 +378,7 @@
       db.collection(col).doc(id).delete().catch(function(){});
     }
     if (typeof syncDeleteItem === "function" && ["todos","events","units","routines"].indexOf(col) !== -1) {
-      syncDeleteItem(col, id);
+      if (familySync) familySync.enqueue({type:'delete',collection:col,id:id});
     }
   }
 
@@ -389,30 +399,34 @@
 
   // GAS(Googleスプレッドシート)から他端末分のデータを取り込み、この端末の表示にも反映する。
   // GitHub Pages環境(claude.aiのdb機能が使えない環境)向けの同期経路。
-  // サーバー側がまだ空で、この端末にだけ既存データがある場合(初回移行)は、
-  // ローカルを消さずにサーバーへアップロードして揃える。
+  // 初回の端末データ移行は保護者が選択し、未送信キューは端末に残す。
   function pullFromGas(){
-    if (typeof syncPull !== "function") return;
-    var localSnapshot = {
-      todos: state.todos.slice(), events: state.events.slice(),
-      units: state.units.slice(), routines: state.routines.slice()
-    };
-    syncPull().then(function(data){
-      if (!data) return;
-      ["todos","events","units","routines"].forEach(function(col){
-        var serverList = data[col] || [];
-        if (serverList.length === 0 && localSnapshot[col].length > 0) {
-          localSnapshot[col].forEach(function(item){ syncUpsert(col, item); });
-        } else {
-          state[col] = serverList;
-        }
+    if (familySync) return familySync.refresh();
+  }
+
+  function initFamilySync(){
+    if (typeof syncPull !== 'function') return;
+    try {
+      familySync = FamilySync.create({storage:localStorage,
+        snapshot:function(){return {todos:state.todos,events:state.events,units:state.units,routines:state.routines,routineDone:state.routineDone};},
+        pull:syncPull,
+        send:function(op){
+          if (op.type === 'done') return syncRoutineDone(op.key,op.done);
+          if (op.type === 'delete') return syncDeleteItem(op.collection,op.id);
+          return syncUpsert(op.collection,op.item);
+        },
+        apply:function(data){
+          ['todos','events','units','routines','routineDone'].forEach(function(c){state[c] = data[c];});
+          saveLocal();
+          // 入力途中のフォームは再描画しない。画面遷移時に最新状態を表示する。
+          if (state.view !== 'parent') render();
+        },
+        status:function(value){ syncStatus = value; var node = document.getElementById('familySyncStatus'); if (node) node.textContent = syncStatusText(); }
       });
-      if (data.routineDone) {
-        state.routineDone = Object.assign({}, state.routineDone, data.routineDone);
-      }
-      saveLocal();
-      render();
-    }).catch(function(){ /* 取得できなければローカルのデータのまま */ });
+    } catch(e){syncStatus = 'storage-error';}
+  }
+  function syncStatusText(){
+    return {local:'プレビュー：このPCだけに保存します',setup:'最初の共有設定が必要です。端末内の記録は保持しています。',syncing:'家族のデータを共有中…',synced:'家族のデータと共有できました',pending:'未送信の変更があります。「共有を更新」を押してください。',error:'共有できませんでした。変更はこの端末に残っています。通信が戻ったら再試行してください。','storage-error':'端末への保存を確認できません。ページを閉じずに保存設定を確認してください。'}[syncStatus];
   }
 
   // ルーチンは「その日やったか」を日付ごとに記録する(ルーチン自体はテンプレートなので使い回す)
@@ -422,7 +436,7 @@
     render();
     saveLocal();
     if (typeof syncRoutineDone === "function") {
-      syncRoutineDone(key, state.routineDone[key]);
+      if (familySync) familySync.enqueue({type:'done',key:key,done:state.routineDone[key]});
     }
   }
   function isRoutineDone(routineId, dateStr){
@@ -433,9 +447,7 @@
     var dow = new Date(dateStr + "T00:00:00").getDay();
     return state.routines.filter(function(r){
       var days = r.days || [0,1,2,3,4,5,6];
-      if (days.indexOf(dow) === -1) return false;
-      if ((r.skipDates||[]).indexOf(dateStr) !== -1) return false;
-      return true;
+      return DailySupport.occurs(r, dateStr);
     });
   }
   // 今日のToDo(日付指定分)とルーチン(曜日に応じて)を合わせた一覧
@@ -445,7 +457,7 @@
       return {
         id: "routine:" + r.id, title: r.title, category: r.category, minutes: r.minutes,
         priority: r.priority || 2, done: isRoutineDone(r.id, dateStr),
-        isRoutine: true, routineId: r.id
+        isRoutine: true, routineId: r.id, dailyLife: r.dailyLife, period: r.period, kind: r.kind
       };
     });
     return fromTodos.concat(fromRoutines).sort(function(a,b){ return (a.priority||2)-(b.priority||2); });
@@ -465,6 +477,8 @@
     app.className = isParent ? ("app--parent" + (state.parentDarkMode ? " dark-mode" : "")) : "";
     document.body.classList.toggle("parent-dark-bg", isParent && state.parentDarkMode);
     document.body.classList.toggle("app--parent-active", isParent);
+    document.body.dataset.theme = isParent ? "parent" : state.childTheme;
+    document.body.classList.toggle("hide-reading", !isParent && !state.showReading);
     app.innerHTML = isParent ? renderParent() : renderChild();
     bindEvents();
   }
@@ -479,7 +493,9 @@
   var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","calendar"];
 
   function getTabOrder(){
-    var order = state.tabOrder && state.tabOrder.length === DEFAULT_TAB_ORDER.length ? state.tabOrder : DEFAULT_TAB_ORDER;
+    var valid = Array.isArray(state.tabOrder) && state.tabOrder.length === DEFAULT_TAB_ORDER.length &&
+      DEFAULT_TAB_ORDER.every(function(id){ return state.tabOrder.indexOf(id) !== -1; });
+    var order = valid ? state.tabOrder : DEFAULT_TAB_ORDER;
     return order;
   }
 
@@ -494,7 +510,7 @@
     var order = getTabOrder();
     return (
       '<div class="topbar"><h1>Rihoko Study</h1>' +
-      '<button class="icon-btn" id="gotoParent" title="保護者用">' +
+      '<button class="icon-btn" id="gotoParent" title="保護者用" aria-label="保護者用の設定を開く">' +
         '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         '<circle cx="12" cy="12" r="3.2" stroke="#2F8F86" stroke-width="1.8"/>' +
         '<path d="M12 3.5v2.1M12 18.4v2.1M20.5 12h-2.1M5.6 12H3.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5M17.7 17.7l-1.5-1.5M7.8 7.8L6.3 6.3" stroke="#2F8F86" stroke-width="1.8" stroke-linecap="round"/>' +
@@ -507,8 +523,8 @@
   }
 
   function tabBtn(id, icon, label){
-    return '<button class="tab-item ' + (state.view===id?"active":"") + '" data-tab="' + id + '">' +
-      '<span class="ic">' + icon + '</span>' + label + '</button>';
+    return '<button class="tab-item ' + (state.view===id?"active":"") + '" ' + (state.view===id?'aria-current="page" ':'') + 'data-tab="' + id + '">' +
+      '<span class="ic nav-art nav-art--' + id + '">' + DailySupport.icon(id) + '</span>' + label + '</button>';
   }
 
   function greetingWord(){
@@ -522,22 +538,49 @@
     var html = '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
       '<p class="date">' + fmtDateLong(today) + '</p></div>';
 
-    html += '<div class="section-label">きょうやること</div>';
-    if (todays.length === 0) {
-      html += '<div class="empty-state">きょうの予定はまだ登録されていません。<br>保護者の方に聞いてみてね。</div>';
+    var completed = todays.filter(function(t){ return t.done; }).length;
+    var pending = todays.filter(function(t){ return !t.done; });
+    var dailyLife = todays.filter(function(t){ return t.dailyLife; });
+    if (dailyLife.length) {
+      var left = dailyLife.filter(function(t){ return !t.done; }).length;
+      html += '<section class="daily-check"><div class="daily-check-heading">' + DailySupport.icon('bag') + '<div><h2>わすれずチェック</h2><p>' + (left ? 'あと ' + left + 'こ。おうちの人とたしかめよう' : 'きょうのチェック、ぜんぶできたね') + '</p></div></div>' + dailyLife.map(renderTodoCard).join('') + '</section>';
+    }
+    var selected = pending.find(function(t){ return t.id === state.focusedTaskId; });
+    var first = selected || pending[0];
+    var questLabel = state.childTheme === "gentle" ? "きょうのクエスト" : "きょうの学習";
+    html += '<section class="daily-hero" aria-label="きょうの進みぐあい"><div class="hero-eyebrow">' + questLabel + '</div>';
+    if (first) {
+      html += '<h2>' + (selected ? 'いまは、これに集中しよう' : 'ひとつずつ、できるをふやそう') + '</h2>' +
+        '<p class="hero-task">' + addFurigana(first.title) + '</p>' +
+        '<p class="hero-detail">' + (first.minutes ? 'めやす ' + escapeHtml(first.minutes) + '分 · ' : '') + 'あと ' + pending.length + 'こ</p>' +
+        (selected ? '<button class="hero-start" data-toggle="' + escapeHtml(first.id) + '">できた！</button>' :
+          '<button class="hero-start" data-focus-task="' + escapeHtml(first.id) + '">これをはじめる →</button>');
     } else {
-      html += '<div class="todo-list">' + todays.map(renderTodoCard).join("") + '</div>';
+      state.focusedTaskId = null;
+      html += '<h2>' + (todays.length ? 'きょうの分、できたね！' : 'きょうは何をしてみよう？') + '</h2>' +
+        '<p class="hero-detail">' + (todays.length ? 'がんばったね。ゆっくり休もう。' : '問題や英会話をえらんではじめられるよ。') + '</p>' +
+        '<button class="hero-start" data-tab="' + (todays.length ? 'dekita' : 'manabu') + '">' + (todays.length ? 'できたことを見る' : 'まなぶを開く →') + '</button>';
+    }
+    if (todays.length) html += '<div class="daily-progress"><span>' + completed + ' / ' + todays.length + ' できた</span><progress value="' + completed + '" max="' + todays.length + '" aria-label="きょうの完了数"></progress></div>';
+    html += '</section><div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
+      '<button data-tab="dekita"><span class="shortcut-symbol">✦</span><span><b>できたこと</b><small>がんばりをふりかえる</small></span><span aria-hidden="true">↗</span></button></div>';
+    html += '<div class="home-columns"><section><h2 class="section-label">きょうやること</h2>';
+    if (todays.length === 0) {
+      html += '<div class="empty-state">きょうやることは、まだないよ。<br>おうちの人といっしょに決めよう。</div>';
+    } else {
+      var otherTasks = todays.filter(function(t){ return !t.dailyLife; });
+      html += otherTasks.length ? '<div class="todo-list">' + otherTasks.map(renderTodoCard).join("") + '</div>' : '<div class="empty-state">きょうやることは、上のチェックにまとまっているよ。</div>';
     }
 
     var next = nextEvent();
-    html += '<div class="section-label">つぎの予定</div>';
+    html += '</section><section><h2 class="section-label">つぎの予定</h2>';
     if (next) {
       html += '<div class="next-card"><div class="dot"></div><div class="txt"><b>' + escapeHtml(next.title) +
         '</b><br>' + fmtDateLong(next.date) + (next.time ? " " + next.time : "") + '</div></div>';
     } else {
       html += '<div class="empty-state">つぎの予定はまだありません。</div>';
     }
-    return html;
+    return html + '</section></div>';
   }
 
   function renderSoraTab(){
@@ -557,10 +600,10 @@
   function renderTodoCard(t){
     var cat = CATS[t.category] || CATS["その他"];
     return '<div class="todo-card ' + (t.done?"done":"") + '" data-id="' + t.id + '">' +
-      '<button class="check" data-toggle="' + t.id + '">' + (t.done ? "✓" : "") + '</button>' +
+      '<button class="check" aria-label="' + escapeHtml(t.title) + '" aria-pressed="' + !!t.done + '" data-toggle="' + escapeHtml(t.id) + '">' + (t.done ? "✓" : "") + '</button>' +
       '<div class="todo-body">' +
-      '<p class="todo-title">' + cat.icon + ' ' + addFurigana(t.title) + '</p>' +
-      '<p class="todo-meta"><span class="tag">' + addFurigana(t.category||"その他") + '</span>' + (t.minutes ? t.minutes + "分" : "") + '</p>' +
+      '<p class="todo-title">' + (t.dailyLife ? '' : cat.icon + ' ') + addFurigana(t.title) + '</p>' +
+      '<p class="todo-meta"><span class="tag">' + (t.dailyLife ? (DailySupport.periods[t.period] || 'いつでも') : addFurigana(t.category||"その他")) + '</span>' + (t.done ? 'できたよ' : t.dailyLife ? 'まだチェックしていないよ' : t.minutes ? t.minutes + '分' : '') + '</p>' +
       '</div></div>';
   }
 
@@ -762,15 +805,113 @@
 
   /* ---------------- parent view ---------------- */
 
+  function renderFamily(){
+    var date = state.familyDate || todayStr();
+    var tasks = combinedItemsForDate(date).filter(function(t){ return t.dailyLife; });
+    var html = '<div class="panel"><h2>家族との共有</h2><p id="familySyncStatus" role="status">' + syncStatusText() + '</p>' +
+      (familySync ? '<button class="btn-primary" id="refreshFamilySync">共有を更新</button><details><summary>初めてこの端末を共有するとき</summary><p class="ri-sub">端末だけにある予定を共有に追加します。同じIDの記録は共有側を優先します。別端末で削除した予定を戻したくない場合は、追加せず「共有データを使う」を選びます。</p><button class="btn-primary" id="importFamilySync">この端末の予定も共有に追加</button><button class="backlink" id="adoptFamilySync">共有データを使う（端末の控えを保存）</button></details>' : '') + '</div>';
+    html += '<div class="panel family-intro"><h2>毎日の「忘れちゃった」をへらそう</h2><p>やることと曜日を決めるだけ。里穂子さんのホームに、その日の分が出ます。</p>' +
+      '<div class="routine-presets"><button data-family-preset="medicine">' + DailySupport.icon('medicine') + '<b>おくすり</b></button><button data-family-preset="school">' + DailySupport.icon('bag') + '<b>学校のじゅんび</b></button><button data-family-preset="custom">' + DailySupport.icon('check') + '<b>ほかの習慣</b></button></div></div>';
+    if (state.familyMessage) html += '<div class="family-message" role="status">' + escapeHtml(state.familyMessage) + '</div>';
+    var draft = state.familyDraft;
+    if (draft) {
+      html += '<form id="familyForm" class="panel"><h2>' + (draft.id ? 'やることを変更' : 'やることを登録') + '</h2>' +
+        '<div class="form-row"><label for="familyTitle">① なにをする？</label><input id="familyTitle" name="title" required maxlength="120" value="' + escapeHtml(draft.title) + '" placeholder="例：スイミングの持ち物をそろえる"></div>' +
+        '<fieldset class="family-days"><legend>② やる曜日をえらぶ</legend>' + WEEK.map(function(w,i){return '<label><input type="checkbox" name="day" value="' + i + '" ' + (draft.days.indexOf(i) !== -1 ? 'checked' : '') + '><span>' + w + '</span></label>';}).join('') + '</fieldset>' +
+        '<p class="ri-sub">チェックした曜日だけ表示します。学校の準備は「準備する日」を選んでください。</p>' +
+        '<div class="form-row"><label for="familyPeriod">③ いつやる？</label><select id="familyPeriod" name="period">' + Object.keys(DailySupport.periods).map(function(k){return '<option value="' + k + '" ' + (draft.period === k ? 'selected' : '') + '>' + DailySupport.periods[k] + '</option>';}).join('') + '</select></div>' +
+        '<p class="ri-sub">' + escapeHtml(draft.note || '') + '</p><p id="familyError" class="form-error" role="alert"></p>' +
+        '<div class="family-actions"><button type="submit" class="btn-primary">この内容で保存する</button><button type="button" id="familyCancel" class="backlink">やめる</button></div></form>';
+    }
+    html += '<div class="panel"><h2>その日に出るものを確認</h2><div class="form-row"><label for="familyDate">確認したい日</label><input type="date" id="familyDate" value="' + date + '"></div><p class="ri-sub">' + fmtDateLong(date) + ' ・ ' + tasks.filter(function(t){return t.done;}).length + ' / ' + tasks.length + ' チェック済み</p>';
+    html += tasks.length ? tasks.map(function(t){ return '<div class="family-preview-row"><span>' + escapeHtml(t.title) + '</span><b>' + (t.done ? 'チェック済み' : '未チェック') + '</b></div>'; }).join('') : '<p class="ri-sub">この日に出る「わすれずチェック」はありません。</p>';
+    html += '</div><div class="panel"><h2>登録した毎日のやること</h2>';
+    var routines = state.routines.filter(function(r){return r.dailyLife;});
+    html += routines.length ? routines.map(function(r){
+      return '<div class="family-routine"><div class="family-preview-row"><b>' + escapeHtml(r.title) + '</b><button class="backlink" data-family-edit="' + escapeHtml(r.id) + '">変更する</button></div>' +
+        '<p class="ri-sub">' + (r.paused ? 'お休み中 ／ ' : '') + (r.days || []).slice().sort().map(function(d){return WEEK[d];}).join('・') + ' ／ ' + (DailySupport.periods[r.period] || 'いつでも') + '</p><button class="backlink" data-family-pause="' + escapeHtml(r.id) + '">' + (r.paused ? 'また表示する' : 'しばらくお休みする') + '</button><br>' +
+        '<label class="skip-label">お休みの日<input type="date" data-family-skipdate="' + escapeHtml(r.id) + '" aria-label="' + escapeHtml(r.title) + 'のお休みの日"></label><button class="backlink" data-family-skip="' + escapeHtml(r.id) + '">この日は表示しない</button>' +
+        '<div class="skip-chips">' + (r.skipDates || []).map(function(d){return '<button data-family-unskip="' + escapeHtml(r.id) + '" data-date="' + escapeHtml(d) + '">' + escapeHtml(d) + ' のお休みを取り消す</button>';}).join('') + '</div></div>';
+    }).join('') : '<p class="ri-sub">上の「おくすり」「学校のじゅんび」から登録できます。</p>';
+    html += '</div><div class="panel"><h2>家族で使うには</h2><a class="family-app-link" href="https://yoppy12291984.github.io/Rihoko-OS/" target="_blank" rel="noopener">家族のアプリを開く ↗</a><p class="ri-sub">このリンクをご家族に送ってください。</p><ol class="family-guide"><li>スマートフォンで上のリンクを開きます。</li><li>ホームの右上から「かんたん設定」を開きます。</li><li>内容を確認するときはページを再読み込みします。</li></ol><p class="ri-sub">公開版では同じ保存先への同期を使います。別端末での動作確認はまだです。</p>' +
+      (location.hostname === '127.0.0.1' || location.hostname === 'localhost' ? '<p class="ri-sub">いまはPC専用のプレビューです。ここでの登録は公開版に反映されません。新しい画面を家族で使うには公開版の更新が必要です。</p>' : '') +
+      '<h3>お知らせについて</h3><p class="ri-sub">今は、ホームを開いたときに未チェックの項目を目立たせる仕組みです。アプリを閉じている間に音や通知で知らせる機能は未対応です。</p></div>';
+    return html;
+  }
+
+  function bindFamilyEvents(app){
+    var refresh = document.getElementById('refreshFamilySync');
+    if (refresh) refresh.onclick = function(){familySync.refresh().then(render);};
+    var importButton = document.getElementById('importFamilySync');
+    if (importButton) importButton.onclick = function(){familySync.refresh(true).then(render);};
+    var adopt = document.getElementById('adoptFamilySync');
+    if (adopt) adopt.onclick = function(){familySync.adopt().then(render);};
+    app.querySelectorAll('[data-family-preset]').forEach(function(b){ b.onclick = function(){
+      var p = DailySupport.presets[b.getAttribute('data-family-preset')];
+      state.familyDraft = Object.assign({}, p, {days:p.days.slice()}); state.familyMessage = ''; render();
+      document.getElementById('familyTitle').focus();
+    }; });
+    app.querySelectorAll('[data-family-edit]').forEach(function(b){ b.onclick = function(){
+      var r = state.routines.find(function(x){return x.id === b.getAttribute('data-family-edit');});
+      if (!r) return;
+      state.familyDraft = Object.assign({}, r, {days:(r.days || []).slice()}); state.familyMessage = ''; render();
+      document.getElementById('familyTitle').focus();
+    }; });
+    var cancel = document.getElementById('familyCancel');
+    if (cancel) cancel.onclick = function(){state.familyDraft = null; render();};
+    var form = document.getElementById('familyForm');
+    if (form) form.oninput = function(){
+      state.familyDraft.title = form.elements.title.value;
+      state.familyDraft.period = form.elements.period.value;
+      state.familyDraft.days = Array.from(form.querySelectorAll('input[name="day"]:checked')).map(function(c){return Number(c.value);});
+    };
+    if (form) form.onsubmit = function(e){
+      e.preventDefault();
+      var title = form.elements.title.value.trim();
+      var days = Array.from(form.querySelectorAll('input[name="day"]:checked')).map(function(c){return Number(c.value);});
+      var error = document.getElementById('familyError');
+      if (!title || !days.length) { error.textContent = !title ? 'やることを入力してください。' : '曜日を1つ以上えらんでください。'; return; }
+      var draft = state.familyDraft;
+      var period = form.elements.period.value;
+      if (state.routines.some(function(r){return r.id !== draft.id && r.title === title && r.period === period && (r.days || []).some(function(d){return days.indexOf(d) !== -1;});})) {error.textContent = '同じ内容が登録されています。「変更する」から直せます。'; return;}
+      var data = {title:title,days:days,period:period,dailyLife:true,kind:draft.kind || 'check',category:draft.category || 'その他',priority:1,minutes:draft.minutes || 0};
+      state.familyDraft = null; state.familyMessage = '保存しました。下の日付で、表示する曜日を確認できます。';
+      if (draft.id) persistUpdate('routines',draft.id,data);
+      else persistAdd('routines',Object.assign(data,{skipDates:[]}));
+    };
+    var date = document.getElementById('familyDate');
+    if (date) date.onchange = function(){ if (date.value) {state.familyDate = date.value; render();} };
+    app.querySelectorAll('[data-family-pause]').forEach(function(b){b.onclick = function(){
+      var id = b.getAttribute('data-family-pause'); var r = state.routines.find(function(x){return x.id === id;});
+      state.familyMessage = r.paused ? '曜日の設定に合わせて、また表示します。' : 'お休み中にしました。「また表示する」で戻せます。';
+      persistUpdate('routines',id,{paused:!r.paused});
+    };});
+    app.querySelectorAll('[data-family-skip]').forEach(function(b){b.onclick = function(){
+      var id = b.getAttribute('data-family-skip');
+      var input = Array.from(app.querySelectorAll('[data-family-skipdate]')).find(function(x){return x.getAttribute('data-family-skipdate') === id;});
+      if (!input.value) { input.focus(); return; }
+      var r = state.routines.find(function(x){return x.id === id;});
+      var skip = (r.skipDates || []).slice(); if (skip.indexOf(input.value) === -1) skip.push(input.value);
+      state.familyMessage = 'お休みの日を保存しました。あとから取り消せます。'; persistUpdate('routines',id,{skipDates:skip});
+    };});
+    app.querySelectorAll('[data-family-unskip]').forEach(function(b){b.onclick = function(){
+      var id = b.getAttribute('data-family-unskip'); var date = b.getAttribute('data-date');
+      var r = state.routines.find(function(x){return x.id === id;});
+      state.familyMessage = 'お休みを取り消しました。'; persistUpdate('routines',id,{skipDates:(r.skipDates || []).filter(function(d){return d !== date;})});
+    };});
+  }
+
   function renderParent(){
     var html = '<div class="parent-header"><button class="backlink" id="backToChild">← こどもの画面へ</button></div>';
-    html += '<div class="parent-header" style="padding-top:2px;"><h1>保護者用</h1></div>';
-    html += '<div class="parent-tabs">' +
+    html += '<div class="parent-header" style="padding-top:2px;"><h1>おうちの人のページ</h1></div>';
+    html += '<div class="parent-tabs">' + ptab('family','かんたん設定') + '<button class="ptab" id="parentAdvanced" aria-expanded="' + state.parentAdvanced + '">詳しい設定 ' + (state.parentAdvanced ? '−' : '＋') + '</button></div>';
+    if (state.parentAdvanced || state.parentTab !== 'family') html += '<div class="parent-tabs">' +
       ptab("schedule","予定・ToDo") + ptab("calendar","カレンダー") + ptab("units","教科書・単元") + ptab("dashboard","ダッシュボード") +
       ptab("history","学習履歴") + ptab("more","その他の設定") +
       '</div>';
 
-    if (state.parentTab === "schedule") html += renderParentSchedule();
+    if (state.parentTab === "family") html += renderFamily();
+    else if (state.parentTab === "schedule") html += renderParentSchedule();
     else if (state.parentTab === "calendar") html += renderParentCalendar();
     else if (state.parentTab === "units") html += renderParentUnits();
     else if (state.parentTab === "dashboard") html += renderParentDashboard();
@@ -1199,6 +1340,10 @@
 
   function renderParentMore(){
     var html = renderUsagePanel();
+    html += '<div class="panel"><h2>こども画面の見た目</h2><p class="ri-sub">学習記録はそのままに、成長や好みに合わせて変更できます。</p><div class="theme-options">' +
+      [{id:"gentle", name:"やさしい", text:"大きな文字とクエスト"}, {id:"calm", name:"すっきり", text:"落ち着いた色とシンプルな表示"}, {id:"planner", name:"手帳", text:"予定を見渡せるコンパクトな表示"}].map(function(t){
+        return '<button data-theme-choice="' + t.id + '" aria-pressed="' + (state.childTheme === t.id) + '"><b>' + t.name + '</b><small>' + t.text + '</small></button>';
+      }).join('') + '</div><label class="reading-setting"><input type="checkbox" id="readingToggle" ' + (state.showReading ? 'checked' : '') + '> ふりがなを表示する</label><p class="ri-sub">この端末に保存されます。ふりがなは登録済みの単語とAIが読みを付けた文章に対応します。</p><button class="btn-primary" data-tab="home">こども画面で確認する</button></div>';
     html += '<div class="panel"><h2>表示設定</h2>' +
       '<div class="form-row" style="flex-direction:row;align-items:center;justify-content:space-between;">' +
       '<label style="margin:0;">保護者画面をダークモードにする</label>' +
@@ -1291,8 +1436,24 @@
 
   function bindEvents(){
     var app = document.getElementById("app");
+    bindFamilyEvents(app);
+    var advanced = document.getElementById('parentAdvanced');
+    if (advanced) advanced.onclick = function(){state.parentAdvanced = !state.parentAdvanced; if (!state.parentAdvanced) state.parentTab = 'family'; render();};
+    function saveAppearance(){
+      try { localStorage.setItem("riho-study-appearance-v1", JSON.stringify({theme:state.childTheme, showReading:state.showReading})); }
+      catch(e) { alert("表示設定を保存できませんでした。この画面では変更が反映されます。"); }
+      render();
+    }
+    app.querySelectorAll("[data-theme-choice]").forEach(function(b){
+      b.onclick = function(){ state.childTheme = b.getAttribute("data-theme-choice"); saveAppearance(); };
+    });
+    var readingToggle = document.getElementById("readingToggle");
+    if (readingToggle) readingToggle.onchange = function(){ state.showReading = readingToggle.checked; saveAppearance(); };
+    app.querySelectorAll("[data-focus-task]").forEach(function(b){
+      b.onclick = function(){ state.focusedTaskId = b.getAttribute("data-focus-task"); render(); };
+    });
     var gp = document.getElementById("gotoParent");
-    if (gp) gp.onclick = function(){ state.view = "parent"; render(); };
+    if (gp) gp.onclick = function(){ state.view = "parent"; state.parentTab = 'family'; state.parentAdvanced = false; render(); };
     var back = document.getElementById("backToChild");
     if (back) back.onclick = function(){ state.view = "home"; render(); };
 
@@ -1691,7 +1852,8 @@
         var idx = state.routineDaysSelected.indexOf(day);
         if (idx === -1) state.routineDaysSelected.push(day);
         else state.routineDaysSelected.splice(idx, 1);
-        render();
+        b.classList.toggle('active', state.routineDaysSelected.indexOf(day) !== -1);
+        b.setAttribute('aria-pressed', String(state.routineDaysSelected.indexOf(day) !== -1));
       };
     });
     var addRoutine = document.getElementById("addRoutine");
@@ -1803,10 +1965,20 @@
   }
 
   loadLocal();
+  initFamilySync();
   render();
   initDb();
   pullFromGas();
   setupSwipeNav_();
+  // 日付をまたいで開いたままでも、前日のチェックを翌日に持ち越さない。
+  var renderedDay = todayStr();
+  function refreshDay(){
+    if (renderedDay !== todayStr() && state.view !== 'parent') { renderedDay = todayStr(); state.focusedTaskId = null; render(); }
+  }
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) {refreshDay(); if (state.view !== 'parent') pullFromGas();} });
+  setInterval(refreshDay, 60000);
+  setInterval(function(){ if (!document.hidden && state.view !== 'parent') pullFromGas(); }, 45000);
+  window.addEventListener('online', pullFromGas);
 })();
 </script>
 </body>

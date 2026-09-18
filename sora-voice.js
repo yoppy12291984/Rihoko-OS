@@ -253,18 +253,15 @@ async function syncPull() {
 }
 
 async function syncUpsert(collection, item) {
-  try { await callBackend_({ action: "syncUpsert", collection: collection, item: item }); }
-  catch (err) { /* 同期の失敗はUIをブロックしない(次回のsyncPullで再度揃う想定) */ }
+  return callBackend_({ action: "syncUpsert", collection: collection, item: item });
 }
 
 async function syncDeleteItem(collection, id) {
-  try { await callBackend_({ action: "syncDelete", collection: collection, id: id }); }
-  catch (err) { /* 同上 */ }
+  return callBackend_({ action: "syncDelete", collection: collection, id: id });
 }
 
 async function syncRoutineDone(key, done) {
-  try { await callBackend_({ action: "syncRoutineDone", key: key, done: done }); }
-  catch (err) { /* 同上 */ }
+  return callBackend_({ action: "syncRoutineDone", key: key, done: done });
 }
 
 /* ---------------- 学習履歴 ---------------- */

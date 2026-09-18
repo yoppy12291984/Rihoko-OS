@@ -1,0 +1,101 @@
+/* 表示テーマは学習データ・通信処理から独立して管理する。 */
+body:where([data-theme]:not([data-theme="parent"])) {
+  --bg: #f5f7f4; --ink: #253e3b; --ink-soft: #5b706a;
+  --teal: #286c60; --teal-soft: #e4eee7; --border: #dce5de;
+  background: var(--bg); --hero-bg: #e4eee1;
+}
+body[data-theme="calm"] { --bg: #f4f6fa; --teal: #385a85; --teal-soft: #e8eef7; --hero-bg: #e7eef8; }
+body[data-theme="planner"] { --bg: #f6f3ee; --teal: #68573e; --teal-soft: #ede7dd; --hero-bg: #eee7da; font-family: system-ui, sans-serif; }
+#app { max-width: 960px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+#app.app--parent { max-width: 760px; }
+.topbar { padding-top: 26px; padding-bottom: 24px; }
+.topbar h1 { letter-spacing: .08em; }
+.greeting .hello { font-size: clamp(26px, 4vw, 34px); letter-spacing: -.04em; }
+.greeting .date { margin-top: 8px; }
+button, input, select { font: inherit; }
+button { touch-action: manipulation; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
+.icon-btn, .check { width: 44px; height: 44px; }
+.daily-hero { margin: 8px 20px 20px; padding: 28px; border-radius: 28px; background: var(--hero-bg); border: 1px solid var(--border); }
+.hero-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--teal); }
+.daily-hero h2 { font-size: clamp(21px, 3.5vw, 28px); line-height: 1.5; margin: 14px 0; }
+.hero-task { font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.hero-detail { color: var(--ink-soft); font-size: 14px; line-height: 1.8; }
+.hero-start { min-height: 50px; padding: 12px 24px; border: 0; border-radius: 14px; background: var(--teal); color: white; font-weight: 700; cursor: pointer; }
+.daily-progress { display: flex; align-items: center; gap: 18px; margin-top: 24px; font-size: 13px; }
+.daily-progress span { white-space: nowrap; }
+.daily-progress progress { width: 100%; height: 8px; accent-color: var(--teal); border: 0; border-radius: 8px; overflow: hidden; }
+progress::-webkit-progress-bar { background: #fff9; }
+progress::-webkit-progress-value { background: var(--teal); }
+.home-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 20px; }
+.home-shortcuts button { display: flex; gap: 12px; align-items: center; text-align: left; padding: 18px; border: 1px solid var(--border); border-radius: 20px; color: var(--ink); background: var(--card); cursor: pointer; }
+.home-shortcuts b, .home-shortcuts small { display: block; }
+.home-shortcuts b { font-size: 15px; }
+.home-shortcuts small { font-size: 12px; color: var(--ink-soft); margin-top: 5px; }
+.shortcut-symbol { display: grid; place-items: center; border-radius: 14px; width: 42px; height: 42px; flex-shrink: 0; background: var(--teal-soft); color: var(--teal); font-size: 22px; }
+.home-shortcuts button > span:last-child { margin-left: auto; }
+.todo-card { box-shadow: none; padding: 18px; border-radius: 18px; }
+.todo-card.done { opacity: .75; }
+.todo-title { line-height: 1.8; overflow-wrap: anywhere; }
+.section-label { font-size: 14px; margin-top: 28px; }
+.tabbar { z-index: 10; box-shadow: none; }
+.tabbar-inner { max-width: 720px; gap: 6px; padding: 0 12px; }
+.tab-item { min-height: 54px; border-radius: 14px; }
+.tab-item.active { background: var(--teal-soft); }
+.study-icon { width: 30px; height: 30px; display: block; flex-shrink: 0; }
+.tabbar { background: transparent; border: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); pointer-events: none; }
+.tabbar-inner { padding: 8px; border: 1px solid var(--border); border-radius: 28px; background: var(--card); box-shadow: 0 8px 30px #254b3e16; pointer-events: auto; }
+.tab-item { gap: 5px; padding: 5px 0; border-radius: 21px; font-size: 11px; }
+.tab-item.active { background: transparent; }
+.nav-art { display: grid; place-items: center; width: 44px; height: 38px; border-radius: 16px; transition: transform .18s; }
+.nav-art--home { color: #4f7b68; background: #edf4ec; }
+.nav-art--manabu { color: #6c6492; background: #f0ebf9; }
+.nav-art--dekita { color: #987429; background: #fff3d8; }
+.nav-art--sora { color: #507f96; background: #e7f2f9; }
+.nav-art--calendar { color: #a56575; background: #faeaf0; }
+.tab-item.active .nav-art { transform: translateY(-3px); box-shadow: 0 3px 0 currentColor; }
+.tab-item.active { color: var(--ink); }
+.daily-check { margin: 4px 20px 22px; padding: 20px; background: #fff8ed; border: 1px solid #eddcbb; border-radius: 24px; }
+.daily-check-heading { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; color: #73572e; }
+.daily-check h2 { font-size: 19px; margin: 0 0 4px; }
+.daily-check p { margin: 0; }
+.daily-check-heading p { font-size: 13px; line-height: 1.6; }
+.daily-check .todo-card { margin-top: 8px; }
+.family-intro p { font-size: 14px; line-height: 1.8; color: var(--ink-soft); }
+.routine-presets { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 18px; }
+.routine-presets button { display: flex; flex-direction: column; gap: 10px; align-items: center; padding: 18px 8px; border: 1px solid var(--border); border-radius: 18px; background: var(--teal-soft); color: var(--teal); cursor: pointer; font-size: 13px; }
+.family-days { display: flex; gap: 6px; border: 0; padding: 0; margin: 20px 0 8px; }
+.family-days legend { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.family-days label { flex: 1; text-align: center; cursor: pointer; }
+.family-days input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.family-days span { display: grid; place-items: center; min-height: 44px; border: 2px solid var(--border); border-radius: 12px; background: var(--card); }
+.family-days input:checked + span { background: var(--teal); color: white; border-color: var(--teal); }
+.family-days input:focus-visible + span { outline: 3px solid var(--teal); outline-offset: 3px; }
+.family-actions { display: flex; gap: 18px; align-items: center; }
+.family-actions .btn-primary { width: auto; }
+.family-preview-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 14px; overflow-wrap: anywhere; }
+.family-preview-row b { flex-shrink: 0; }
+.family-routine { padding: 12px 0; border-top: 1px solid var(--border); }
+.family-routine .backlink { min-height: 44px; }
+.skip-label { display: inline-flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 13px; }
+.skip-label input { min-height: 44px; max-width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 6px; background: var(--card); color: var(--ink); }
+.skip-chips button { padding: 8px 12px; min-height: 44px; border: 1px solid var(--border); border-radius: 12px; background: var(--teal-soft); color: var(--ink); font-size: 12px; margin: 4px; }
+.family-message { margin: 12px 20px; padding: 14px; border-radius: 14px; color: var(--ink); background: var(--teal-soft); font-size: 14px; }
+.form-error { color: var(--danger); font-size: 14px; }
+.family-guide { padding-left: 22px; font-size: 14px; line-height: 1.9; }
+.family-app-link { display: inline-block; padding: 14px 18px; border-radius: 14px; color: var(--teal); background: var(--teal-soft); font-weight: 700; text-decoration: none; }
+@media (max-width:480px) { .daily-check { padding: 16px; } .routine-presets { gap: 6px; } .routine-presets button { font-size: 12px; padding: 14px 4px; } }
+.theme-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.theme-options button { border: 2px solid var(--border); background: var(--card); color: var(--ink); border-radius: 14px; padding: 14px 10px; cursor: pointer; text-align: left; }
+.theme-options button[aria-pressed="true"] { border-color: var(--teal); background: var(--teal-soft); }
+.theme-options small { display: block; margin-top: 6px; line-height: 1.6; }
+.reading-setting { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.reading-setting input { width: 20px; height: 20px; }
+.hide-reading rt { display: none; }
+body[data-theme="planner"] .daily-hero, body[data-theme="planner"] .todo-card, body[data-theme="planner"] .home-shortcuts button { border-radius: 10px; }
+body[data-theme="planner"] .daily-hero { padding: 22px; }
+body[data-theme="planner"] .todo-card { padding: 12px 16px; }
+@media (min-width: 700px) { .home-columns { display: grid; grid-template-columns: 1.3fr 1fr; } .home-columns > section { min-width: 0; } }
+@media (max-width: 480px) { .daily-hero { padding: 22px; } .home-shortcuts { gap: 10px; } .home-shortcuts button { padding: 14px 10px; gap: 8px; } .shortcut-symbol { display: none; } .theme-options { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+@media print { body[data-theme] { background: white !important; } #app { max-width: 100%; padding-bottom: 0; } }
