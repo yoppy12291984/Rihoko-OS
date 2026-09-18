@@ -264,11 +264,370 @@ body:not(.app--parent-active) #familyLogout {display:none}
   ブロックされるため動作しない。GitHub Pagesにデプロイした本番環境で使うこと。
   未デプロイ・未配置の間は読み込みに失敗してもアプリの他の機能には影響しない。
 -->
+<style>
+.voice-studio{max-width:740px;margin:0 auto;padding:12px 0 30px;color:var(--text,#254b49)}
+.voice-studio header{padding:15px 4px 20px}.voice-studio h2{font-size:28px;margin:10px 0}.voice-studio h3{font-size:18px;margin:0 0 14px}.voice-studio p{line-height:1.7}
+.voice-badge{font-size:12px;font-weight:700;letter-spacing:.08em;color:#286f68}.voice-kumi .voice-badge{color:#986635}
+.voice-card{background:var(--card,#fff);border:1px solid #dbe7e3;border-radius:20px;padding:22px;margin:0 0 16px}.voice-kumi .voice-card{border-color:#e5ddcb}
+.voice-studio label{display:block;font-size:14px;font-weight:700;margin:12px 0}.voice-studio select,.voice-studio textarea,.voice-studio input{display:block;box-sizing:border-box;width:100%;margin-top:8px;font:inherit;font-size:16px;line-height:1.6;padding:12px;border:1px solid #becfca;border-radius:10px;background:#fff;color:#254b49}.voice-studio textarea{resize:vertical}
+.voice-studio button{min-height:46px;cursor:pointer;font:inherit;font-weight:700;border-radius:12px;padding:12px 18px}.voice-primary{background:#28796f;border:0;color:white;width:100%;margin-top:10px}.voice-kumi .voice-primary{background:#95643b}.voice-secondary{background:#f1f6f3;color:#285f57;border:1px solid #cadbd5}.voice-studio button:disabled{opacity:.5;cursor:default}
+.voice-help{font-size:13px;color:#576c67;margin:10px 0}.voice-status{font-weight:700;margin-bottom:4px}.voice-notice{color:#a23a28;font-size:14px;white-space:pre-wrap}.voice-notice:empty{display:none}
+.voice-messages{max-height:350px;overflow:auto;overscroll-behavior:contain}.voice-line{background:#f1f5f3;border-radius:12px;padding:12px;margin:10px 16px 10px 0}.voice-line b{font-size:12px;color:#536962}.voice-line p{white-space:pre-wrap;margin:4px 0;overflow-wrap:anywhere}.voice-child{margin:10px 0 10px 16px;background:#e7f2ed}.voice-kumi .voice-child{background:#f7efdf}.diary-review{border-top:1px solid #ddd;padding-top:20px;margin-top:20px}.diary-text{white-space:pre-wrap;overflow-wrap:anywhere}.voice-studio details{padding:14px 0;border-top:1px solid #e3e8e4}.voice-studio summary{cursor:pointer;line-height:1.7;font-weight:700;overflow-wrap:anywhere}
+@media(max-width:480px){.voice-card{padding:16px}.voice-studio h2{font-size:25px}.tabbar-inner .tab-item{min-width:0;font-size:10px;padding-left:2px;padding-right:2px}}
+
+</style>
+<script>
+/* WebRTC音声接続。開始・終了の競合で古いマイクや会話を残さない。 */
+(function () {
+  'use strict';
+  let active = null;
+  function stop() {
+    const s = active; active = null;
+    if (!s) return;
+    clearTimeout(s.timer); clearTimeout(s.connectTimer); s.abort.abort();
+    if (s.dc) { s.dc.onopen = s.dc.onmessage = s.dc.onclose = null; s.dc.close(); }
+    if (s.pc) { s.pc.ontrack = s.pc.oniceconnectionstatechange = null; s.pc.close(); }
+    if (s.stream) s.stream.getTracks().forEach(t => t.stop());
+    const audio = document.getElementById('soraAudio');
+    if (audio) { audio.pause(); audio.srcObject = null; }
+  }
+  async function start(options) {
+    stop();
+    const s = {abort:new AbortController(), items:new Map(), order:[], pending:new Set()};
+    active = s;
+    const live = () => active === s;
+    const status = text => { if (live()) options.onStatus(text); };
+    const fail = error => { if (live()) { stop(); options.onError(error); } };
+    const emit = () => {
+      if (live()) options.onMessages(s.order.map(id => s.items.get(id)).filter(x => x && x.text));
+    };
+    function item(id, role, previous) {
+      if (!s.items.has(id)) {
+        s.items.set(id, {id,role,text:''});
+        const index = s.order.indexOf(previous);
+        if (index >= 0) s.order.splice(index + 1, 0, id); else s.order.push(id);
+      }
+      return s.items.get(id);
+    }
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('このブラウザーではマイクを使えません。Safariで開いてね。');
+      status('マイクを準備しています…');
+      let stream;
+      const constraints = {echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1};
+      if (options.deviceId) constraints.deviceId = {exact:options.deviceId};
+      try { stream = await navigator.mediaDevices.getUserMedia({audio:constraints}); }
+      catch (err) {
+        if (err.name === 'OverconstrainedError' && !options.deviceId) stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        else throw err;
+      }
+      if (!live()) { stream.getTracks().forEach(t => t.stop()); return; }
+      s.stream = stream;
+      const track = stream.getAudioTracks()[0];
+      options.onDevice(track.label || '端末が選んだマイク');
+      status('音声AIにつないでいます…');
+      s.connectTimer = setTimeout(() => fail(new Error('接続に時間がかかっています。通信を確認してもう一度ためしてね。')),45000);
+      const token = await FamilyAuth.request({action:'token',persona:options.persona,audioMode:options.audioMode});
+      if (!live()) return;
+      if (!token.value) throw new Error('音声AIの準備ができませんでした。');
+      const pc = s.pc = new RTCPeerConnection();
+      const audio = document.getElementById('soraAudio');
+      audio.autoplay = true; audio.playsInline = true; audio.volume = options.audioMode === 'headphones' ? 1 : 0.75;
+      pc.ontrack = event => {
+        if (!live()) return;
+        audio.srcObject = event.streams[0];
+        audio.play().catch(() => fail(new Error('音声を再生できませんでした。もう一度「話す」を押してね。')));
+      };
+      pc.oniceconnectionstatechange = () => {
+        if (!live()) return;
+        clearTimeout(s.timer);
+        const lost = () => fail(new Error('接続が切れました。話した内容は残っています。もう一度つないでね。'));
+        if (pc.iceConnectionState === 'disconnected') s.timer = setTimeout(lost,8000);
+        else if (['failed','closed'].includes(pc.iceConnectionState)) lost();
+      };
+      stream.getTracks().forEach(t => pc.addTrack(t,stream));
+      const dc = s.dc = pc.createDataChannel('oai-events');
+      dc.onopen = () => {
+        if (!live()) return;
+        clearTimeout(s.connectTimer); status('話していいよ'); options.onReady();
+        dc.send(JSON.stringify({type:'response.create'}));
+      };
+      dc.onclose = () => fail(new Error('音声の接続が終わりました。もう一度つないでね。'));
+      dc.onmessage = event => {
+        if (!live()) return;
+        let e; try { e = JSON.parse(event.data); } catch (_) { return; }
+        if (e.type === 'conversation.item.created' || e.type === 'conversation.item.added') {
+          if (e.item && ['user','assistant'].includes(e.item.role)) item(e.item.id,e.item.role,e.previous_item_id);
+        }
+        if (e.type === 'input_audio_buffer.speech_started') { s.pending.add(e.item_id); status('聞いているよ…'); }
+        if (e.type === 'input_audio_buffer.speech_stopped') status('言葉をたしかめています…');
+        if (e.type === 'conversation.item.input_audio_transcription.delta') {
+          item(e.item_id,'user').text += e.delta || ''; emit();
+        }
+        if (e.type === 'conversation.item.input_audio_transcription.completed') {
+          item(e.item_id,'user').text = e.transcript || ''; s.pending.delete(e.item_id); emit();
+        }
+        if (e.type === 'conversation.item.input_audio_transcription.failed') {
+          s.pending.delete(e.item_id); options.onNotice('聞き取りができなかった部分があります。もう一度話すか、文字で直してね。');
+        }
+        if (e.type === 'response.output_audio_transcript.delta') { item(e.item_id,'assistant').text += e.delta || ''; emit(); }
+        if (e.type === 'response.output_audio_transcript.done') { item(e.item_id,'assistant').text = e.transcript || ''; emit(); }
+        if (e.type === 'output_audio_buffer.started') status('お話ししています…');
+        if (e.type === 'output_audio_buffer.stopped') status('話していいよ');
+        if (e.type === 'error') fail(new Error('音声AIでエラーが起きました。もう一度つないでね。'));
+      };
+      const offer = await pc.createOffer(); if (!live()) return;
+      await pc.setLocalDescription(offer); if (!live()) return;
+      const response = await fetch('https://api.openai.com/v1/realtime/calls', {
+        method:'POST',headers:{Authorization:'Bearer '+token.value,'Content-Type':'application/sdp'},body:offer.sdp,signal:s.abort.signal
+      });
+      if (!response.ok) throw new Error('音声AIにつながりませんでした（'+response.status+'）。');
+      const answer = await response.text(); if (!live()) return;
+      await pc.setRemoteDescription({type:'answer',sdp:answer});
+    } catch (err) {
+      if (err.name === 'NotAllowedError') err = new Error('マイクを使う許可が必要です。iPhoneのSafari設定を確認してね。');
+      if (err.name === 'NotFoundError' || err.name === 'OverconstrainedError') err = new Error('選んだマイクが見つかりません。「端末におまかせ」でつなぎ直してね。');
+      fail(err);
+    }
+  }
+  async function finish() {
+    const s = active;
+    if (!s) return;
+    if (s.stream) s.stream.getAudioTracks().forEach(t => { t.enabled = false; });
+    // 最後の発言のVAD確定・文字起こしを待つ。長引いても画面の文字は編集できる。
+    await new Promise(resolve => setTimeout(resolve,1400));
+    const until = Date.now()+5000;
+    while (active === s && s.pending.size && Date.now()<until) await new Promise(resolve => setTimeout(resolve,100));
+    if (active === s) {
+      if (s.pending.size && s.dc) s.dc.onmessage = null;
+      stop();
+    }
+  }
+  window.VoiceSession = {start,stop,finish};
+})();
+
+</script>
+<script>
+/* 会話画面と、本人が確認して保存する端末内の日記。 */
+(function () {
+  'use strict';
+  const KEY = 'rihoko-kumi-diaries-v1';
+  const states = {};
+  let root = null, persona = null;
+  const esc = value => String(value || '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const today = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  function initial() { return {phase:'idle',status:'話すボタンを押して、はじめよう。',mode:'speaker',deviceId:'',devices:[],device:'',messages:[],source:'',draft:null,busy:false,notice:'',summary:'',session:0,date:today()}; }
+  function diaries() {
+    const value = JSON.parse(localStorage.getItem(KEY) || '[]');
+    if (!Array.isArray(value)) throw new Error('保存した日記を読み込めませんでした。');
+    return value;
+  }
+  function draw() {
+    if (!root || !persona) return;
+    const s = states[persona], kumi = persona === 'kumi', name = kumi ? 'Kumi' : 'Sola';
+    const active = s.phase !== 'idle';
+    root.innerHTML = '<section class="voice-studio '+(kumi?'voice-kumi':'')+'"><header><span class="voice-badge">'+(kumi?'きょうの日記':'えいごの友だち')+'</span><h2>'+name+'とおはなし</h2><p>'+(kumi?'今日あったことを、日本語で聞かせてね。':'好きなことを、ひとことずつ話そう。日本語でも大丈夫。')+'</p></header>'+
+      '<div class="voice-card"><label>音の出し方<select id="voiceMode" '+(active?'disabled':'')+'><option value="speaker" '+(s.mode==='speaker'?'selected':'')+'>iPhone・iPadのスピーカー</option><option value="headphones" '+(s.mode==='headphones'?'selected':'')+'>AirPods・イヤホン</option></select></label>'+
+      '<p class="voice-help">'+(s.mode==='headphones'?'先にAirPodsをiPhoneへ接続してね。音が本体から出るときは、コントロールセンターで出力先をAirPodsにしてから話そう。':'静かな場所で、マイクの近くから話してね。考える時間も待つよ。')+'</p>'+
+      (s.devices.length?'<label>使うマイク<select id="voiceMic" '+(active?'disabled':'')+'><option value="">端末におまかせ</option>'+s.devices.map(d=>'<option value="'+esc(d.deviceId)+'" '+(s.deviceId===d.deviceId?'selected':'')+'>'+esc(d.label)+'</option>').join('')+'</select></label>':'')+
+      (s.device?'<p class="voice-help">マイク：'+esc(s.device)+'</p>':'')+
+      '<button class="voice-primary" id="voiceToggle" '+(s.busy||s.phase==='finishing'?'disabled':'')+'>'+(s.phase==='finishing'?'最後の言葉を受け取っています…':active?'おわる':name+'に話す')+'</button>'+
+      '<p id="voiceStatus" class="voice-status" role="status">'+esc(s.status)+'</p><p id="voiceNotice" class="voice-notice" role="alert">'+esc(s.notice)+'</p></div>'+
+      '<div class="voice-card"><h3>話したこと</h3><p class="voice-help">聞き取りが違っていたら、もう一度ゆっくり話してね。</p><div id="voiceMessages" class="voice-messages" aria-label="会話の文字"></div></div>'+
+      (kumi?diaryEditor(s,active):s.summary?'<div class="voice-card">'+esc(s.summary)+'</div>':'')+
+      (kumi?diaryList():'')+'</section>';
+    root.querySelector('#voiceMode').onchange = e => { s.mode=e.target.value; draw(); };
+    const mic=root.querySelector('#voiceMic'); if(mic) mic.onchange=e=>{s.deviceId=e.target.value;};
+    root.querySelector('#voiceToggle').onclick = () => active ? end(persona,true) : begin(persona);
+    paintMessages();
+    if (kumi) bindDiary(s);
+  }
+  function paintMessages() {
+    if (!root || !persona) return;
+    const s=states[persona], box=root.querySelector('#voiceMessages');
+    if (!box) return;
+    const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+    box.innerHTML=s.messages.length?s.messages.map(m=>'<div class="voice-line '+(m.role==='user'?'voice-child':'')+'"><b>'+esc(m.role==='user'?'里穂子':persona==='kumi'?'Kumi':'Sola')+'</b><p>'+esc(m.text)+'</p></div>').join(''):'<p class="voice-help">ここに里穂子と'+(persona==='kumi'?'Kumi':'Sola')+'の言葉が出るよ。</p>';
+    if(atBottom) box.scrollTop=box.scrollHeight;
+  }
+  function status(p,text) {
+    states[p].status=text;
+    if(root&&persona===p) {const el=root.querySelector('#voiceStatus');if(el) el.textContent=text;}
+  }
+  async function begin(p) {
+    const s=states[p];
+    if(s.phase!=='idle'||s.busy) return;
+    s.phase='connecting';s.notice='';s.session++;
+    const session=s.session, prior=s.messages.slice();
+    draw();
+    await VoiceSession.start({persona:p,audioMode:s.mode,deviceId:s.deviceId,
+      onStatus:text=>status(p,text),
+      onReady:()=>{s.phase='talking'; if(persona===p)draw();},
+      onDevice:label=>{
+        s.device=label;
+        navigator.mediaDevices.enumerateDevices().then(all=>{
+          s.devices=all.filter(d=>d.kind==='audioinput'&&d.deviceId&&d.label).map(d=>({deviceId:d.deviceId,label:d.label}));
+          if(persona===p) draw();
+        }).catch(()=>{});
+      },
+      onMessages:messages=>{
+        if(s.session!==session)return;
+        s.messages=prior.concat(messages.map(m=>({...m,id:session+':'+m.id})));
+        if(persona===p)paintMessages();
+      },
+      onNotice:text=>{s.notice=text;if(persona===p)draw();},
+      onError:err=>{s.phase='idle';s.notice=err.message;collectSource(p);status(p,'話したことは画面に残っています。');if(persona===p)draw();}
+    });
+  }
+  function collectSource(p) {
+    const s=states[p];
+    // 編集済みの文章を消さず、まだ取り込んでいない本人の発言だけを追加。
+    if(!s.collected)s.collected=new Set();
+    const fresh=s.messages.filter(m=>m.role==='user'&&!s.collected.has(m.id));
+    fresh.forEach(m=>s.collected.add(m.id));
+    if(fresh.length)s.source=[s.source,...fresh.map(m=>m.text)].filter(Boolean).join('\n');
+  }
+  async function end(p,grace) {
+    const s=states[p];if(!s||s.phase==='idle'||s.phase==='finishing')return;
+    const connected=s.phase==='talking'; s.phase='finishing';if(persona===p)draw();
+    if(grace&&connected)await VoiceSession.finish();else VoiceSession.stop();
+    s.phase='idle';collectSource(p);status(p,p==='kumi'?'話したことをたしかめて、日記にしよう。':'お話ししたね。また話そう。');
+    if(persona===p)draw();
+    if(p==='sola'&&s.messages.some(m=>m.role==='user')&&!s.busy){
+      s.busy=true;if(persona===p)draw();
+      try {
+        const transcript=s.messages.map(m=>(m.role==='user'?'里穂子':'Sola')+': '+m.text).join('\n');
+        const result=await FamilyAuth.request({action:'log',transcript});
+        s.summary=result.summary&&result.summary.comment||'';
+        if(result.summary&&(result.summary.error||result.summary._saveError))s.notice='会話は終了しましたが、学習記録を保存できませんでした。';
+      }catch(_){s.notice='会話は終了しましたが、学習記録を保存できませんでした。';}
+      finally{s.busy=false;if(persona===p)draw();}
+    }
+  }
+  function diaryEditor(s,active) {
+    return '<div class="voice-card"><h3>日記にする</h3><label>話したことをたしかめよう<textarea id="diarySource" rows="5" maxlength="8000" '+(active||s.busy?'disabled':'')+' placeholder="文字で書き足してもいいよ">'+esc(s.source)+'</textarea></label>'+
+      '<button id="diaryDraft" class="voice-secondary" '+(active||s.busy?'disabled':'')+'>'+(s.busy?'下書きを作っています…':'この内容で下書きを作る')+'</button>'+
+      '<p class="voice-help">音声と下書きづくりにはAIを使います。保存先は、この端末のこのブラウザーです。別の端末には共有されません。</p>'+
+      (s.draft?'<div class="diary-review"><h3>読んで、直して、保存しよう</h3><label>日付<input id="diaryDate" type="date" value="'+esc(s.date)+'"></label><label>題名<input id="diaryTitle" maxlength="100" value="'+esc(s.draft.title)+'"></label><label>日記<textarea id="diaryBody" rows="7" maxlength="8000">'+esc(s.draft.body)+'</textarea></label><button id="diarySave" class="voice-primary" '+(active||s.busy?'disabled':'')+'>確認して保存</button></div>':'')+'</div>';
+  }
+  function diaryList() {
+    try {
+      const list=diaries();
+      return '<div class="voice-card"><h3>保存した日記</h3><p class="voice-help">ブラウザーのデータを消すと日記も消えます。大切な日記は「ファイルに保存」で残せるよ。</p>'+(!list.length?'<p>まだ日記はないよ。</p>':list.slice().reverse().map(d=>'<details><summary>'+esc(d.date)+'　'+esc(d.title)+'</summary><p class="diary-text">'+esc(d.body)+'</p><button class="voice-secondary" data-diary-export="'+esc(d.id)+'">ファイルに保存</button></details>').join(''))+'</div>';
+    } catch(_){return '<p class="voice-notice">保存した日記を読み込めません。ブラウザーの保存設定を確認してね。</p>';}
+  }
+  function bindDiary(s) {
+    root.querySelector('#diarySource').oninput=e=>{s.source=e.target.value;};
+    root.querySelector('#diaryDraft').onclick=async()=>{
+      if(!s.source.trim()){s.notice='話したことを入れてから押してね。';draw();return;}
+      s.busy=true;s.notice='';draw();
+      try {
+        const result=await FamilyAuth.request({action:'diaryDraft',transcript:s.source});
+        if(!result.draft||!result.draft.body)throw new Error('下書きを作れませんでした。');
+        s.draft=result.draft;s.savedId=null;status('kumi','まだ保存していません。読んで、合っているかたしかめてね。');
+      }catch(e){s.notice=e.name==='AbortError'?'時間がかかっています。少し待ってからもう一度ためしてね。':e.message;}
+      finally{s.busy=false;if(persona==='kumi')draw();}
+    };
+    if(s.draft){
+      root.querySelector('#diaryDate').oninput=e=>{s.date=e.target.value;};
+      root.querySelector('#diaryTitle').oninput=e=>{s.draft.title=e.target.value;};
+      root.querySelector('#diaryBody').oninput=e=>{s.draft.body=e.target.value;};
+      root.querySelector('#diarySave').onclick=()=>{
+        if(!s.date||!s.draft.title.trim()||!s.draft.body.trim()){s.notice='日付・題名・日記を入れてね。';draw();return;}
+        try{
+          const list=diaries(), id=s.savedId||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+          const entry={id,date:s.date,title:s.draft.title.trim(),body:s.draft.body.trim()};
+          const index=list.findIndex(d=>d.id===id);if(index<0)list.push(entry);else list[index]=entry;
+          localStorage.setItem(KEY,JSON.stringify(list));s.savedId=id;s.notice='';status('kumi','日記をこの端末に保存したよ。');
+        }catch(_){s.notice='保存できませんでした。本文をコピーして残してね。ブラウザーの空き容量や保存設定を確認してください。';}
+        draw();
+      };
+    }
+    root.querySelectorAll('[data-diary-export]').forEach(button=>button.onclick=()=>{
+      const entry=diaries().find(d=>d.id===button.dataset.diaryExport);if(!entry)return;
+      const url=URL.createObjectURL(new Blob([entry.date+'\n'+entry.title+'\n\n'+entry.body],{type:'text/plain;charset=utf-8'}));
+      const a=document.createElement('a');a.href=url;a.download='Kumi-'+entry.date+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    });
+  }
+  function mount(element,p) {
+    if(persona&&persona!==p&&states[persona].phase!=='idle')end(persona,false);
+    root=element;persona=p;
+    if(!p||!element)return;
+    if(!states[p])states[p]=initial();
+    draw();
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&persona)end(persona,false);});
+  window.addEventListener('pagehide',()=>VoiceSession.stop());
+  window.VoiceStudio={mount};
+})();
+
+</script>
 <script src="sora-voice.js" onerror="console.warn('sora-voice.js が見つかりません。Sora機能は無効化されたまま動作します。')"></script>
 
-<script src="daily-support.js"></script>
+<script>
+/* 毎日の予定とアイコン。画面や保存先に依存しない共通定義。 */
+(function(root){
+  'use strict';
+  var paths = {
+    home: '<path d="M5 14 16 5l11 9v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2Z"/><path d="M12 29v-9h8v9"/><path d="M11 12h.01M21 12h.01"/>',
+    manabu: '<path d="M16 9C12 6 7 6 3 8v19c5-2 9-1 13 1 4-2 8-3 13-1V8c-4-2-9-2-13 1Z"/><path d="M16 9v19M7 13h5M20 13h5M7 18h4M20 18h4"/>',
+    dekita: '<path d="m16 3 4.1 8.3 9.2 1.4-6.7 6.5 1.6 9.2-8.2-4.3-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.4Z"/><path d="M12 17h.01M20 17h.01M13 20q3 3 6 0"/>',
+    sora: '<path d="M8 25a7 7 0 0 1-1-14 9 9 0 0 1 17-1 7.5 7.5 0 0 1 0 15Z"/><path d="M12 16h.01M21 16h.01M14 20q3 3 5 0"/>',
+    kumi: '<path d="M7 4h18v24H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z"/><path d="M9 4v24M13 11h8M13 16h8M13 21h5"/>',
+    calendar: '<rect x="4" y="7" width="24" height="22" rx="6"/><path d="M10 3v8M22 3v8M4 15h24M10 20h.01M16 20h.01M22 20h.01M10 25h.01M16 25h.01"/>',
+    bag: '<rect x="6" y="8" width="20" height="21" rx="6"/><path d="M12 8V6a4 4 0 0 1 8 0v2M6 17h20M12 21h8v5h-8Z"/>',
+    medicine: '<rect x="9" y="9" width="14" height="20" rx="4"/><path d="M10 9V4h12v5M12 19h8M16 15v8"/>',
+    check: '<circle cx="16" cy="16" r="12"/><path d="m10 16 4 4 8-9"/>'
+  };
+  function icon(id){ return '<svg class="study-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+(paths[id]||paths.check)+'</svg>'; }
+  function occurs(r, date){
+    if (r.paused) return false;
+    var day = new Date(date+'T00:00:00').getDay();
+    return (r.days || [0,1,2,3,4,5,6]).indexOf(day) !== -1 && (r.skipDates || []).indexOf(date) === -1;
+  }
+  var api = {icon:icon, occurs:occurs, periods:{morning:'あさ', afternoon:'かえってから', evening:'よる', anytime:'いつでも'}, presets:{
+    medicine:{title:'おくすりをのむ',days:[],period:'anytime',kind:'medicine',note:'飲む曜日・タイミングは、ご家庭で決めている内容を選んでください。'},
+    school:{title:'あしたの学校のじゅんび',days:[0,1,2,3,4],period:'evening',kind:'bag',note:'翌日が月〜金の学校なら、準備するのは日〜木の夜です。土曜は表示しません。祝日や休校日は「お休みの日」で調整できます。'},
+    custom:{title:'',days:[0,1,2,3,4,5,6],period:'anytime',kind:'check',note:'習い事の持ち物や、毎日の習慣にも使えます。'}
+  }};
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.DailySupport = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script src="family-sync.js"></script>
-<script src="family-auth.js"></script>
+<script>
+/* 利用者の希望による一時的なログイン省略。認証版は同フォルダのバックアップから復旧する。 */
+(function(){
+  'use strict';
+  async function request(payload){
+    var controller=new AbortController();
+    // プリント生成は30秒を超える場合があるため、生成結果を最大2分待つ。
+    var timeoutMs=payload && ['worksheet','diaryDraft','log'].indexOf(payload.action)!==-1 ? 120000 : 30000;
+    var timeout=setTimeout(function(){controller.abort();},timeoutMs);
+    try {
+      var response=await fetch(SORA_TOKEN_ENDPOINT,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal});
+      if(!response.ok) throw new Error('network_error');
+      var data=await response.json();
+      if(data.error) throw new Error(typeof data.error==='string'?data.error:'request_failed');
+      return data;
+    } finally {clearTimeout(timeout);}
+  }
+  function boot(start){
+    document.documentElement.classList.add('family-authorized');
+    document.getElementById('app').inert=false;
+    document.getElementById('familyAuthGate').hidden=true;
+    document.getElementById('familyLogout').hidden=true;
+    start();
+  }
+  function mountDevices(){
+    var panel=document.getElementById('familyDevicePanel');
+    if(panel) panel.hidden=true;
+  }
+  window.FamilyAuth={boot:boot,request:request,mountDevices:mountDevices,isAuthorized:function(){return true;}};
+})();
+
+
+</script>
 <script>
 (function(){
   "use strict";
@@ -494,6 +853,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     document.body.classList.toggle("hide-reading", !isParent && !state.showReading);
     app.innerHTML = isParent ? renderParent() : renderChild();
     bindEvents();
+    if (window.VoiceStudio) VoiceStudio.mount(document.getElementById("voiceStudio"),state.view === "sora" ? "sola" : state.view === "kumi" ? "kumi" : null);
   }
 
   var TAB_DEFS = {
@@ -501,14 +861,14 @@ body:not(.app--parent-active) #familyLogout {display:none}
     manabu:   { icon: "📚", label: "まなぶ" },
     dekita:   { icon: "🌟", label: "できた" },
     sora:     { icon: "☁️", label: "Sola" },
+    kumi:     { icon: "📖", label: "Kumi" },
     calendar: { icon: "📅", label: "カレンダー" }
   };
-  var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","calendar"];
+  var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","kumi","calendar"];
 
   function getTabOrder(){
-    var valid = Array.isArray(state.tabOrder) && state.tabOrder.length === DEFAULT_TAB_ORDER.length &&
-      DEFAULT_TAB_ORDER.every(function(id){ return state.tabOrder.indexOf(id) !== -1; });
-    var order = valid ? state.tabOrder : DEFAULT_TAB_ORDER;
+    var order = Array.isArray(state.tabOrder) ? state.tabOrder.filter(function(id,i,a){return TAB_DEFS[id] && a.indexOf(id) === i;}) : [];
+    DEFAULT_TAB_ORDER.forEach(function(id){if(order.indexOf(id) === -1)order.push(id);});
     return order;
   }
 
@@ -517,7 +877,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     if (state.view === "home") body = renderHome();
     else if (state.view === "manabu") body = renderManabu();
     else if (state.view === "dekita") body = renderDekita();
-    else if (state.view === "sora") body = renderSoraTab();
+    else if (state.view === "sora" || state.view === "kumi") body = renderSoraTab();
     else if (state.view === "calendar") body = renderParentCalendar();
 
     var order = getTabOrder();
@@ -576,7 +936,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     }
     if (todays.length) html += '<div class="daily-progress"><span>' + completed + ' / ' + todays.length + ' できた</span><progress value="' + completed + '" max="' + todays.length + '" aria-label="きょうの完了数"></progress></div>';
     html += '</section><div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
-      '<button data-tab="dekita"><span class="shortcut-symbol">✦</span><span><b>できたこと</b><small>がんばりをふりかえる</small></span><span aria-hidden="true">↗</span></button></div>';
+      '<button data-tab="kumi"><span class="shortcut-symbol">K</span><span><b>Kumiと日記</b><small>きょうのことを、日本語で</small></span><span aria-hidden="true">↗</span></button></div>';
     html += '<div class="home-columns"><section><h2 class="section-label">きょうやること</h2>';
     if (todays.length === 0) {
       html += '<div class="empty-state">きょうやることは、まだないよ。<br>おうちの人といっしょに決めよう。</div>';
@@ -597,17 +957,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
 
   function renderSoraTab(){
-    var html = '<div class="greeting"><p class="hello">Solaとおはなし</p><p class="date">えいごで話してみよう</p></div>';
-    var talking = state.soraState === "talking" || state.soraState === "connecting";
-    html += '<button class="sora-btn ' + (talking?"talking":"") + '" id="soraBtn">🎙️ ' +
-      (state.soraState === "talking" ? "おわる" : state.soraState === "connecting" ? "せつぞく中…" : "Solaに話す") +
-      '</button>';
-    html += '<div class="sora-status">' + escapeHtml(state.soraStatus || "") + '</div>';
-    html += '<div class="sora-transcript ' + (state.soraTranscript ? "show" : "") + '">' + escapeHtml(state.soraTranscript || "") + '</div>';
-    if (state.soraLastSummary && state.soraLastSummary.comment) {
-      html += '<div class="summary-card">🌟 ' + furiganaFromParens(state.soraLastSummary.comment) + '</div>';
-    }
-    return html;
+    return '<div id="voiceStudio"></div>';
   }
 
   function renderTodoCard(t){
