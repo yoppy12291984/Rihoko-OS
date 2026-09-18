@@ -3,7 +3,9 @@
   'use strict';
   async function request(payload){
     var controller=new AbortController();
-    var timeout=setTimeout(function(){controller.abort();},30000);
+    // プリント生成は30秒を超える場合があるため、生成結果を最大2分待つ。
+    var timeoutMs=payload && payload.action==='worksheet' ? 120000 : 30000;
+    var timeout=setTimeout(function(){controller.abort();},timeoutMs);
     try {
       var response=await fetch(SORA_TOKEN_ENDPOINT,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal});
       if(!response.ok) throw new Error('network_error');
