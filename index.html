@@ -257,6 +257,7 @@ html:not(.family-authorized) #app {display:none!important}
 body:not(.app--parent-active) #familyLogout {display:none}
 </style>
 <section id="familyAuthGate" aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">登録を確認しています…</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：里穂子のiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">次からはそのまま開けます。Safariとホーム画面のアイコンで別の登録が必要な場合があります。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
+<div id="keepsakeSharing" class="no-print" style="padding:8px 16px;font-size:12px"><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span> <button id="refreshKeepsakes" type="button">共有を更新</button></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -280,6 +281,81 @@ body:not(.app--parent-active) #familyLogout {display:none}
 @media(max-width:480px){.voice-card{padding:16px}.voice-studio h2{font-size:25px}.tabbar-inner .tab-item{min-width:0;font-size:10px;padding-left:2px;padding-right:2px}}
 
 </style>
+<script>
+/* 保存を確定した日記・プリント・スタンプの共有。未送信も一つのJSONへ原子的に保存する。 */
+(function(root){
+  'use strict';
+  var names=['diaries','worksheets','rewards'];
+  var legacy={diaries:'rihoko-kumi-diaries-v1',worksheets:'riho-worksheets-v1',rewards:'riho-rewards-v1'};
+  function create(storage,request,notify){
+    var key='riho-keepsake-sync-v1',running=null,send=request;
+    var uid=function(){return 'op-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);};
+    function load(){
+      var raw=storage.getItem(key);
+      if(raw)return JSON.parse(raw);
+      var s={records:{diaries:[],worksheets:[],rewards:[]},queue:[]};
+      names.forEach(function(c){
+        var list=JSON.parse(storage.getItem(legacy[c])||'[]');
+        if(!Array.isArray(list))throw new Error('保存データを読み込めません');
+        list.forEach(function(item){
+          item=JSON.parse(JSON.stringify(item));if(c==='rewards')item.id=item.date;
+          if(!item.id)throw new Error('保存データのIDがありません');
+          s.queue.push({collection:c,item:item,base:null,opId:uid()});
+        });
+      });
+      // 旧キーは移行前の控えとして残す。書込み失敗時は移行済みにしない。
+      storage.setItem(key,JSON.stringify(s));return s;
+    }
+    function status(v){if(notify)notify(v);}
+    function read(c){
+      var s=load(),map=new Map(s.records[c].map(function(r){return [r.item.id,r.item];}));
+      s.queue.filter(function(o){return o.collection===c;}).forEach(function(o){map.set(o.item.id,o.item);});
+      return Array.from(map.values()).sort(function(a,b){return String(a.date||a.createdAt||a.id).localeCompare(String(b.date||b.createdAt||b.id));});
+    }
+    function save(c,item){
+      var s=load();item=JSON.parse(JSON.stringify(item));if(c==='rewards')item.id=item.date;
+      if(names.indexOf(c)<0||!item.id)throw new Error('保存形式が不正です');
+      var record=s.records[c].find(function(r){return r.item.id===item.id;});
+      s.queue.push({collection:c,item:item,base:record?record.revision:null,opId:uid()});
+      storage.setItem(key,JSON.stringify(s));status('pending');refresh();return item;
+    }
+    function refresh(){
+      if(running)return running;if(!send){status('local');return Promise.resolve();}
+      running=(async function(){
+        try{
+          status('syncing');
+          do {
+            var s=load(),batch=s.queue.filter(function(o,i,a){return a.findIndex(function(x){return x.collection===o.collection&&x.item.id===o.item.id;})===i;}).slice(0,10);
+            var reply=await send({action:'keepsakeSync',changes:batch});
+            if(!reply||reply.version!==1||!names.every(function(c){return Array.isArray(reply.records&&reply.records[c]);})||!Array.isArray(reply.acked))throw new Error('共有先を更新してください');
+            var latest=load(),ids=new Set(reply.acked);
+            if(batch.some(function(o){return !ids.has(o.opId);}))throw new Error('共有の保存を確認できません');
+            latest.queue=latest.queue.filter(function(o){return !ids.has(o.opId);});
+            // 送信中・連続編集の次の操作を、自分の直前の保存へつなぐ。
+            batch.forEach(function(o){var record=reply.records[o.collection].find(function(r){return r.revision===o.opId;});
+              if(record)latest.queue.forEach(function(next){if(next.collection===o.collection&&next.item.id===o.item.id&&next.base===o.base){next.base=record.revision;next.item.id=record.item.id;}});
+            });
+            latest.records=reply.records;storage.setItem(key,JSON.stringify(latest));
+            status(latest.queue.length?'pending':'synced');
+          }while(load().queue.length);
+        }catch(e){status('error');}
+        finally{running=null;}
+      })();return running;
+    }
+    return {read:read,save:save,refresh:refresh,connect:function(fn){send=fn;return refresh();}};
+  }
+  if(typeof module!=='undefined'&&module.exports)module.exports={create:create};
+  else {
+    var store=create(root.localStorage,null,function(value){
+      var node=document.getElementById('keepsakeSyncStatus');
+      if(node)node.textContent={local:'日記・プリント・スタンプ：この端末に保存',pending:'日記・プリント・スタンプ：未送信の記録があります',syncing:'日記・プリント・スタンプを共有中…',synced:'日記・プリント・スタンプ：共有済み',error:'日記・プリント・スタンプ：共有できません。記録は端末に残っています。「共有を更新」で再試行できます。'}[value];
+      if(value==='synced')root.dispatchEvent(new Event('keepsakes-updated'));
+    });
+    root.KeepsakeSync=store;
+  }
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
 <script>
 /* WebRTC音声接続。開始・終了の競合で古いマイクや会話を残さない。 */
 (function () {
@@ -452,7 +528,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   const today = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
   function initial() { return {phase:'idle',turn:'connecting',status:'つないでから「話しはじめる」を押してね。',mode:'speaker',deviceId:'',devices:[],device:'',messages:[],source:'',draft:null,busy:false,notice:'',summary:'',session:0,date:today()}; }
   function diaries() {
-    const value = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const value = window.KeepsakeSync ? KeepsakeSync.read('diaries') : JSON.parse(localStorage.getItem(KEY) || '[]');
     if (!Array.isArray(value)) throw new Error('保存した日記を読み込めませんでした。');
     return value;
   }
@@ -545,13 +621,13 @@ body:not(.app--parent-active) #familyLogout {display:none}
   function diaryEditor(s,active) {
     return '<div class="voice-card"><h3>日記にする</h3><label>話したことをたしかめよう<textarea id="diarySource" rows="5" maxlength="8000" '+(active||s.busy?'disabled':'')+' placeholder="文字で書き足してもいいよ">'+esc(s.source)+'</textarea></label>'+
       '<button id="diaryDraft" class="voice-secondary" '+(active||s.busy?'disabled':'')+'>'+(s.busy?'下書きを作っています…':'この内容で下書きを作る')+'</button>'+
-      '<p class="voice-help">音声と下書きづくりにはAIを使います。保存先は、この端末のこのブラウザーです。別の端末には共有されません。</p>'+
+      '<p class="voice-help">音声と下書きづくりにはAIを使います。「確認して保存」した日記をご家族の端末と共有します。未保存の下書きは共有しません。</p>'+
       (s.draft?'<div class="diary-review"><h3>読んで、直して、保存しよう</h3><label>日付<input id="diaryDate" type="date" value="'+esc(s.date)+'"></label><label>題名<input id="diaryTitle" maxlength="100" value="'+esc(s.draft.title)+'"></label><label>日記<textarea id="diaryBody" rows="7" maxlength="8000">'+esc(s.draft.body)+'</textarea></label><button id="diarySave" class="voice-primary" '+(active||s.busy?'disabled':'')+'>確認して保存</button></div>':'')+'</div>';
   }
   function diaryList() {
     try {
       const list=diaries();
-      return '<div class="voice-card"><h3>保存した日記</h3><p class="voice-help">ブラウザーのデータを消すと日記も消えます。大切な日記は「ファイルに保存」で残せるよ。</p>'+(!list.length?'<p>まだ日記はないよ。</p>':list.slice().reverse().map(d=>'<details><summary>'+esc(d.date)+'　'+esc(d.title)+'</summary><p class="diary-text">'+esc(d.body)+'</p><button class="voice-secondary" data-diary-export="'+esc(d.id)+'">ファイルに保存</button></details>').join(''))+'</div>';
+      return '<div class="voice-card"><h3>保存した日記</h3><p class="voice-help">共有済みの日記は別の端末でも読めます。大切な日記は「ファイルに保存」でも残せるよ。</p>'+(!list.length?'<p>まだ日記はないよ。</p>':list.slice().reverse().map(d=>'<details><summary>'+esc(d.date)+'　'+esc(d.title)+'</summary><p class="diary-text">'+esc(d.body)+'</p><button class="voice-secondary" data-diary-export="'+esc(d.id)+'">ファイルに保存</button></details>').join(''))+'</div>';
     } catch(_){return '<p class="voice-notice">保存した日記を読み込めません。ブラウザーの保存設定を確認してね。</p>';}
   }
   function bindDiary(s) {
@@ -576,7 +652,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
           const list=diaries(), id=s.savedId||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
           const entry={id,date:s.date,title:s.draft.title.trim(),body:s.draft.body.trim()};
           const index=list.findIndex(d=>d.id===id);if(index<0)list.push(entry);else list[index]=entry;
-          localStorage.setItem(KEY,JSON.stringify(list));s.savedId=id;s.notice='';status('kumi','日記をこの端末に保存したよ。');
+          if(window.KeepsakeSync)KeepsakeSync.save('diaries',entry);else localStorage.setItem(KEY,JSON.stringify(list));s.savedId=id;s.notice='';status('kumi','日記を保存したよ。共有状況は画面の上で確認できるよ。');
         }catch(_){s.notice='保存できませんでした。本文をコピーして残してね。ブラウザーの空き容量や保存設定を確認してください。';}
         draw();
       };
@@ -596,6 +672,8 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&persona)end(persona,false);});
   window.addEventListener('pagehide',()=>VoiceSession.stop());
+  // 入力中の本文はstatesに保持されるため、共有履歴を更新しても下書きを失わない。
+  window.addEventListener('keepsakes-updated',()=>{if(root&&persona==='kumi')draw();});
   window.VoiceStudio={mount};
 })();
 
@@ -604,28 +682,30 @@ body:not(.app--parent-active) #familyLogout {display:none}
 /* プリントとごほうびの端末内保存。成功した書込みだけを保存済みとして扱う。 */
 (function(root){
   'use strict';
-  function create(storage){
+  function create(storage,shared){
     var sheetKey='riho-worksheets-v1', rewardKey='riho-rewards-v1';
     function read(key){var value=JSON.parse(storage.getItem(key)||'[]');if(!Array.isArray(value))throw new Error('保存データを読み込めません');return value;}
-    function worksheets(){return read(sheetKey);}
+    function worksheets(){return shared?shared.read("worksheets"):read(sheetKey);}
     function saveWorksheet(entry){
       if(!entry.id||!entry.worksheet||!Array.isArray(entry.worksheet.questions)||!entry.worksheet.questions.length)throw new Error('空のプリントは保存できません');
+      if(shared)return shared.save("worksheets",entry);
       var list=worksheets(),i=list.findIndex(function(x){return x.id===entry.id;});
       if(i<0)list.push(entry);else list[i]=entry;
       storage.setItem(sheetKey,JSON.stringify(list));return entry;
     }
-    function rewards(){return read(rewardKey);}
+    function rewards(){return shared?shared.read("rewards"):read(rewardKey);}
     function claim(date,items){
       var list=rewards(),existing=list.find(function(x){return x.date===date;});
       if(existing)return existing;
       if(!items.length||!items.every(function(x){return x.done===true;}))return null;
       var entry={date:date,sticker:list.length%6,completed:items.length};
+      if(shared)return shared.save("rewards",entry);
       list.push(entry);storage.setItem(rewardKey,JSON.stringify(list));return entry;
     }
     return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim};
   }
   if(typeof module!=='undefined'&&module.exports)module.exports={create:create};
-  else root.StudyKeepsakes=create(root.localStorage);
+  else root.StudyKeepsakes=create(root.localStorage,root.KeepsakeSync);
 })(typeof window!=='undefined'?window:this);
 
 </script>
@@ -1194,7 +1274,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
   function renderWorksheetLibrary(){
     var list=[];try{list=StudyKeepsakes.worksheets();}catch(e){return '<div class="keepsake-note" role="alert">保存したプリントを読み込めません。ブラウザーの保存設定を確認してください。</div>';}
-    return '<section class="worksheet-library"><h2 class="section-label">保存したプリント</h2><p class="keepsake-note">作ったプリントは、この端末に自動保存します。別の端末では「ファイルに保存」で持ち出してね。</p>'+
+    return '<section class="worksheet-library"><h2 class="section-label">保存したプリント</h2><p class="keepsake-note">作ったプリントは自動保存し、ご家族の端末と共有します。共有状況は画面の上で確認できるよ。</p>'+
       (!list.length?'<div class="empty-state">これから作るプリントが、ここに並ぶよ。</div>':'<div class="todo-list">'+list.slice().reverse().map(function(e){return '<button class="todo-card" data-saved-sheet="'+escapeHtml(e.id)+'"><div class="todo-body"><p class="todo-title">'+escapeHtml(e.worksheet.title||e.subject+'のプリント')+'</p><p class="todo-meta">'+escapeHtml(e.date+' · '+e.subject+(e.context?' · '+e.context:''))+' · '+e.worksheet.questions.length+'問</p></div><span>ひらく →</span></button>';}).join('')+'</div>')+'</section>';
   }
   function worksheetChoicesHtml(q, ruby){
@@ -1225,7 +1305,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     html+='<p class="reward-total">これまで <b>'+list.length+'</b> こ・ゴール '+Math.floor(list.length/10)+'回</p>';
     if(collection&&cardIndex>0)html+='<details class="rally-history"><summary>これまでの台紙を見る</summary>'+Array.from({length:cardIndex},function(_,i){return rallyCard(i);}).join('')+'</details>';
     if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
-    return html+'<p class="reward-help">1日1こ。お休みしてもスタンプは消えないよ。この端末に保存されます。</p></section>';
+    return html+'<p class="reward-help">1日1こ。お休みしてもスタンプは消えないよ。ご家族の端末でも同じ台紙が見られるよ。</p></section>';
   }
 
   function renderQuiz(){
@@ -2468,6 +2548,14 @@ body:not(.app--parent-active) #familyLogout {display:none}
   function startApp(){
   loadLocal();
   initFamilySync();
+  var localPreview=['127.0.0.1','localhost'].includes(location.hostname);
+  if(!localPreview)KeepsakeSync.connect(function(body){return FamilyAuth.request(body);});
+  else KeepsakeSync.refresh();
+  document.getElementById('refreshKeepsakes').onclick=function(){KeepsakeSync.refresh();};
+  window.addEventListener('online',function(){KeepsakeSync.refresh();});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)KeepsakeSync.refresh();});
+  setInterval(function(){if(!document.hidden)KeepsakeSync.refresh();},45000);
+  window.addEventListener('keepsakes-updated',function(){if(!['parent','sora','sola','kumi'].includes(state.view))render();});
   render();
   initDb();
   pullFromGas();
