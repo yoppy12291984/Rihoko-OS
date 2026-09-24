@@ -1092,6 +1092,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
 
   function render(){
+    if(state.view !== 'parent' && getVisibleTabs().indexOf(state.view) === -1) state.view = getVisibleTabs()[0];
     var app = document.getElementById("app");
     var isParent = state.view === "parent";
     app.className = isParent ? ("app--parent" + (state.parentDarkMode ? " dark-mode" : "")) : "";
@@ -1113,6 +1114,19 @@ body:not(.app--parent-active) #familyLogout {display:none}
     calendar: { icon: "📅", label: "カレンダー" }
   };
   var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","kumi","calendar"];
+  var tabPreferences = {hidden:[],start:'home'};
+  function getVisibleTabs(){
+    var order=getTabOrder().filter(function(id){return tabPreferences.hidden.indexOf(id)===-1;});
+    return order.length ? order : ['home'];
+  }
+  function startupView(){return getVisibleTabs().indexOf(tabPreferences.start)!==-1 ? tabPreferences.start : getVisibleTabs()[0];}
+  function saveTabPreferences(){try{localStorage.setItem('riho-study-tab-preferences-v1',JSON.stringify(tabPreferences));}catch(e){}}
+  function renderTabPreferences(){
+    var visible=getVisibleTabs();
+    return '<div class="panel"><h2>表示するタブ・起動時の画面</h2><p class="ri-sub">この端末に自動保存します。非表示にしても記録は残ります。</p>'+getTabOrder().map(function(id){
+      return '<label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input type="checkbox" data-tabvisible="'+id+'" '+(visible.indexOf(id)!==-1?'checked ':'')+(visible.length===1&&visible[0]===id?'disabled':'')+'>'+TAB_DEFS[id].label+'</label>';
+    }).join('')+'<label for="childStartupTab">起動時の画面</label><select id="childStartupTab">'+visible.map(function(id){return '<option value="'+id+'" '+(startupView()===id?'selected':'')+'>'+TAB_DEFS[id].label+'</option>';}).join('')+'</select></div>';
+  }
 
   function getTabOrder(){
     var order = Array.isArray(state.tabOrder) ? state.tabOrder.filter(function(id,i,a){return TAB_DEFS[id] && a.indexOf(id) === i;}) : [];
@@ -1128,7 +1142,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     else if (state.view === "sora" || state.view === "kumi") body = renderSoraTab();
     else if (state.view === "calendar") body = renderParentCalendar();
 
-    var order = getTabOrder();
+    var order = getVisibleTabs();
     return (
       '<div class="topbar"><h1>Rihoko Study</h1>' +
       '<button class="icon-btn" id="gotoParent" title="保護者用" aria-label="保護者用の設定を開く">' +
@@ -2002,7 +2016,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
         '<button class="del-btn" data-tabmove="' + i + ':down" ' + (i===order.length-1?"disabled":"") + ' style="color:var(--ink-soft);">▼</button>' +
         '</div></div>';
     }).join("");
-    return '<div class="panel"><h2>タブの並び順</h2>' +
+    return renderTabPreferences() + '<div class="panel"><h2>タブの並び順</h2>' +
       '<div class="ri-sub" style="margin-bottom:8px;">こども画面の下のタブの順番を変えられます。</div>' +
       '<div class="row-list">' + rows + '</div></div>';
   }
@@ -2105,6 +2119,12 @@ body:not(.app--parent-active) #familyLogout {display:none}
 
   function bindEvents(){
     var app = document.getElementById("app");
+    app.querySelectorAll('[data-tabvisible]').forEach(function(input){input.onchange=function(){
+      var id=input.getAttribute('data-tabvisible');if(!input.checked&&getVisibleTabs().length===1){input.checked=true;return;}
+      tabPreferences.hidden=tabPreferences.hidden.filter(function(x){return x!==id;});if(!input.checked)tabPreferences.hidden.push(id);
+      tabPreferences.start=startupView();saveTabPreferences();render();
+    };});
+    var startup=document.getElementById('childStartupTab');if(startup)startup.onchange=function(){tabPreferences.start=startup.value;saveTabPreferences();};
     bindFamilyEvents(app);
     var advanced = document.getElementById('parentAdvanced');
     if (advanced) advanced.onclick = function(){state.parentAdvanced = !state.parentAdvanced; if (!state.parentAdvanced) state.parentTab = 'family'; render();};
@@ -2637,7 +2657,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
       var dy = e.changedTouches[0].clientY - startY;
       startX = null;
       if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      var order = getTabOrder();
+      var order = getVisibleTabs();
       var idx = order.indexOf(state.view);
       if (idx === -1) return;
       if (dx < 0 && idx < order.length - 1) { state.view = order[idx + 1]; render(); }
@@ -2647,6 +2667,8 @@ body:not(.app--parent-active) #familyLogout {display:none}
 
   function startApp(){
   loadLocal();
+  try{var savedTabs=JSON.parse(localStorage.getItem('riho-study-tab-preferences-v1')||'null');if(savedTabs&&Array.isArray(savedTabs.hidden))tabPreferences=savedTabs;}catch(e){}
+  state.view=startupView();
   initFamilySync();
   var localPreview=['127.0.0.1','localhost'].includes(location.hostname);
   if(!localPreview)KeepsakeSync.connect(function(body){return FamilyAuth.request(body);});
