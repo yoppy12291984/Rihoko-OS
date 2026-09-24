@@ -256,8 +256,8 @@ html:not(.family-authorized) #app {display:none!important}
 #familyLogout {position:fixed;bottom:100px;right:12px;z-index:30;border:1px solid #b4ccc8;border-radius:12px;background:white;padding:8px;color:#45635f}
 body:not(.app--parent-active) #familyLogout {display:none}
 </style>
-<section id="familyAuthGate" aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">登録を確認しています…</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：里穂子のiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">次からはそのまま開けます。Safariとホーム画面のアイコンで別の登録が必要な場合があります。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="no-print" style="padding:8px 16px;font-size:12px"><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span> <button id="refreshKeepsakes" type="button">共有を更新</button></div>
+<section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：里穂子のiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
+<div id="keepsakeSharing" class="no-print" style="padding:8px 16px;font-size:12px"><span id="deviceAccessStatus" role="status"></span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span> <button id="refreshKeepsakes" type="button">共有を更新</button></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -281,6 +281,39 @@ body:not(.app--parent-active) #familyLogout {display:none}
 @media(max-width:480px){.voice-card{padding:16px}.voice-studio h2{font-size:25px}.tabbar-inner .tab-item{min-width:0;font-size:10px;padding-left:2px;padding-right:2px}}
 
 </style>
+<script>
+/* アプリごとの端末資格。通信障害と登録解除を区別し、通常起動では通信を待たない。 */
+(function(root){
+  'use strict';
+  function create(options){
+    var device=null;
+    function remember(value){
+      if(!value||!value.device||!/^[A-Za-z0-9_-]{43}$/.test(value.session||''))throw new Error('invalid_device');
+      options.storage.setItem(options.key,JSON.stringify(value));device=value;return value;
+    }
+    function forget(){device=null;options.storage.removeItem(options.key);options.lock();}
+    async function request(body){
+      if(!device)throw new Error('registration_required');
+      var result=await options.transport(Object.assign({},body,{familySession:device.session}));
+      if(result.error==='device_revoked'){forget();throw new Error('device_revoked');}
+      if(result.error)throw new Error(result.error);
+      return result;
+    }
+    async function check(){
+      try{var info=await request({action:'authCheck'});device.manager=info.manager===true;remember(device);options.status('ready');}
+      catch(e){if(e.message!=='device_revoked')options.status('offline');}
+    }
+    function boot(){
+      var saved;try{saved=JSON.parse(options.storage.getItem(options.key)||'null');}catch(_){}
+      if(saved&&saved.device&&/^[A-Za-z0-9_-]{43}$/.test(saved.session||'')){device=saved;options.open();return check();}
+      options.lock();return Promise.resolve();
+    }
+    return {boot:boot,remember:remember,request:request,check:check,forget:forget,current:function(){return device;}};
+  }
+  if(typeof module!=='undefined'&&module.exports)module.exports={create:create};else root.DeviceAccess={create:create};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
 <script>
 /* 保存を確定した日記・プリント・スタンプの共有。未送信も一つのJSONへ原子的に保存する。 */
 (function(root){
@@ -744,36 +777,103 @@ body:not(.app--parent-active) #familyLogout {display:none}
 </script>
 <script src="family-sync.js"></script>
 <script>
-/* 利用者の希望による一時的なログイン省略。認証版は同フォルダのバックアップから復旧する。 */
+/* Rihoko用アダプター。登録済み端末は先に開き、確認は裏側で行う。 */
 (function(){
   'use strict';
-  async function request(payload){
-    var controller=new AbortController();
-    // プリント生成は30秒を超える場合があるため、生成結果を最大2分待つ。
-    var timeoutMs=payload && ['worksheet','diaryDraft','log'].indexOf(payload.action)!==-1 ? 120000 : 30000;
-    var timeout=setTimeout(function(){controller.abort();},timeoutMs);
-    try {
-      var response=await fetch(SORA_TOKEN_ENDPOINT,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal});
-      if(!response.ok) throw new Error('network_error');
-      var data=await response.json();
-      if(data.error) throw new Error(typeof data.error==='string'?data.error:'request_failed');
-      return data;
-    } finally {clearTimeout(timeout);}
+  var key='riho-family-device',pendingKey='riho-family-login-pending',startApp,started=false,core;
+  var $=function(id){return document.getElementById(id);};
+  function message(text){$('familyAuthMessage').textContent=text;}
+  async function raw(payload){
+    var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},['worksheet','diaryDraft','log'].includes(payload.action)?120000:30000);
+    try{
+      var res=await fetch(SORA_TOKEN_ENDPOINT,{method:'POST',credentials:'omit',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:controller.signal});
+      if(!res.ok)throw new Error('通信できませんでした');return await res.json();
+    }finally{clearTimeout(timer);}
   }
-  function boot(start){
-    document.documentElement.classList.add('family-authorized');
-    document.getElementById('app').inert=false;
-    document.getElementById('familyAuthGate').hidden=true;
-    document.getElementById('familyLogout').hidden=true;
-    start();
+  function lock(){
+    document.documentElement.classList.remove('family-authorized');$('app').inert=true;$('familyAuthGate').hidden=false;
+    $('keepsakeSharing').hidden=true;$('familyLogout').hidden=true;
+    if(window.VoiceSession)VoiceSession.stop();
+    message('このアプリを使う最初の一回だけ、家族の招待コードを入れてください。');
   }
-  function mountDevices(){
-    var panel=document.getElementById('familyDevicePanel');
-    if(panel) panel.hidden=true;
+  function open(){
+    document.documentElement.classList.add('family-authorized');$('app').inert=false;$('familyAuthGate').hidden=true;$('keepsakeSharing').hidden=false;
+    if(!started){started=true;startApp();}else location.reload();
   }
-  window.FamilyAuth={boot:boot,request:request,mountDevices:mountDevices,isAuthorized:function(){return true;}};
+  function persistHint(){if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(function(){});}
+  function probeStorage(){var p=key+'-probe';localStorage.setItem(p,'1');localStorage.removeItem(p);}
+  async function pair(){
+    var btn=$('familyPair');btn.disabled=true;
+    try{
+      probeStorage();message('このアプリを登録しています…');
+      var invite=$('familyInvite').value.replace(/[\s-]/g,'').toUpperCase();
+      var pending=JSON.parse(localStorage.getItem(key+'-pending-registration')||'null');
+      if(!pending||pending.invite!==invite){pending={invite:invite,session:base64(crypto.getRandomValues(new Uint8Array(32)))};localStorage.setItem(key+'-pending-registration',JSON.stringify(pending));}
+      var check=await raw({action:'authCheck',familySession:pending.session});
+      var result=check.authenticated?{session:pending.session,device:true,manager:check.manager}:await raw({action:'authRedeemInvite',invite:invite,deviceToken:pending.session,name:$('familyDeviceName').value||'家族のアプリ'});
+      if(result.error)throw new Error('登録できませんでした。コードを確認して、もう一度お試しください。');
+      core.remember(result);localStorage.removeItem(key+'-pending-registration');persistHint();open();
+    }catch(e){message(e.name==='AbortError'?'通信に時間がかかっています。接続を確認して再試行してください。':e.message);}
+    finally{btn.disabled=false;}
+  }
+  function base64(bytes){return btoa(String.fromCharCode.apply(null,new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+  async function google(){
+    $('familyLogin').disabled=true;
+    try{
+      probeStorage();var verifier=base64(crypto.getRandomValues(new Uint8Array(32)));
+      var challenge=base64(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
+      var reply=await raw({action:'authStart',challenge:challenge,returnToApp:true});
+      if(reply.error||!reply.url)throw new Error('初期設定につなげませんでした');
+      var url=new URL(reply.url);if(url.origin!=='https://accounts.google.com')throw new Error('戻り先が不正です');
+      localStorage.setItem(pendingKey,JSON.stringify({verifier:verifier,state:url.searchParams.get('state'),expires:Date.now()+600000}));location.assign(url.href);
+    }catch(e){message(e.message);$('familyLogin').disabled=false;}
+  }
+  async function callback(){
+    var q=new URLSearchParams(location.search);if(!q.has('state'))return false;
+    var pending=JSON.parse(localStorage.getItem(pendingKey)||'null');
+    history.replaceState(null,'',location.pathname);localStorage.removeItem(pendingKey);
+    if(!pending||pending.expires<Date.now()||pending.state!==q.get('state'))throw new Error('初期設定を開始した画面から、もう一度操作してください。');
+    var session=await raw({action:'authComplete',state:q.get('state'),code:q.get('code'),error:q.get('error'),verifier:pending.verifier});
+    if(session.error)throw new Error('管理者の確認ができませんでした');
+    var device=await raw({action:'authRemember',familySession:session.session,name:$('familyDeviceName').value||'保護者の管理端末'});
+    if(device.error)throw new Error('管理端末を登録できませんでした');
+    core.remember(device);persistHint();open();return true;
+  }
+  async function boot(start){
+    startApp=start;
+    core=DeviceAccess.create({key:key,storage:localStorage,transport:raw,open:open,lock:lock,status:function(value){
+      var note=$('deviceAccessStatus');if(note)note.textContent=value==='offline'?'通信を確認できません。登録は保持しています。接続が戻ると再試行します。':'';
+    }});
+    $('familyPair').onclick=pair;$('familyLogin').onclick=google;$('familyLogout').hidden=true;
+    window.addEventListener('online',function(){if(core.current())core.check();});
+    document.addEventListener('visibilitychange',function(){if(!document.hidden&&core.current())core.check();});
+    try{if(await callback())return;}catch(e){lock();message(e.message);return;}
+    var pending;try{pending=JSON.parse(localStorage.getItem(key+'-pending-registration')||'null');}catch(_){}
+    if(pending){try{var check=await raw({action:'authCheck',familySession:pending.session});if(check.authenticated){core.remember({session:pending.session,device:true,manager:check.manager});localStorage.removeItem(key+'-pending-registration');}}catch(_){} }
+    await core.boot();
+  }
+  async function mountDevices(){
+    var panel=$('familyDevicePanel');if(!panel)return;panel.replaceChildren();
+    var device=core&&core.current();if(!device)return;
+    var h=document.createElement('h2');h.textContent='家族のアプリ登録';panel.append(h);
+    var note=document.createElement('p');note.textContent='このアプリは登録済みです。日数による再ログインはありません。';panel.append(note);
+    if(!device.manager)return;
+    var invite=document.createElement('button');invite.className='btn-primary';invite.textContent='家族の招待コードを作る';panel.append(invite);
+    var result=document.createElement('p');result.setAttribute('role','status');panel.append(result);
+    invite.onclick=async function(){invite.disabled=true;try{
+      var r=await core.request({action:'authCreateInvite'});result.textContent='24時間以内に一回使えます。ホーム画面のアプリから入力してください。';
+      var input=document.createElement('input');input.readOnly=true;input.value=r.code;input.setAttribute('aria-label','家族の招待コード');panel.append(input);
+      var copy=document.createElement('button');copy.textContent='コードをコピー';copy.onclick=function(){navigator.clipboard.writeText(r.code).catch(function(){input.select();});};panel.append(copy);
+    }catch(e){result.textContent='通信できませんでした。登録は保持しています。';}finally{invite.disabled=false;}};
+    try{
+      var list=await core.request({action:'authDevices'});
+      list.devices.forEach(function(d){var row=document.createElement('p');row.textContent=d.name+(d.current?'（この端末）':'');
+        if(!d.current){var revoke=document.createElement('button');revoke.textContent='登録解除';revoke.onclick=async function(){if(!confirm(d.name+'の登録を解除しますか？'))return;try{await core.request({action:'authRevokeDevice',id:d.id});mountDevices();}catch(_){result.textContent='解除できませんでした。もう一度お試しください。';}};row.append(revoke);}panel.append(row);
+      });
+    }catch(_){result.textContent='一覧を取得できません。登録は保持しています。';}
+  }
+  window.FamilyAuth={boot:boot,request:function(body){return core.request(body);},mountDevices:mountDevices,isAuthorized:function(){return !!(core&&core.current());}};
 })();
-
 
 </script>
 <script>
