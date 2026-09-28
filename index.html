@@ -711,7 +711,65 @@ body:not(.app--parent-active) #familyLogout {display:none}
 })();
 
 </script>
-<script>
+<style>.game-unlock{margin:18px 20px;padding:20px;border:1px solid #bfdbcf;border-radius:20px;background:#edf7ef;color:#284b43}.game-unlock h2{font-size:20px;margin:0 0 8px}.game-unlock p{font-size:14px;line-height:1.7}.game-choices{display:flex;gap:10px;flex-wrap:wrap}.game-choices button{flex:1;min-width:120px;min-height:48px;border:0;border-radius:12px;background:#28796f;color:white;font:inherit;font-weight:bold;cursor:pointer}.game-choices button:disabled{background:#dde6e0;color:#617469;cursor:default}
+.reward-game{box-sizing:border-box;width:min(94vw,480px);max-height:90dvh;overflow:auto;border:0;border-radius:22px;padding:20px;background:#fffcf3;color:#284b43;font-family:inherit;box-shadow:0 16px 70px #132d4050}.reward-game::backdrop{background:#172a3a99}.rg-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.rg-top h2{font-size:24px;margin:0}.reward-game button{font:inherit;cursor:pointer;touch-action:manipulation}.rg-top button,.rg-footer button{min-height:44px;padding:8px 12px;border:1px solid #b9cfc4;border-radius:12px;background:white;color:#28594e}.rg-intro{font-size:14px;line-height:1.6}.rg-status{min-height:2.8em;line-height:1.5;font-weight:bold}.rg-footer{display:flex;justify-content:space-between;gap:8px;margin-top:22px}.rg-memory{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.rg-card{aspect-ratio:1;border:2px solid #28796f;border-radius:12px;background:#28796f;color:white;font-size:28px!important;font-weight:bold}.rg-card.up{background:white}.rg-card.matched{background:#e5f1cf;border-color:#a2b77a}.rg-card:disabled{cursor:default}.rg-othello{display:grid;grid-template-columns:repeat(8,1fr);border:3px solid #225a42;background:#225a42;gap:1px;max-width:390px;margin:auto}.rg-othello button{aspect-ratio:1;padding:3px;display:flex;align-items:center;justify-content:center;border:0;background:#388e67;min-width:0}.rg-othello button:disabled{opacity:1;cursor:default}.rg-piece{width:88%;height:88%;border-radius:50%;background:#20272c;box-shadow:inset 0 1px 3px #ffffff44,0 2px 2px #163e37}.rg-piece.white{background:#fffdf5}.rg-dot{width:20%;height:20%;border-radius:50%;background:#dcebb5}.rg-score{font-size:14px}.reward-game button:focus-visible,.game-choices button:focus-visible{outline:3px solid #df9437;outline-offset:3px}@media(max-width:360px){.reward-game{padding:14px}.rg-memory{gap:7px}.rg-footer button{font-size:13px}}
+</style><script>
+(function(root){
+  'use strict';
+  const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  function initialBoard(){const b=Array(64).fill(0);b[27]=b[36]=2;b[28]=b[35]=1;return b;}
+  function flips(b,pos,player){
+    if(b[pos]!==0)return [];
+    const result=[],row=Math.floor(pos/8),col=pos%8;
+    for(const [dr,dc] of dirs){let r=row+dr,c=col+dc,line=[];
+      while(r>=0&&r<8&&c>=0&&c<8&&b[r*8+c]===3-player){line.push(r*8+c);r+=dr;c+=dc;}
+      if(line.length&&r>=0&&r<8&&c>=0&&c<8&&b[r*8+c]===player)result.push(...line);
+    }return result;
+  }
+  function moves(b,p){return b.map((_,i)=>i).filter(i=>flips(b,i,p).length);}
+  function place(b,pos,p){const f=flips(b,pos,p);if(!f.length)return null;const next=b.slice();next[pos]=p;f.forEach(i=>next[i]=p);return next;}
+  function allowed(items){return Array.isArray(items)&&items.length>0&&items.every(x=>x.done===true);}
+  function deck(random=Math.random){const d=['🐨','🐱','🐼','🐬','🌸','🍎'];const a=d.concat(d);for(let i=a.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  const rules={initialBoard,flips,moves,place,allowed,deck};
+  if(typeof module!=='undefined'&&module.exports){module.exports=rules;return;}
+  let dialog,gate,kind='',game=null,timer,watch,opener;
+  const day=()=>new Date().toLocaleDateString('en-CA');let gameDay='';
+  function close(){clearTimeout(timer);clearInterval(watch);if(dialog&&dialog.open)dialog.close();if(opener&&opener.isConnected)opener.focus();}
+  function check(){if(dialog&&dialog.open&&(!gate()||gameDay!==day())){close();game=null;return false;}return true;}
+  function reset(){clearTimeout(timer);game=kind==='othello'?{board:initialBoard(),turn:1,note:'',over:false}:{cards:deck(),shown:[],matched:[],attempts:0,busy:false};draw();}
+  function draw(){
+    if(!check())return;
+    const memory=kind==='memory';
+    dialog.innerHTML='<div class="rg-top"><h2>'+ (memory?'神経衰弱':'オセロ') +'</h2><button data-close aria-label="ゲームをとじる">とじる ✕</button></div><p class="rg-intro">'+(memory?'2枚ずつめくって、同じ絵を6組見つけよう。':'あなたは黒、コンピューターは白。点のあるマスに置けるよ。')+'</p>'+(memory?memoryView():othelloView())+'<div class="rg-footer"><button data-reset>もう一度あそぶ</button><button data-close>今日はここまで</button></div>';
+    dialog.querySelectorAll('[data-close]').forEach(b=>b.onclick=close);
+    dialog.querySelector('[data-reset]').onclick=reset;
+    dialog.querySelectorAll('[data-card]').forEach(b=>b.onclick=()=>reveal(Number(b.dataset.card)));
+    dialog.querySelectorAll('[data-cell]').forEach(b=>b.onclick=()=>move(Number(b.dataset.cell)));
+  }
+  function memoryView(){const complete=game.matched.length===12;
+    return '<p class="rg-status" role="status">'+(complete?'🎉 全部そろった！ '+game.attempts+'回でクリア！':game.matched.length/2+' / 6組・めくった回数 '+game.attempts)+'</p><div class="rg-memory">'+game.cards.map((c,i)=>{const matched=game.matched.includes(i),up=matched||game.shown.includes(i);return '<button data-card="'+i+'" class="rg-card '+(up?'up':'')+' '+(matched?'matched':'')+'" '+(game.busy||up?'disabled':'')+' aria-label="'+(i+1)+'枚目 '+(up?c+(matched?' そろった':''):'裏向き')+'">'+(up?c:'?')+'</button>';}).join('')+'</div>';
+  }
+  function reveal(i){if(!check()||game.busy||game.shown.includes(i)||game.matched.includes(i))return;game.shown.push(i);
+    if(game.shown.length===2){game.attempts++;const [a,b]=game.shown;if(game.cards[a]===game.cards[b]){game.matched.push(a,b);game.shown=[];}else{game.busy=true;timer=setTimeout(()=>{if(!check())return;game.shown=[];game.busy=false;draw();},1000);}}draw();
+  }
+  function othelloView(){const black=game.board.filter(x=>x===1).length,white=game.board.filter(x=>x===2).length,valid=moves(game.board,1);
+    return '<p class="rg-score">● あなた '+black+'　○ コンピューター '+white+'</p><p class="rg-status" role="status">'+(game.over?(black>white?'🎉 あなたの勝ち！':black===white?'引き分け！ よくがんばったね。':'コンピューターの勝ち。また挑戦してね。'):game.note+(game.turn===1?'あなたの番だよ。':'コンピューターが考えています…'))+'</p><div class="rg-othello" aria-label="オセロ盤">'+game.board.map((v,i)=>'<button data-cell="'+i+'" '+(game.over||game.turn!==1||!valid.includes(i)?'disabled':'')+' aria-label="'+(Math.floor(i/8)+1)+'行'+(i%8+1)+'列 '+(v===1?'黒':v===2?'白':valid.includes(i)?'置けます':'空き')+'">'+(v?'<span class="rg-piece '+(v===2?'white':'')+'"></span>':game.turn===1&&valid.includes(i)?'<span class="rg-dot"></span>':'')+'</button>').join('')+'</div>';
+  }
+  function next(){
+    if(!check())return;game.note='';
+    if(!moves(game.board,game.turn).length){game.turn=3-game.turn;if(!moves(game.board,game.turn).length){game.over=true;draw();return;}game.note=game.turn===1?'白は置けないのでパス。':'黒は置けないのでパス。';}
+    draw();if(game.turn===2)timer=setTimeout(()=>{if(!check())return;const options=moves(game.board,2);options.sort((a,b)=>score(b)-score(a));game.board=place(game.board,options[0],2);game.turn=1;next();},650);
+  }
+  function score(i){return ([0,7,56,63].includes(i)?100:0)+flips(game.board,i,2).length;}
+  function move(i){if(!check()||game.turn!==1||game.over)return;const b=place(game.board,i,1);if(!b)return;game.board=b;game.turn=2;next();}
+  function open(type,canPlay){if(!canPlay()||!['memory','othello'].includes(type))return;gate=canPlay;opener=document.activeElement;
+    if(!dialog){dialog=document.createElement('dialog');dialog.className='reward-game';dialog.setAttribute('aria-label','ごほうびゲーム');document.body.appendChild(dialog);dialog.addEventListener('close',()=>{clearTimeout(timer);clearInterval(watch);});}
+    kind=type;gameDay=day();dialog.showModal();reset();watch=setInterval(check,1000);dialog.querySelector('[data-close]').focus();
+  }
+  root.RewardGames={...rules,open,check};
+})(typeof window!=='undefined'?window:this);
+
+</script><script>
 /* プリントとごほうびの端末内保存。成功した書込みだけを保存済みとして扱う。 */
 (function(root){
   'use strict';
@@ -1092,6 +1150,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
   }
 
   function render(){
+    if(window.RewardGames)RewardGames.check();
     if(state.view !== 'parent' && getVisibleTabs().indexOf(state.view) === -1) state.view = getVisibleTabs()[0];
     var app = document.getElementById("app");
     var isParent = state.view === "parent";
@@ -1197,7 +1256,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
         '<button class="hero-start" data-tab="' + (todays.length ? 'dekita' : 'manabu') + '">' + (todays.length ? 'できたことを見る' : 'まなぶを開く →') + '</button>';
     }
     if (todays.length) html += '<div class="daily-progress"><span>' + completed + ' / ' + todays.length + ' できた</span><progress value="' + completed + '" max="' + todays.length + '" aria-label="きょうの完了数"></progress></div>';
-    html += '</section>' + renderRewardCard(false) + '<div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
+    html += '</section>' + renderRewardCard(false) + renderGameEntry() + '<div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
       '<button data-tab="kumi"><span class="shortcut-symbol">K</span><span><b>Kumiと日記</b><small>きょうのことを、日本語で</small></span><span aria-hidden="true">↗</span></button></div>';
     html += '<div class="home-columns"><section><h2 class="section-label">きょうやること</h2>';
     if (todays.length === 0) {
@@ -1400,6 +1459,11 @@ body:not(.app--parent-active) #familyLogout {display:none}
     var page='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+escapeHtml(w.title||'プリント')+'</title><style>body{max-width:800px;margin:30px auto;padding:20px;font-family:sans-serif;line-height:1.9}li{margin-bottom:24px;white-space:pre-wrap}summary{cursor:pointer}@media print{details{break-before:page}}<'+ '/style><h1>'+escapeHtml(w.title||'プリント')+'</h1><p>なまえ：________________　日づけ：________________</p><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.question)+worksheetChoicesHtml(q,false)+'<p>こたえ：________________________________</p></li>';}).join('')+'</ol><details><summary>こたえを見る（印刷するときは開いてね）</summary><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.answer)+'</li>';}).join('')+'</ol></details>';
     var url=URL.createObjectURL(new Blob([page],{type:'text/html;charset=utf-8'}));var a=document.createElement('a');a.href=url;a.download='Rihoko-プリント-'+(worksheetEntry?worksheetEntry.date:todayStr())+'.html';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
   }
+  function gamesAvailable(){return RewardGames.allowed(combinedItemsForDate(todayStr()));}
+  function renderGameEntry(){
+    var ready=gamesAvailable();
+    return '<section class="game-unlock"><h2>🎮 ごほうびゲーム</h2><p>'+(ready?'今日のやること、ぜんぶできたね！ 好きなゲームであそぼう。':'今日のやることをぜんぶ終えたら、あそべるよ。')+'</p><div class="game-choices"><button data-reward-game="othello" '+(ready?'':'disabled')+'>● オセロ</button><button data-reward-game="memory" '+(ready?'':'disabled')+'>🃏 神経衰弱</button></div></section>';
+  }
   function renderRewardCard(collection){
     var list=[];try{list=StudyKeepsakes.rewards();}catch(e){return '<div class="keepsake-note">ごほうびを読み込めません。ブラウザーの保存設定を確認してね。</div>';}
     var today=todayStr(), earned=list.find(function(e){return e.date===today;}), tasks=combinedItemsForDate(today);
@@ -1474,7 +1538,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     var totalDays = Object.keys(doneDates).length;
 
     var html = '<div class="greeting"><p class="hello">できた</p><p class="date">' + fmtDateLong(today) + '</p></div>';
-    html += renderRewardCard(true);
+    html += renderRewardCard(true) + renderGameEntry();
     html += '<div class="badge-row">がんばった日 <b>' + totalDays + '</b> 日' + (totalDays >= 5 ? " ⭐" : "") + '</div>';
     html += '<div class="section-label">きょう終えたこと</div>';
     if (doneToday.length === 0) {
@@ -2247,6 +2311,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
     if(worksheetDownload)worksheetDownload.onclick=downloadWorksheet;
     var worksheetRetrySave = document.getElementById("worksheetRetrySave");
     if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
+    app.querySelectorAll('[data-reward-game]').forEach(function(b){b.onclick=function(){RewardGames.open(b.dataset.rewardGame,gamesAvailable);};});
     var rewardClaim = document.getElementById("rewardClaim");
     if(rewardClaim)rewardClaim.onclick=function(){try{StudyKeepsakes.claim(todayStr(),combinedItemsForDate(todayStr()));rewardError="";rewardJustClaimed=true;}catch(e){rewardError="ごほうびを保存できませんでした。もう一度ためしてね。";}render();};
     var worksheetBack = document.getElementById("worksheetBack");
