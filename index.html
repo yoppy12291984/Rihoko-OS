@@ -156,6 +156,7 @@
     border:1px solid var(--border); font-size:13.5px; line-height:1.7;
   }
   .summary-card b { display:block; margin-bottom:2px; }
+  .calendar-achievement { position:absolute; top:2px; right:3px; color:#e7a91a; font-size:14px; line-height:1; filter:drop-shadow(0 1px 0 #fff); }
 
   .quiz-card { margin: 0 20px; background: var(--card); border-radius:20px; box-shadow: var(--shadow); padding:18px; border:1px solid var(--border); }
   .quiz-q { font-size:15px; font-weight:700; margin: 0 0 14px; line-height:1.6; }
@@ -282,7 +283,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.06.5</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.06.6</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4473,7 +4474,7 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.06.5";
+  var APP_VERSION = "2026.10.06.6";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5240,6 +5241,8 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     var daysInMonth = new Date(year, month, 0).getDate();
     var startWeekday = firstDay.getDay();
     var today = todayStr();
+    var rewardDates = {};
+    try { StudyKeepsakes.rewards().forEach(function(r){ rewardDates[r.date] = true; }); } catch(e) {}
 
     var html = '<div class="panel">';
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
@@ -5258,19 +5261,21 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
       var items = combinedItemsForDate(dateStr);
       var hasEvent = state.events.some(function(e){ return eventOccursOnDate(e, dateStr); });
       var count = items.length;
+      var achieved = !!rewardDates[dateStr] || (count > 0 && items.every(function(item){ return item.done; }));
       var isToday = dateStr === today;
       var isSelected = dateStr === state.calSelectedDate;
       cells.push('<button data-caldate="' + dateStr + '" style="' +
         'aspect-ratio:1;border-radius:10px;border:' + (isSelected?"2px solid var(--teal)":"1px solid var(--border)") + ';' +
-        'background:' + (isToday?"var(--teal-soft)":"var(--card)") + ';font-family:inherit;font-size:12px;color:var(--ink);' +
+        'position:relative;background:' + (isToday?"var(--teal-soft)":"var(--card)") + ';font-family:inherit;font-size:12px;color:var(--ink);' +
         'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;">' +
+        (achieved ? '<span class="calendar-achievement" aria-label="ぜんぶできた日">★</span>' : '') +
         '<span>' + day + '</span>' +
         (count>0 ? '<span style="width:5px;height:5px;border-radius:50%;background:var(--coral);"></span>' : '') +
         (hasEvent ? '<span style="width:5px;height:5px;border-radius:50%;background:var(--yellow);"></span>' : '') +
         '</button>');
     }
     html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">' + cells.join("") + '</div>';
-    html += '<div class="ri-sub" style="margin-top:8px;">🔴 ToDo・ルーチン　🟡 予定</div>';
+    html += '<div class="ri-sub" style="margin-top:8px;">⭐ ぜんぶできた日　🔴 ToDo・ルーチン　🟡 予定</div>';
     html += '</div>';
 
     if (state.calSelectedDate) {
