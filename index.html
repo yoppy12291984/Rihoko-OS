@@ -283,7 +283,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.06.6</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.07.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4474,7 +4474,7 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.06.6";
+  var APP_VERSION = "2026.10.07.1";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -6276,27 +6276,6 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     };
   }
 
-  function setupSwipeNav_(){
-    var appEl = document.getElementById("app");
-    var startX = null, startY = null;
-    appEl.addEventListener("touchstart", function(e){
-      if (state.view === "parent" || !e.touches[0]) return;
-      startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-    }, { passive: true });
-    appEl.addEventListener("touchend", function(e){
-      if (state.view === "parent" || startX === null || !e.changedTouches[0]) { startX = null; return; }
-      var dx = e.changedTouches[0].clientX - startX;
-      var dy = e.changedTouches[0].clientY - startY;
-      startX = null;
-      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-      var order = getVisibleTabs();
-      var idx = order.indexOf(state.view);
-      if (idx === -1) return;
-      if (dx < 0 && idx < order.length - 1) { state.view = order[idx + 1]; render(); }
-      else if (dx > 0 && idx > 0) { state.view = order[idx - 1]; render(); }
-    }, { passive: true });
-  }
-
   function startApp(){
   loadLocal();
   try{var savedTabs=JSON.parse(localStorage.getItem('riho-study-tab-preferences-v1')||'null');if(savedTabs&&Array.isArray(savedTabs.hidden))tabPreferences=savedTabs;}catch(e){}
@@ -6316,7 +6295,6 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
   render();
   initDb();
   pullFromGas();
-  setupSwipeNav_();
   // 日付をまたいで開いたままでも、前日のチェックを翌日に持ち越さない。
   var renderedDay = todayStr();
   function refreshDay(){
