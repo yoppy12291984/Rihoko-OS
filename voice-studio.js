@@ -40,7 +40,7 @@
     const s=states[persona], box=root.querySelector('#voiceMessages');
     if (!box) return;
     const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
-    box.innerHTML=s.messages.length?s.messages.map(m=>'<div class="voice-line '+(m.role==='user'?'voice-child':'')+'"><b>'+esc(m.role==='user'?'里穂子':persona==='kumi'?'Kumi':'Sola')+'</b><p>'+esc(m.text)+'</p></div>').join(''):'<p class="voice-help">ここに里穂子と'+(persona==='kumi'?'Kumi':'Sola')+'の言葉が出るよ。</p>';
+    box.innerHTML=s.messages.length?s.messages.map(m=>'<div class="voice-line '+(m.role==='user'?'voice-child':'')+'"><b>'+esc(m.role==='user'?'Rihoko':persona==='kumi'?'Kumi':'Sola')+'</b><p>'+esc(m.text)+'</p></div>').join(''):'<p class="voice-help">ここにRihokoと'+(persona==='kumi'?'Kumi':'Sola')+'の言葉が出るよ。</p>';
     if(atBottom) box.scrollTop=box.scrollHeight;
   }
   function status(p,text) {
@@ -90,7 +90,7 @@
     if(p==='sola'&&s.messages.some(m=>m.role==='user')&&!s.busy){
       s.busy=true;if(persona===p)draw();
       try {
-        const transcript=s.messages.map(m=>(m.role==='user'?'里穂子':'Sola')+': '+m.text).join('\n');
+        const transcript=s.messages.map(m=>(m.role==='user'?'Rihoko':'Sola')+': '+m.text).join('\n');
         const result=await FamilyAuth.request({action:'log',transcript});
         s.summary=result.summary&&result.summary.comment||'';
         if(result.summary&&(result.summary.error||result.summary._saveError))s.notice='会話は終了しましたが、学習記録を保存できませんでした。';
