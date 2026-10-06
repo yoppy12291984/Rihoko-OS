@@ -12,7 +12,7 @@
     return {steps:steps,total:steps.reduce(function(a,b){return a+b;},0)};
   }
   function portrait(compact){
-    return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+(compact?'rihoko-adventurer-compact-v1.png?v=20261006-1':'rihoko-adventurer-v2.png?v=20261006-1')+'" alt="里穂子の冒険者アイコン">';
+    return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+(compact?'rihoko-adventurer-compact-v1.png?v=20261006-2':'rihoko-adventurer-v2.png?v=20261006-2')+'" alt="里穂子の冒険者アイコン">';
   }
   function badge(count){
     var level=levelFor(count),progress=progressFor(count);
