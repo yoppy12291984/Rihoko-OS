@@ -39,18 +39,30 @@
   function markRolled(date){try{root.localStorage.setItem(rolledKey(date),'1');}catch(e){}}
   function adventure(rewards,today){
     var trip=journey(rewards),count=rewards.length,die=count?trip.steps[count-1]:0,earned=rewards.some(function(r){return r.date===today;}),rolled=earned&&hasRolled(today);
-    var boardSize=30,map=Math.floor(trip.total/boardSize)+1,pos=trip.total%boardSize;
+    var shownTotal=trip.total-(earned&&!rolled?die:0);
+    trip.total=shownTotal;
+    var boardSize=30,map=Math.floor(shownTotal/boardSize)+1,pos=shownTotal%boardSize;
     var events={4:'⭐',9:'🎁',14:'🌈',19:'📚',24:'💎',29:'🏰'};
-    var cells=Array.from({length:boardSize},function(_,i){var n=i+1,current=i===pos;return '<div class="adventure-space '+(current?'is-current ':'')+(events[i]?'is-event':'')+'" style="--order:'+i+'"><small>'+n+'</small>'+(current?portrait(true):events[i]||'')+'</div>';}).join('');
+    var cells=Array.from({length:boardSize},function(_,i){var n=i+1,current=i===pos;return '<div class="adventure-space '+(current?'is-current ':'')+(events[i]?'is-event':'')+'" style="--order:'+i+'"><small>'+n+'</small>'+(events[i]?'<span class="adventure-event">'+events[i]+'</span>':'')+(current?portrait(true):'')+'</div>';}).join('');
     var action='';
     if(earned&&!rolled)action='<button type="button" class="adventure-roll" id="adventureRoll">🎲 今日のサイコロをふる</button>';
-    else if(earned)action='<p class="adventure-result">きょうは <b>'+die+'</b> が出て、'+die+'マス進んだよ！</p>';
+    else if(earned)action='<p class="adventure-result" role="status">🎲 <b>'+die+'</b> が出て、'+die+'マス進んだよ！<br>マップ '+map+'・'+(pos+1)+'マス目に到着！</p>';
     else action='<p class="adventure-result">次のスタンプでサイコロをふれるよ。</p>';
     return '<section class="adventure-map"><div class="adventure-head"><div><p>Rihokoの大冒険</p><h3>ぼうけんマップ '+map+'</h3></div><div class="adventure-distance">合計 <b>'+trip.total+'</b> マス</div></div><div class="adventure-board" aria-label="30マスの冒険マップ">'+cells+'</div>'+action+'<p class="adventure-note">出る目は1〜6。戻るマスや罰ゲームはないよ。</p></section>';
   }
+  var rolling=false;
   function roll(button,date,value,done){
-    if(!button)return;button.disabled=true;var n=0;
-    var timer=setInterval(function(){button.textContent='🎲 '+(n%6+1);n++;if(n>=12){clearInterval(timer);markRolled(date);button.textContent='🎲 '+value+'！';setTimeout(done,500);}},70);
+    if(!button||button.disabled||rolling||hasRolled(date))return;rolling=true;button.disabled=true;var n=0;
+    var timer=setInterval(function(){button.textContent='🎲 '+(n%6+1);n++;if(n>=12){clearInterval(timer);button.textContent='🎲 '+value+'！';
+      var board=document.querySelector('.adventure-board'),cells=board?Array.from(board.children):[],start=cells.findIndex(function(c){return c.classList.contains('is-current');}),step=0;
+      function advance(){
+        if(step>=value){markRolled(date);rolling=false;done();return;}
+        var prev=cells[(start+step)%30],next=cells[(start+step+1)%30],hero=prev&&prev.querySelector('img');
+        if(hero&&next){prev.classList.remove('is-current');next.classList.add('is-current');next.appendChild(hero);}
+        step++;setTimeout(advance,220);
+      }
+      setTimeout(advance,450);
+    }},70);
   }
   function show(level){
     var old=document.getElementById('levelCelebration');if(old)old.remove();
