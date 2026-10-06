@@ -325,3 +325,4 @@ async function fetchWeeklyReport() {
   const data = await callBackend_({ action: "weeklyReport" });
   return data.report || null;
 }
+

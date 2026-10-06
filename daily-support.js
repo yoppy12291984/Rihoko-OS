@@ -6,6 +6,7 @@
     manabu: '<path d="M16 9C12 6 7 6 3 8v19c5-2 9-1 13 1 4-2 8-3 13-1V8c-4-2-9-2-13 1Z"/><path d="M16 9v19M7 13h5M20 13h5M7 18h4M20 18h4"/>',
     dekita: '<path d="m16 3 4.1 8.3 9.2 1.4-6.7 6.5 1.6 9.2-8.2-4.3-8.2 4.3 1.6-9.2-6.7-6.5 9.2-1.4Z"/><path d="M12 17h.01M20 17h.01M13 20q3 3 6 0"/>',
     sora: '<path d="M8 25a7 7 0 0 1-1-14 9 9 0 0 1 17-1 7.5 7.5 0 0 1 0 15Z"/><path d="M12 16h.01M21 16h.01M14 20q3 3 5 0"/>',
+    kumi: '<path d="M7 4h18v24H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z"/><path d="M9 4v24M13 11h8M13 16h8M13 21h5"/>',
     calendar: '<rect x="4" y="7" width="24" height="22" rx="6"/><path d="M10 3v8M22 3v8M4 15h24M10 20h.01M16 20h.01M22 20h.01M10 25h.01M16 25h.01"/>',
     bag: '<rect x="6" y="8" width="20" height="21" rx="6"/><path d="M12 8V6a4 4 0 0 1 8 0v2M6 17h20M12 21h8v5h-8Z"/>',
     medicine: '<rect x="9" y="9" width="14" height="20" rx="4"/><path d="M10 9V4h12v5M12 19h8M16 15v8"/>',

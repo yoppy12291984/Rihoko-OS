@@ -246,6 +246,25 @@
 .rally-board{margin-top:22px;padding:16px 8px;border:2px solid #e0c780;border-radius:18px;background:#fffdf5}.rally-board h3{font-size:16px;margin:0 0 18px}.rally-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px 6px;position:relative}.rally-track:before{content:"";position:absolute;left:8%;right:8%;top:30px;bottom:30px;border:3px dashed #dfce9c;border-left:0;border-radius:0 20px 20px 0}.rally-stop{position:relative;z-index:1;display:flex;align-items:center;flex-direction:column;gap:3px;min-width:0}.rally-stop span{display:flex;align-items:center;justify-content:center;width:clamp(30px,8vw,54px);height:clamp(30px,8vw,54px);border:2px dashed #d6caa6;border-radius:50%;background:#fffdf5;font-size:20px;color:#aa9a72}.rally-stop small{font-size:9px;background:#fffdf5}.rally-stop.stamped span{border:2px solid #86b2a0;background:#e6f2e8;font-size:27px;transform:rotate(-8deg)}.rally-stop.next span{border:2px solid #d88c39;background:#fff0cd;color:#795319}.rally-stop:nth-child(6){grid-row:2;grid-column:5}.rally-stop:nth-child(7){grid-row:2;grid-column:4}.rally-stop:nth-child(8){grid-row:2;grid-column:3}.rally-stop:nth-child(9){grid-row:2;grid-column:2}.rally-stop:nth-child(10){grid-row:2;grid-column:1}.rally-history summary{cursor:pointer;padding:12px;font-weight:bold}.rally-board p{font-size:13px;margin:16px 0 0}
 </style>
 <link rel="stylesheet" href="study-theme.css">
+<style>.level-hero{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px auto 4px;padding:10px 14px;max-width:280px;border:2px solid #dbc16d;border-radius:16px;background:#fffdf2;box-shadow:0 4px 0 #e6d69f}
+.level-portrait{width:54px;height:54px;flex:0 0 auto;border:3px solid #69502c;border-radius:8px;background:#182332;object-fit:cover;object-position:50% 16%;image-rendering:auto}
+.level-copy{text-align:left}.level-copy strong{display:block;font-size:20px;color:#76551e}.level-copy span{font-size:11px;color:#786b50}
+.level-meter{height:8px;margin-top:5px;border:1px solid #c5ae65;border-radius:2px;background:#eee5c5;overflow:hidden}.level-meter>i{display:block;height:100%;background:linear-gradient(90deg,#57bca8,#f4bf52);border-right:1px solid #fff}
+.level-celebration{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 35%,#274b7ae8,#11182df5 70%);color:white;text-align:center;overflow:hidden}
+.level-celebration[hidden]{display:none}.level-celebration__card{position:relative;z-index:2;width:min(86vw,390px);padding:26px 18px 22px;border:4px solid #ffe28a;border-radius:24px;background:linear-gradient(160deg,#305b89,#533f86);box-shadow:0 12px 0 #0d1427,0 20px 50px #0009;animation:level-card-in .8s cubic-bezier(.2,.9,.25,1.25)}
+.level-celebration__title{margin:0;font-size:clamp(27px,9vw,44px);letter-spacing:.08em;color:#fff2a8;text-shadow:0 3px 0 #985d25,3px 0 0 #985d25,-3px 0 0 #985d25}
+.level-celebration__trophy{font-size:78px;line-height:1;margin:6px 0;filter:drop-shadow(0 7px 0 #8a5724);animation:trophy-arrive .9s .2s both cubic-bezier(.15,.85,.25,1.25)}
+.level-celebration__hero{display:flex;align-items:center;justify-content:center;gap:15px;margin:12px auto}.level-celebration__hero .level-portrait{width:74px;height:74px;border-color:#fff2a8;background:#b9e1d1;box-shadow:0 5px 0 #18243f}.level-celebration__level{font-size:17px}.level-celebration__level b{display:block;font-size:36px;color:#fff2a8}
+.level-celebration__message{margin:12px 0 18px;font-weight:700;line-height:1.7}.level-celebration__close{min-height:48px;padding:10px 28px;border:3px solid #fff3b3;border-radius:999px;background:#ffcf55;color:#513a14;font:800 16px/1 inherit;box-shadow:0 5px 0 #a76921;cursor:pointer}
+.firework{position:absolute;left:var(--x);top:var(--y);width:7px;height:7px;border-radius:50%;background:transparent;box-shadow:0 -54px var(--c),38px -38px var(--c),54px 0 var(--c),38px 38px var(--c),0 54px var(--c),-38px 38px var(--c),-54px 0 var(--c),-38px -38px var(--c);animation:firework-burst 1.5s var(--d) infinite ease-out}
+@keyframes level-card-in{from{transform:translateY(80vh) scale(.72);opacity:0}to{transform:none;opacity:1}}@keyframes trophy-arrive{from{transform:translateY(-70vh) rotate(-18deg) scale(.45)}to{transform:none}}@keyframes firework-burst{0%{transform:scale(.05);opacity:0}20%{opacity:1}75%,100%{transform:scale(1.35);opacity:0}}
+@media(prefers-reduced-motion:reduce){.level-celebration__card,.level-celebration__trophy,.firework{animation:none}}
+.adventure-map{margin:22px 0 8px;padding:16px 10px;border:2px solid #9cc8ae;border-radius:18px;background:linear-gradient(#effbea,#fff8d9);color:#385349}.adventure-head{display:flex;align-items:end;justify-content:space-between;gap:12px;padding:0 5px 12px;text-align:left}.adventure-head p{margin:0;font-size:11px;font-weight:800;letter-spacing:.1em;color:#4d8873}.adventure-head h3{margin:3px 0 0;font-size:19px}.adventure-distance{font-size:11px;white-space:nowrap}.adventure-distance b{font-size:20px;color:#ba6a36}.adventure-board{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:8px;border:2px solid #d9bd78;border-radius:14px;background:#dff0cf}.adventure-space{position:relative;display:grid;place-items:center;aspect-ratio:1;border:1px solid #d2c48f;border-radius:7px;background:#fffdf2;font-size:clamp(13px,4vw,22px)}.adventure-space small{position:absolute;top:2px;left:3px;font-size:7px;color:#9b8d65}.adventure-space.is-event{background:#fff0b6}.adventure-space.is-current{z-index:1;border:3px solid #e47d58;background:#ffe5d6;box-shadow:0 0 0 3px #ffffffaa}.adventure-space .level-portrait{width:82%;height:82%;border-width:1px;border-radius:3px}.adventure-roll{display:block;width:min(100%,270px);min-height:50px;margin:14px auto 6px;border:2px solid #fff0a4;border-radius:999px;background:#e88845;color:#fff;font:800 16px/1 inherit;box-shadow:0 5px 0 #a84e30;cursor:pointer}.adventure-roll:disabled{opacity:.8}.adventure-result{margin:12px 0 4px!important}.adventure-result b{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;background:#fff;color:#b65c32;font-size:22px;box-shadow:0 3px 0 #d8c17a}.adventure-note{margin:8px 0 0!important;font-size:10px;color:#73877d}
+@media(max-width:390px){.adventure-board{gap:3px;padding:5px}.adventure-space{border-radius:5px}}
+.adventure-space .level-portrait{width:92%;height:92%;object-position:50% 12%}
+.adventure-space .level-portrait--compact{object-fit:contain;object-position:center;background:transparent;border:0;border-radius:0}
+.rpg-status{margin:10px 20px 20px;padding:8px;border:3px solid #eef4ff;border-radius:10px;background:linear-gradient(135deg,#142b78,#1760ae 55%,#1a398e);color:#fff;box-shadow:0 0 0 3px #7a8dac,0 7px 18px #192a5c55;font-family:"Yu Gothic",system-ui,sans-serif;text-shadow:1px 1px 0 #071744}.rpg-status>header{display:flex;align-items:center;justify-content:space-between;padding:5px 9px 8px;border-bottom:1px solid #91b6ef}.rpg-status>header span{font:700 10px/1 monospace;letter-spacing:.18em;color:#b9d7ff}.rpg-status>header b{font-size:19px;letter-spacing:.08em}.rpg-status__body{display:grid;grid-template-columns:98px 1fr;gap:12px;padding:12px 8px}.rpg-status__portrait{height:118px;border:2px solid #c8dbff;border-radius:5px;background:#0a1d56;overflow:hidden;box-shadow:inset 0 0 18px #06113e}.rpg-status__portrait .level-portrait{width:100%;height:100%;border:0;border-radius:0;object-fit:cover;object-position:50% 16%}.rpg-status__main{text-align:left;min-width:0}.rpg-status__title{margin:0 0 8px!important;font-size:11px;color:#bed8ff}.rpg-status__title span{display:block;margin-top:3px;color:#ffe693;font-size:14px;font-weight:800}.rpg-status__level{display:flex;align-items:baseline;gap:9px}.rpg-status__level span{font:700 13px/1 monospace;color:#b9d7ff}.rpg-status__level b{font:800 34px/1 monospace;color:#fff}.rpg-status__exp{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-top:9px;font:700 10px/1.3 monospace;color:#b9d7ff}.rpg-status__exp b{text-align:right;color:#fff}.rpg-status__exp i{grid-column:1/-1;height:7px;border:1px solid #bcd5ff;background:#081b56}.rpg-status__exp em{display:block;height:100%;background:linear-gradient(90deg,#55e1c3,#ffe16f)}.rpg-status__exp small{grid-column:1/-1;margin-top:3px;text-align:right;color:#dbeaff}.rpg-status__stats{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:1px solid #91b6ef}.rpg-status__stats>div{display:flex;justify-content:space-between;gap:6px;padding:8px;border-right:1px solid #6c9cdd;border-bottom:1px solid #6c9cdd}.rpg-status__stats dt{font-size:10px;color:#bfd9ff}.rpg-status__stats dd{margin:0;font:800 14px/1 monospace;color:#fff4a8}@media(max-width:380px){.rpg-status{margin-inline:12px}.rpg-status__body{grid-template-columns:82px 1fr}.rpg-status__portrait{height:106px}}
+</style>
 </head>
 <body>
 <style>
@@ -255,9 +274,11 @@ html:not(.family-authorized) #app {display:none!important}
 #familyLogin {padding:14px 22px;border:1px solid #b4ccc8;border-radius:14px;background:#fff;font:inherit;cursor:pointer}
 #familyLogout {position:fixed;bottom:100px;right:12px;z-index:30;border:1px solid #b4ccc8;border-radius:12px;background:white;padding:8px;color:#45635f}
 body:not(.app--parent-active) #familyLogout {display:none}
+.sync-bar{position:sticky;top:0;z-index:900;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:9px max(12px,env(safe-area-inset-left));background:#fffffff2;border-bottom:1px solid #d7e5df;box-shadow:0 3px 12px #31594e18;backdrop-filter:blur(10px);font:12px/1.35 system-ui;color:#49645e}.sync-brand{display:flex;align-items:baseline;gap:8px;min-width:0}.sync-brand strong{font-size:14px;color:#294b47}.app-version{padding:2px 6px;border:1px solid #bdd1ca;border-radius:999px;background:#f4faf7;color:#486760;font:700 10px/1.2 monospace;white-space:nowrap}.sync-now{grid-column:2;grid-row:1/3;min-width:104px;min-height:42px;border:0;border-radius:12px;background:#267f73;color:#fff;font:800 14px/1 system-ui;box-shadow:0 3px 0 #17564e;cursor:pointer}.sync-now:disabled{opacity:.65;box-shadow:none}.global-sync-status{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sync-details{grid-column:1/-1;font-size:11px}.sync-details summary{cursor:pointer}.sync-details span{display:block;margin-top:4px}
+@media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：里穂子のiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="no-print" style="padding:8px 16px;font-size:12px"><span id="deviceAccessStatus" role="status"></span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span> <button id="refreshKeepsakes" type="button">共有を更新</button></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.06.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -339,7 +360,7 @@ body:not(.app--parent-active) #familyLogout {display:none}
       // 旧キーは移行前の控えとして残す。書込み失敗時は移行済みにしない。
       storage.setItem(key,JSON.stringify(s));return s;
     }
-    function status(v){if(notify)notify(v);}
+    function status(v){if(notify)notify(v);if(root&&root.dispatchEvent&&typeof root.CustomEvent==='function')root.dispatchEvent(new root.CustomEvent('keepsake-status',{detail:{status:v}}));}
     function read(c){
       var s=load(),map=new Map(s.records[c].map(function(r){return [r.item.id,r.item];}));
       s.queue.filter(function(o){return o.collection===c;}).forEach(function(o){map.set(o.item.id,o.item);});
@@ -4215,6 +4236,64 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
 })(typeof window!=='undefined'?window:this);
 
 </script><script>
+(function(root){
+  'use strict';
+  function levelFor(count){return Math.floor(Math.max(0,count)/10)+1;}
+  function progressFor(count){return Math.max(0,count)%10;}
+  function diceFor(date,index){
+    var text=String(date||'')+'|'+String(index||0)+'|rihoko-adventure-v1',hash=2166136261;
+    for(var i=0;i<text.length;i++){hash^=text.charCodeAt(i);hash=Math.imul(hash,16777619);}
+    return (hash>>>0)%6+1;
+  }
+  function journey(rewards){
+    var steps=(rewards||[]).map(function(r,i){return diceFor(r.date,i+1);});
+    return {steps:steps,total:steps.reduce(function(a,b){return a+b;},0)};
+  }
+  function portrait(compact){
+    return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+(compact?'rihoko-adventurer-compact-v1.png?v=20261006-1':'rihoko-adventurer-v2.png?v=20261006-1')+'" alt="里穂子の冒険者アイコン">';
+  }
+  function badge(count){
+    var level=levelFor(count),progress=progressFor(count);
+    return '<div class="level-hero">'+portrait()+'<div class="level-copy"><strong>里穂子 Lv. '+level+'</strong><span>次のレベルまで あと'+(10-progress)+'こ</span><div class="level-meter" aria-label="次のレベルまで '+progress+' / 10"><i style="width:'+progress*10+'%"></i></div></div></div>';
+  }
+  function titleFor(level){
+    var titles=['はじめの冒険者','こつこつ冒険者','星をあつめる人','まなびの探検家','光のチャレンジャー','伝説をつくる人'];
+    return titles[Math.min(titles.length-1,Math.max(0,level-1))];
+  }
+  function status(rewards,stats){
+    rewards=rewards||[];stats=stats||{};
+    var count=rewards.length,level=levelFor(count),progress=progressFor(count),trip=journey(rewards);
+    return '<section class="rpg-status" aria-label="里穂子のステータス"><header><span>STATUS</span><b>里穂子</b></header><div class="rpg-status__body"><div class="rpg-status__portrait">'+portrait(false)+'</div><div class="rpg-status__main"><p class="rpg-status__title">称号　<span>'+titleFor(level)+'</span></p><div class="rpg-status__level"><span>LV</span><b>'+level+'</b></div><div class="rpg-status__exp"><span>EXP</span><b>'+progress*100+' / 1000</b><i><em style="width:'+progress*10+'%"></em></i><small>NEXT　あと '+(10-progress)+' スタンプ</small></div></div></div><dl class="rpg-status__stats"><div><dt>がんばった日</dt><dd>'+Number(stats.totalDays||0)+'</dd></div><div><dt>できたこと</dt><dd>'+Number(stats.completed||0)+'</dd></div><div><dt>まなび</dt><dd>'+Number(stats.units||0)+'</dd></div><div><dt>ぼうけん</dt><dd>'+trip.total+'マス</dd></div></dl></section>';
+  }
+  function rolledKey(date){return 'riho-adventure-rolled-'+date;}
+  function hasRolled(date){try{return root.localStorage.getItem(rolledKey(date))==='1';}catch(e){return false;}}
+  function markRolled(date){try{root.localStorage.setItem(rolledKey(date),'1');}catch(e){}}
+  function adventure(rewards,today){
+    var trip=journey(rewards),count=rewards.length,die=count?trip.steps[count-1]:0,earned=rewards.some(function(r){return r.date===today;}),rolled=earned&&hasRolled(today);
+    var boardSize=30,map=Math.floor(trip.total/boardSize)+1,pos=trip.total%boardSize;
+    var events={4:'⭐',9:'🎁',14:'🌈',19:'📚',24:'💎',29:'🏰'};
+    var cells=Array.from({length:boardSize},function(_,i){var n=i+1,current=i===pos;return '<div class="adventure-space '+(current?'is-current ':'')+(events[i]?'is-event':'')+'" style="--order:'+i+'"><small>'+n+'</small>'+(current?portrait(true):events[i]||'')+'</div>';}).join('');
+    var action='';
+    if(earned&&!rolled)action='<button type="button" class="adventure-roll" id="adventureRoll">🎲 今日のサイコロをふる</button>';
+    else if(earned)action='<p class="adventure-result">きょうは <b>'+die+'</b> が出て、'+die+'マス進んだよ！</p>';
+    else action='<p class="adventure-result">次のスタンプでサイコロをふれるよ。</p>';
+    return '<section class="adventure-map"><div class="adventure-head"><div><p>里穂子の大冒険</p><h3>ぼうけんマップ '+map+'</h3></div><div class="adventure-distance">合計 <b>'+trip.total+'</b> マス</div></div><div class="adventure-board" aria-label="30マスの冒険マップ">'+cells+'</div>'+action+'<p class="adventure-note">出る目は1〜6。戻るマスや罰ゲームはないよ。</p></section>';
+  }
+  function roll(button,date,value,done){
+    if(!button)return;button.disabled=true;var n=0;
+    var timer=setInterval(function(){button.textContent='🎲 '+(n%6+1);n++;if(n>=12){clearInterval(timer);markRolled(date);button.textContent='🎲 '+value+'！';setTimeout(done,500);}},70);
+  }
+  function show(level){
+    var old=document.getElementById('levelCelebration');if(old)old.remove();
+    var el=document.createElement('div');el.id='levelCelebration';el.className='level-celebration';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','levelCelebrationTitle');
+    el.innerHTML='<i class="firework" style="--x:18%;--y:23%;--c:#ffdb61;--d:0s"></i><i class="firework" style="--x:78%;--y:27%;--c:#ff7396;--d:.35s"></i><i class="firework" style="--x:28%;--y:72%;--c:#69e4d1;--d:.7s"></i><i class="firework" style="--x:83%;--y:73%;--c:#88b9ff;--d:1s"></i><section class="level-celebration__card"><h2 class="level-celebration__title" id="levelCelebrationTitle">LEVEL UP!</h2><div class="level-celebration__trophy" aria-hidden="true">🏆</div><div class="level-celebration__hero">'+portrait()+'<div class="level-celebration__level">里穂子は<b>Lv. '+level+'</b>になった！</div></div><p class="level-celebration__message">スタンプ10こ、ゴールおめでとう！<br>がんばった力が またひとつ増えたよ。</p><button class="level-celebration__close" type="button">つぎの冒険へ！</button></section>';
+    document.body.appendChild(el);var close=el.querySelector('button');function done(){el.remove();}close.onclick=done;el.onclick=function(e){if(e.target===el)done();};document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){document.removeEventListener('keydown',esc);done();}});close.focus();
+  }
+  var api={levelFor:levelFor,progressFor:progressFor,diceFor:diceFor,journey:journey,badge:badge,status:status,adventure:adventure,roll:roll,show:show};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RewardCelebration=api;
+})(typeof window!=='undefined'?window:this);
+
+</script><script>
 /* プリントとごほうびの端末内保存。成功した書込みだけを保存済みとして扱う。 */
 (function(root){
   'use strict';
@@ -4383,6 +4462,8 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
 (function(){
   "use strict";
 
+  var APP_VERSION = "2026.10.06.1";
+
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
     todos: [], events: [], units: [], routines: [], routineDone: {},
@@ -4544,12 +4625,29 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
           // 入力途中のフォームは再描画しない。画面遷移時に最新状態を表示する。
           if (state.view !== 'parent') render();
         },
-        status:function(value){ syncStatus = value; var node = document.getElementById('familySyncStatus'); if (node) node.textContent = syncStatusText(); }
+        status:function(value){ syncStatus = value; var node = document.getElementById('familySyncStatus'); if (node) node.textContent = syncStatusText(); updateGlobalSyncBar(); }
       });
     } catch(e){syncStatus = 'storage-error';}
   }
   function syncStatusText(){
     return {local:'プレビュー：このPCだけに保存します',setup:'最初の共有設定が必要です。端末内の記録は保持しています。',syncing:'家族のデータを共有中…',synced:'家族のデータと共有できました',pending:'未送信の変更があります。「共有を更新」を押してください。',error:'共有できませんでした。変更はこの端末に残っています。通信が戻ったら再試行してください。','storage-error':'端末への保存を確認できません。ページを閉じずに保存設定を確認してください。'}[syncStatus];
+  }
+  function updateGlobalSyncBar(){
+    var global=document.getElementById('globalSyncStatus'),family=document.getElementById('familySyncStatusGlobal');
+    if(family)family.textContent='予定・ToDo：'+syncStatusText();
+    if(!global)return;
+    var keepsake=document.getElementById('keepsakeSyncStatus'),keepText=keepsake?keepsake.textContent:'';
+    if(syncStatus==='syncing'||/共有中/.test(keepText))global.textContent='同期中…';
+    else if(syncStatus==='error'||syncStatus==='storage-error'||/共有できません|未送信/.test(keepText))global.textContent='未送信があります。もう一度同期してください';
+    else if(syncStatus==='setup')global.textContent='初回の共有設定を確認してください';
+    else if(syncStatus==='synced'&&/共有済み/.test(keepText))global.textContent='✓ 最新の状態です';
+    else global.textContent='同期できます';
+  }
+  function syncAllNow(){
+    var button=document.getElementById('refreshKeepsakes');if(!button)return Promise.resolve();
+    button.disabled=true;button.textContent='同期中…';
+    var jobs=[KeepsakeSync.refresh()];if(familySync)jobs.push(familySync.refresh());
+    return Promise.all(jobs.map(function(p){return Promise.resolve(p).catch(function(){return null;});})).then(function(){updateGlobalSyncBar();}).finally(function(){button.disabled=false;button.textContent='↻ 同期する';});
   }
 
   // ルーチンは「その日やったか」を日付ごとに記録する(ルーチン自体はテンプレートなので使い回す)
@@ -4925,6 +5023,8 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     }
     html+=rallyCard(cardIndex);
     if(progress===10)html+='<p>次のスタンプから、新しい台紙がはじまるよ。</p>';
+    if(typeof RewardCelebration!=="undefined")html+=RewardCelebration.badge(list.length);
+    if(typeof RewardCelebration!=="undefined")html+=RewardCelebration.adventure(list,today);
     html+='<p class="reward-total">これまで <b>'+list.length+'</b> こ・ゴール '+Math.floor(list.length/10)+'回</p>';
     if(collection&&cardIndex>0)html+='<details class="rally-history"><summary>これまでの台紙を見る</summary>'+Array.from({length:cardIndex},function(_,i){return rallyCard(i);}).join('')+'</details>';
     if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
@@ -4982,7 +5082,10 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     });
     var totalDays = Object.keys(doneDates).length;
 
+    var rewards=[];try{rewards=StudyKeepsakes.rewards();}catch(e){}
+    var completedTotal=state.todos.filter(function(t){return t.done;}).length+Object.keys(state.routineDone).filter(function(k){return state.routineDone[k];}).length;
     var html = '<div class="greeting"><p class="hello">できた</p><p class="date">' + fmtDateLong(today) + '</p></div>';
+    if(typeof RewardCelebration!=="undefined")html+=RewardCelebration.status(rewards,{totalDays:totalDays,completed:completedTotal,units:state.units.length});
     html += renderRewardCard(true) + renderGameEntry();
     html += '<div class="badge-row">がんばった日 <b>' + totalDays + '</b> 日' + (totalDays >= 5 ? " ⭐" : "") + '</div>';
     html += '<div class="section-label">きょう終えたこと</div>';
@@ -5758,7 +5861,9 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
     app.querySelectorAll('[data-reward-game]').forEach(function(b){b.onclick=function(){RewardGames.open(b.dataset.rewardGame,gamesAvailable);};});
     var rewardClaim = document.getElementById("rewardClaim");
-    if(rewardClaim)rewardClaim.onclick=function(){try{StudyKeepsakes.claim(todayStr(),combinedItemsForDate(todayStr()));rewardError="";rewardJustClaimed=true;}catch(e){rewardError="ごほうびを保存できませんでした。もう一度ためしてね。";}render();};
+    if(rewardClaim)rewardClaim.onclick=function(){try{var before=StudyKeepsakes.rewards().length;var claimed=StudyKeepsakes.claim(todayStr(),combinedItemsForDate(todayStr()));var after=StudyKeepsakes.rewards().length;rewardError="";rewardJustClaimed=true;render();if(claimed&&after>before&&after%10===0&&typeof RewardCelebration!=="undefined")RewardCelebration.show(RewardCelebration.levelFor(after));}catch(e){rewardError="ごほうびを保存できませんでした。もう一度ためしてね。";render();}};
+    var adventureRoll=document.getElementById("adventureRoll");
+    if(adventureRoll&&typeof RewardCelebration!=="undefined")adventureRoll.onclick=function(){var rewards=StudyKeepsakes.rewards(),trip=RewardCelebration.journey(rewards),value=trip.steps[trip.steps.length-1];RewardCelebration.roll(adventureRoll,todayStr(),value,render);};
     var worksheetBack = document.getElementById("worksheetBack");
     if (worksheetBack) worksheetBack.onclick = function(){
       state.worksheetSubject = null; state.worksheet = null; ++worksheetRequest; render();
@@ -6183,7 +6288,10 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
   var localPreview=['127.0.0.1','localhost'].includes(location.hostname);
   if(!localPreview)KeepsakeSync.connect(function(body){return FamilyAuth.request(body);});
   else KeepsakeSync.refresh();
-  document.getElementById('refreshKeepsakes').onclick=function(){KeepsakeSync.refresh();};
+  document.getElementById('appVersion').textContent='v'+APP_VERSION;
+  document.getElementById('refreshKeepsakes').onclick=syncAllNow;
+  window.addEventListener('keepsake-status',updateGlobalSyncBar);
+  updateGlobalSyncBar();
   window.addEventListener('online',function(){KeepsakeSync.refresh();});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)KeepsakeSync.refresh();});
   setInterval(function(){if(!document.hidden)KeepsakeSync.refresh();},45000);
