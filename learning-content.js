@@ -4,10 +4,10 @@
   var KEY='rihoko-learning-content-v1';
   var companions=[
     {id:'rihoko',name:'里穂子',at:0,image:'detective-girl-v1.png',role:'ひらめき探偵団のリーダー',line:'気づいたことが、次の手がかりになるよ。'},
-    {id:'kotone',name:'ことね',at:1,image:'detective-kotone-v1.png',role:'ことばの手がかり係',line:'「どうして？」の答えを、ことばの中からさがそう。'},
-    {id:'leo',name:'レオ',at:3,image:'detective-leo-v1.png',role:'世界とつながる英語係',line:'Let’s try! ゆっくり、一つずつやってみよう。'},
-    {id:'haru',name:'ハル',at:5,image:'detective-haru-v1.png',role:'実験と発見の係',line:'予想とちがっても大発見！ くらべると何が分かるかな？'},
-    {id:'mina',name:'みな',at:8,image:'detective-mina-v1.png',role:'地図とまちの調査係',line:'手がかりをつないで、全体を見てみよう。'}
+    {id:'kotone',name:'ことね',at:1,image:'detective-kotone-v2.png',role:'ことばの手がかり係',line:'「どうして？」の答えを、ことばの中からさがそう。'},
+    {id:'leo',name:'レオ',at:3,image:'detective-leo-v2.png',role:'世界とつながる英語係',line:'Let’s try! ゆっくり、一つずつやってみよう。'},
+    {id:'haru',name:'ハル',at:5,image:'detective-haru-v2.png',role:'実験と発見の係',line:'予想とちがっても大発見！ くらべると何が分かるかな？'},
+    {id:'mina',name:'みな',at:8,image:'detective-mina-v2.png',role:'地図とまちの調査係',line:'手がかりをつないで、全体を見てみよう。'}
   ];
   function text(v,max,required){if(typeof v!=='string'||v.length>max||(required&&!v.trim()))throw Error('教材の文字数・必須項目を確認してください。');return v;}
   function id(v){if(typeof v!=='string'||! /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(v))throw Error('教材IDが不正です。');return v;}
