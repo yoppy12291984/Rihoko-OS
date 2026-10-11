@@ -284,7 +284,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.12.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.12.2</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4616,10 +4616,10 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
   var KEY='rihoko-learning-content-v1';
   var companions=[
     {id:'rihoko',name:'里穂子',at:0,image:'detective-girl-v1.png',role:'ひらめき探偵団のリーダー',line:'気づいたことが、次の手がかりになるよ。'},
-    {id:'kotone',name:'ことね',at:1,image:'detective-kotone-v1.png',role:'ことばの手がかり係',line:'「どうして？」の答えを、ことばの中からさがそう。'},
-    {id:'leo',name:'レオ',at:3,image:'detective-leo-v1.png',role:'世界とつながる英語係',line:'Let’s try! ゆっくり、一つずつやってみよう。'},
-    {id:'haru',name:'ハル',at:5,image:'detective-haru-v1.png',role:'実験と発見の係',line:'予想とちがっても大発見！ くらべると何が分かるかな？'},
-    {id:'mina',name:'みな',at:8,image:'detective-mina-v1.png',role:'地図とまちの調査係',line:'手がかりをつないで、全体を見てみよう。'}
+    {id:'kotone',name:'ことね',at:1,image:'detective-kotone-v2.png',role:'ことばの手がかり係',line:'「どうして？」の答えを、ことばの中からさがそう。'},
+    {id:'leo',name:'レオ',at:3,image:'detective-leo-v2.png',role:'世界とつながる英語係',line:'Let’s try! ゆっくり、一つずつやってみよう。'},
+    {id:'haru',name:'ハル',at:5,image:'detective-haru-v2.png',role:'実験と発見の係',line:'予想とちがっても大発見！ くらべると何が分かるかな？'},
+    {id:'mina',name:'みな',at:8,image:'detective-mina-v2.png',role:'地図とまちの調査係',line:'手がかりをつないで、全体を見てみよう。'}
   ];
   function text(v,max,required){if(typeof v!=='string'||v.length>max||(required&&!v.trim()))throw Error('教材の文字数・必須項目を確認してください。');return v;}
   function id(v){if(typeof v!=='string'||! /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(v))throw Error('教材IDが不正です。');return v;}
@@ -4733,7 +4733,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.12.1";
+  var APP_VERSION = "2026.10.12.2";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
