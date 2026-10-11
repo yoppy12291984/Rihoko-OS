@@ -7,10 +7,12 @@
   return value.map(function(s){
    if(!s||!['pen','rect'].includes(s.tool)||!Array.isArray(s.points)||!s.points.length)throw Error('図の形式が不正です。');
    count+=s.points.length;if(count>24000)throw Error('図が大きすぎます。');
-   return {tool:s.tool,points:s.points.map(function(p){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||p[0]<0||p[0]>600||p[1]<0||p[1]>300)throw Error('図の座標が不正です。');return p.map(function(n){return Math.round(n*10)/10;});})};
+   var out={tool:s.tool,points:s.points.map(function(p){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||p[0]<0||p[0]>600||p[1]<0||p[1]>300)throw Error('図の座標が不正です。');return p.map(function(n){return Math.round(n*10)/10;});})};
+   if(s.color!==undefined){if(!/^#[0-9a-f]{6}$/i.test(s.color))throw Error('図の色が不正です。');out.color=s.color;}
+   if(s.width!==undefined){if(![3,12].includes(s.width))throw Error('線の太さが不正です。');out.width=s.width;}return out;
   });
  }
- function shapes(lines){return lines.map(function(s){var a=s.points[0],b=s.points[s.points.length-1];if(s.tool==='rect')return '<rect x="'+Math.min(a[0],b[0])+'" y="'+Math.min(a[1],b[1])+'" width="'+Math.abs(a[0]-b[0])+'" height="'+Math.abs(a[1]-b[1])+'"/>';return '<polyline points="'+s.points.map(function(p){return p.join(',');}).join(' ')+'"/>';}).join('');}
+ function shapes(lines){return validate(lines).map(function(s){var a=s.points[0],b=s.points[s.points.length-1],style=' stroke="'+(s.color||'#285a4b')+'" stroke-width="'+(s.width||3)+'"';if(s.tool==='rect')return '<rect'+style+' x="'+Math.min(a[0],b[0])+'" y="'+Math.min(a[1],b[1])+'" width="'+Math.abs(a[0]-b[0])+'" height="'+Math.abs(a[1]-b[1])+'"/>';return '<polyline'+style+' points="'+s.points.map(function(p){return p.join(',');}).join(' ')+'"/>';}).join('');}
  function mount(el,value,onSave){
   var lines=validate(value||[]),tool='pen',active=null,pointer=null;
   el.innerHTML='<div class="lc-actions"><button type="button" data-tool="pen" aria-pressed="true">えんぴつ</button><button type="button" data-tool="rect" aria-pressed="false">長方形</button><button type="button" data-undo>1つもどす</button></div><svg class="lc-drawing" viewBox="0 0 600 300" preserveAspectRatio="none" role="img" aria-label="図をかく場所。指・ペン・マウスでかけます"><rect width="600" height="300" fill="white"/><g fill="none" stroke="#285a4b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></g></svg><p class="lc-note">長方形は、ななめに引っぱるとかけるよ。画面を動かすときは、枠の外をさわってね。</p><p role="status" data-drawing-status></p>';

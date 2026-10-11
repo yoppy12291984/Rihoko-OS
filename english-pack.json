@@ -1,0 +1,233 @@
+{
+  "format": "rihoko-lesson-pack",
+  "version": 1,
+  "id": "english4-first-2026",
+  "revision": 1,
+  "title": "英検4級・手がかりから考える英語",
+  "description": "ことば探偵になって、会話やメモの手がかりを集めよう。1回3問。ゆっくりの英語音声付き（端末の読み上げ）。公式試験の模擬テストではありません。",
+  "lessons": [
+    {
+      "id": "E1",
+      "week": 1,
+      "title": "ことば探偵：消えた言葉",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "空らんに入る言葉を一つ選びましょう。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "I (     ) my grandmother last Sunday.",
+          "answer": "2. visited",
+          "hint": "last Sunday は、これから？ それとも、もう終わった日？",
+          "explanation": "last Sunday（この前の日曜日）は過去のこと。visitの過去形visitedを使う。「この前の日曜日、おばあさんを訪ねました。」",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "visit",
+            "visited",
+            "visits",
+            "visiting"
+          ],
+          "audio": "I, blank, my grandmother last Sunday."
+        },
+        {
+          "id": "q2",
+          "question": "We have no bread at home. Let’s go to the (     ) to buy some.",
+          "answer": "3. supermarket",
+          "hint": "買い物をする場所はどこかな。",
+          "explanation": "buy someは「いくらか買う」。breadとbuyが手がかりなのでsupermarket（スーパー）が合う。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "hospital",
+            "library",
+            "supermarket",
+            "station"
+          ],
+          "audio": "We have no bread at home. Let us go to the, blank, to buy some."
+        },
+        {
+          "id": "q3",
+          "question": "My brother is taller (     ) me.",
+          "answer": "1. than",
+          "hint": "taller は、二人の高さをくらべる言い方だよ。",
+          "explanation": "taller than ...で「…より背が高い」。比べる相手meの前にthanを置く。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "than",
+            "from",
+            "with",
+            "at"
+          ],
+          "audio": "My brother is taller, blank, me."
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "英文に、言葉のぬけた場所があるよ。「いつ」「どこで」「何を」を手がかりに、合う言葉を見つけよう。"
+    },
+    {
+      "id": "E2",
+      "week": 2,
+      "title": "会話のバトンをつなごう",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "空らんに入る返事を一つ選びましょう。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "A: How long does it take to walk to the park?\nB: (     )",
+          "answer": "4. About ten minutes.",
+          "hint": "How long と take が一緒に出てきたら、かかる時間を考えよう。",
+          "explanation": "公園まで歩くのにかかる時間を聞いている。「約10分」が合う。場所や行った日は答えにならない。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "Near the station.",
+            "Last Sunday.",
+            "With my sister.",
+            "About ten minutes."
+          ],
+          "audio": "How long does it take to walk to the park?"
+        },
+        {
+          "id": "q2",
+          "question": "A: Would you like some orange juice?\nB: (     ) I’m very thirsty.",
+          "answer": "2. Yes, please.",
+          "hint": "thirsty は「のどがかわいている」。ジュースをすすめられたら？",
+          "explanation": "飲みたい気持ちに合う返事はYes, please.（はい、お願いします）。後ろの文も読んで選ぼう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "No, thank you.",
+            "Yes, please.",
+            "You’re welcome.",
+            "See you tomorrow."
+          ],
+          "audio": "Would you like some orange juice? Blank. I am very thirsty."
+        },
+        {
+          "id": "q3",
+          "question": "A: Where did you put my bag?\nB: (     )",
+          "answer": "3. Under your chair.",
+          "hint": "Where は何をたずねているかな。",
+          "explanation": "場所をたずねているので「あなたのいすの下」が合う。Yesterdayは時、It is blueは色の説明。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "Yesterday.",
+            "It is blue.",
+            "Under your chair.",
+            "I like it."
+          ],
+          "audio": "Where did you put my bag?"
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "相手の言葉を受け取って、ぴったりの返事を選ぼう。後ろに続く言葉も大事なヒント！"
+    },
+    {
+      "id": "E3",
+      "week": 3,
+      "title": "お出かけ探偵：待ち合わせを守れ",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "Hi Emma,\nLet’s go to the zoo on Saturday. It opens at nine. Please meet me at the station at eight thirty. We can take a bus from there. Bring your lunch. We will eat in the park near the zoo.\nLucy",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "What time will Emma and Lucy meet?",
+          "answer": "1. At eight thirty.",
+          "hint": "動物園が開く時間と、二人が会う時間は同じかな。",
+          "explanation": "meet me ... at eight thirtyが答えの根拠。nineは動物園の開く時間なので区別しよう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "At eight thirty.",
+            "At nine.",
+            "At ten.",
+            "At twelve."
+          ],
+          "audio": "What time will Emma and Lucy meet?"
+        },
+        {
+          "id": "q2",
+          "question": "How will they go from the station to the zoo?",
+          "answer": "4. By bus.",
+          "hint": "from the station と from there の there は、同じ場所を表しているよ。",
+          "explanation": "We can take a bus from there.のthereはstation。駅からバスで向かう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "By train.",
+            "By bike.",
+            "On foot.",
+            "By bus."
+          ],
+          "audio": "How will they go from the station to the zoo?"
+        },
+        {
+          "id": "q3",
+          "question": "What should Emma bring?",
+          "answer": "2. Her lunch.",
+          "hint": "Bring の後ろを探そう。",
+          "explanation": "Bring your lunch.は「お昼ごはんを持ってきて」。公園で食べる予定も書いてある。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "A map.",
+            "Her lunch.",
+            "A ball.",
+            "A camera."
+          ],
+          "audio": "What should Emma bring?"
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "Lucyからメモが届いたよ。時間や場所を取りちがえないように、三つの情報を見つけよう。",
+      "audio": "Hi Emma,\nLet’s go to the zoo on Saturday. It opens at nine. Please meet me at the station at eight thirty. We can take a bus from there. Bring your lunch. We will eat in the park near the zoo.\nLucy"
+    },
+    {
+      "id": "E4",
+      "week": 4,
+      "title": "ばらばら英文を組み立てよう",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "すべての語を1回ずつ使い、日本語に合う英文を書きましょう。文のはじめは大文字にします。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "「私はきのう、ピアノを練習しました。」\n[ the / practiced / I / yesterday / piano ]",
+          "answer": "I practiced the piano yesterday.",
+          "hint": "だれが→何をした→何を→いつ、の順に考えよう。",
+          "explanation": "Iが主語、practicedが過去の動作。楽器はthe pianoという形にする。Yesterday, I practiced the piano.も意味は同じ。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "the. practiced. I. yesterday. piano."
+        },
+        {
+          "id": "q2",
+          "question": "「あなたは放課後、何をするつもりですか。」\n[ you / after school / what / to / going / do / are ]",
+          "answer": "What are you going to do after school?",
+          "hint": "What の後ろは are you。be going to をひとかたまりにしよう。",
+          "explanation": "What + are you going to doで「何をするつもりですか」。toの後ろのdoは、する予定の動作。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "you. after school. what. to. going. do. are."
+        },
+        {
+          "id": "q3",
+          "question": "「私は本を読むことが好きです。」\n[ books / like / I / reading ]",
+          "answer": "I like reading books.",
+          "hint": "I like の後ろに、「本を読むこと」をつなげよう。",
+          "explanation": "reading booksは「本を読むこと」。I like books.だけではreadingが残り、聞かれた意味を全部表せない。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "books. like. I. reading."
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "言葉のカードがばらばらになったよ。全部使って、意味の通る文を完成させよう。"
+    }
+  ]
+}
