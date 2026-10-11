@@ -44,3 +44,12 @@
 - lesson-audio.jsで利用者のタップに応じて端末のSpeechSynthesis英語音声を0.7倍速再生。本文/会話/選択肢の読み上げと停止、ページ/ステップ移動時停止。録音・マイク・外部APIは不要。音声の声質/利用可否は端末次第。内蔵ブラウザーで再生完了イベントと停止確認、実機の聴感は未確認。
 - 確認：learning-content/content-quality/lesson-drawing/lesson-workspace/lesson-audioテスト、公開HTMLの16インラインJS構文。54問、旧版保持、色と分数図の保存、カード全解の独立列挙、音声の低速/停止/未対応/失敗を確認。ブラウザーで国語に描画なし、英語選択保存、カード操作、ステップ移動、分数2色と再読込復元。1024×768と390×844で拡大領域を確認。
 - 次回はJSONを直接改訂→tools/bundle-lesson-packs.cjs→tools/build-release.cjs。今回のtools/*content.py、*missions.pyなどは一回限りの移行スクリプトで再実行しない。最新の編集元はcurriculum-work、公開クローンgame-publish。
+
+## 2026-10-11 5教科へ統合・問題入替・女の子の探偵（v2026.10.11.5）
+- ユーザーが教材ごとに第1週が並ぶ複雑さと既存の算数/分数/国語を却下。週別・教材別の一覧を撤去し、算数/国語/英語/理科/社会の5ボタンだけから選ぶ。
+- subject-pack.json（新ID detective-five-subjects-2026、revision 1）を導入。算数4・国語3・英語4・理科2・社会2、計15レッスン45問。算数はあまりの場面解釈、時刻、逆算、小4の面積。国語は新作物語、お知らせ、案内文の推敲へ入替。旧分数とカード問題は表示しない。英語12問と音声は新教材へ継承。
+- 旧4版はbundledのarchived:trueで記録用に保持。packs()で退役IDは除外し、古い教材の再importも拒否。旧回答はexportResultsに教材とともに残す。新しい問題へ過去回答を誤って流用しない。
+- Z会×ちびむすドリルの小3計算パズル、小4面積の無料見本をダウンロードしPopplerで紙面を確認。例・段階的な設問・図の構成を参考にし、問題文/数値/図はオリジナル。資料はcurriculum-work/references内のみ、公開しない。
+- 女の子のオリジナル探偵detective-girl-v1.pngを画像生成。ティールの帽子/ケープ、虫眼鏡と手帳。既存作品の顔・衣装・ロゴを使わず、問題の横と一覧に配置。先に作った男の子版は不採用、公開しない。detective-theme.cssで探偵手帳・調査ファイルの背景。装飾による操作妨害なし。
+- 新規subject-lessons.test.cjsで5教科45問、旧教材非表示/旧回答保持、分数撤去、面積図12/13マスと印刷、あまり/時刻/金額の独立検算を確認。旧content-quality.testは旧データの互換回帰専用に分離。ローカルブラウザーで5教科切替、女の子画像の実ロード、記録と同じステップの復帰、1024/390幅の横はみ出しなしを確認。実iPadの操作は未確認。
+- 編集元curriculum-work→bundle-lesson-packs.cjs→build-release.cjs release-content→公開クローンgame-publish。新規教材はsubject-pack.jsonを編集。過去の一回限りのPython移行スクリプトを再実行しない。
