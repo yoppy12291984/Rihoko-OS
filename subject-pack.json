@@ -1,0 +1,710 @@
+{
+  "format": "rihoko-lesson-pack",
+  "version": 1,
+  "id": "detective-five-subjects-2026",
+  "revision": 1,
+  "title": "Rihokoの探偵ノート",
+  "description": "教科を一つ選び、1回3問。基本から考える問題へ進もう。",
+  "lessons": [
+    {
+      "id": "M01",
+      "week": 1,
+      "title": "バッジを運ぶ箱のなぞ",
+      "subject": "算数",
+      "level": "小3・あまりのあるわり算",
+      "time": "10〜15分",
+      "passage": "探偵クラブのバッジが29こあります。箱1つには6こまで入ります。バッジを切ったり、箱からはみ出させたりはできません。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "6こずつ入った箱は、何箱作れますか。また、バッジは何こあまりますか。",
+          "answer": "4箱できて、5こあまる。29÷6＝4あまり5。",
+          "hint": "6×4と6×5を、29とくらべてみよう。",
+          "explanation": "6×4＝24、29−24＝5。6×5＝30は29をこえるので、6こ入りの箱は4箱。あまり5は6より小さいね。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "29こ全部を箱に入れて運ぶには、箱は少なくとも何箱いりますか。あまりのバッジをどうするかも書きましょう。",
+          "answer": "5箱。6こ入りの4箱に加え、あまった5こを入れる箱が1箱いる。",
+          "hint": "問1のあまりも運ばなければいけないね。",
+          "explanation": "4箱では24こまでしか入らない。5箱なら30こまで入るので、29こ全部が入る。「商の4」と「必要な箱の5」を区別しよう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "箱は今、5箱あります。バッジが29こからあと何こ増えると、初めて6箱目が必要になりますか。",
+          "answer": "2こ。5箱には30こまで入るので、31こになったとき6箱目がいる。31−29＝2。",
+          "hint": "5箱に入る一番多い数を調べ、その一つ上を考えよう。",
+          "explanation": "1こ増えて30こなら5箱に入る。2こ増えて31こになると入らない。答えの前後を確かめると、間違いを見つけられる。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "バッジを一つも残さず届けよう。計算の「あまり」を、場面に合う答えに変えるのが今回の手がかり。",
+      "source": "構成の参考：Z会グレードアップ問題集 小学3年 算数 計算・図形 公開見本（例→自分で計算→確かめる）。https://happylilac.net/zgusy3sansu-keisan2023.html\n文章題の段階づけも参考に、新しい場面・数値・設問で作成。原文の転載ではありません。"
+    },
+    {
+      "id": "M02",
+      "week": 1,
+      "title": "図書館へ向かう時間メモ",
+      "subject": "算数",
+      "level": "小3・時刻と時間",
+      "time": "10〜15分",
+      "passage": "探偵は午前10時45分に事務所を出ます。図書館までは歩いて20分かかります。図書館に着いたら、すぐに調べものを始めます。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "図書館に着くのは午前何時何分ですか。",
+          "answer": "午前11時5分。",
+          "hint": "10時45分から11時までは何分？ 残りの時間も足そう。",
+          "explanation": "11時まで15分。20分のうち残り5分を進めて11時5分。1時間は60分なので、10時65分とは書かない。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "図書館で35分間調べものをしました。終わるのは午前何時何分ですか。",
+          "answer": "午前11時40分。",
+          "hint": "問1の到着時刻から35分進めよう。",
+          "explanation": "11時5分から35分後は11時40分。出発時刻ではなく、調べものを始めた時刻を使おう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "正午までに事務所に戻ります。帰り道も20分かかります。図書館を出る一番おそい時刻は、午前何時何分ですか。",
+          "answer": "午前11時40分。",
+          "hint": "正午12時から、帰り道の20分をもどそう。",
+          "explanation": "12時から20分もどると11時40分。問2の調べものが終わったらすぐ出れば間に合う。時間は、進めるだけでなく逆にも考えられる。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "時間メモをつないで、正午までに戻る計画を完成させよう。",
+      "source": "構成の参考：Z会グレードアップ問題集 小学3年 算数 計算・図形 公開見本（例→自分で計算→確かめる）。https://happylilac.net/zgusy3sansu-keisan2023.html\n文章題の段階づけも参考に、新しい場面・数値・設問で作成。原文の転載ではありません。"
+    },
+    {
+      "id": "M03",
+      "week": 1,
+      "title": "消えた値札を見つけよう",
+      "subject": "算数",
+      "level": "小3・逆から考える計算",
+      "time": "10〜15分",
+      "passage": "文具店のレシートを調べます。えんぴつは1本70円です。書かれた金額には、消費税もふくまれています。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "えんぴつ3本とノート1冊を買うと、合計500円でした。ノート1冊は何円ですか。",
+          "answer": "290円。70×3＝210、500−210＝290。",
+          "hint": "まず、ねだんの分かっているえんぴつ3本分を出そう。",
+          "explanation": "全体の500円から、えんぴつの210円を引く。確かめは210＋290＝500。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "別の人は、えんぴつ何本かを買って1000円を出し、おつりを650円もらいました。買ったえんぴつは何本ですか。",
+          "answer": "5本。1000−650＝350、350÷70＝5。",
+          "hint": "おつりは使わなかったお金。まず、使ったお金を出そう。",
+          "explanation": "350円を70円ずつに分けると5本。5×70＋650＝1000でも確かめられる。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "「えんぴつ4本とノート1冊で500円」というレシートもありました。ノートは問1と同じ品物です。このレシートは正しいですか。正しい合計も書きましょう。",
+          "answer": "正しくない。正しい合計は570円。70×4＋290＝570。",
+          "hint": "問1よりえんぴつが1本増えたから、合計はいくら増えるかな。",
+          "explanation": "問1の500円に70円を足しても570円になる。全部計算し直す方法と、変わった分だけ考える方法がある。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "値札の消えたノートと、あやしいレシート。計算した後に、もとの金額に戻るか確かめよう。",
+      "source": "構成の参考：Z会グレードアップ問題集 小学3年 算数 計算・図形 公開見本（例→自分で計算→確かめる）。https://happylilac.net/zgusy3sansu-keisan2023.html\n文章題の段階づけも参考に、新しい場面・数値・設問で作成。原文の転載ではありません。"
+    },
+    {
+      "id": "M04",
+      "week": 1,
+      "title": "展示室の床を調べよう",
+      "subject": "算数",
+      "level": "小4チャレンジ・面積",
+      "time": "10〜15分",
+      "passage": "青いマスは、1辺が1cmの正方形です。この1マスの広さを1cm²（1平方センチメートル）といいます。面積をまだ習っていなければ、マスを数えて考えてかまいません。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "青い長方形の面積は何cm²ですか。マスを数えるか、同じ数のまとまりで考えましょう。",
+          "answer": "12cm²。横4マスが3段あるので、4×3＝12。",
+          "hint": "1段に何マスある？ それが何段ある？",
+          "explanation": "広さは青い1cm²のマスの数で表せる。周りの線の長さをたすのとは、ちがう量を調べているよ。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": "area12"
+        },
+        {
+          "id": "q2",
+          "question": "こちらの展示室は、右上の2マスがありません。青い部分の面積は何cm²ですか。",
+          "answer": "13cm²。5×3＝15、15−2＝13。",
+          "hint": "欠けた部分をうめると、横5マス、たて3マスの長方形になる。",
+          "explanation": "上の段は3マス、下の2段は5マスずつなので、3＋5＋5＝13と分けてもよい。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": "area13"
+        },
+        {
+          "id": "q3",
+          "question": "問2の13cm²を、「全体から引く方法」と「部分に分けて足す方法」の二つの式で表しましょう。",
+          "answer": "5×3−2＝13。3＋5＋5＝13（または3＋5×2＝13）。",
+          "hint": "同じ青いマスを、二つの数え方で数えてみよう。",
+          "explanation": "どちらも青い13マスを数えている。式は違っても、どの部分を表しているか説明できればよい。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": "area13"
+        }
+      ],
+      "mission": "床のマスが広さの手がかり。数える・まとめる・別の方法で確かめる、の順に調べよう。",
+      "source": "構成の参考：Z会グレードアップ問題集 小学4年 算数 計算・図形「面積」公開見本（分ける・全体から引く）。https://happylilac.net/zgusy4sansu-keisan2023.html\n新しい図と設問で作成。原文の転載ではありません。"
+    },
+    {
+      "id": "J01",
+      "week": 1,
+      "title": "雨の日の小さな約束",
+      "subject": "国語",
+      "level": "小3・物語の読み取り",
+      "time": "10〜15分",
+      "passage": "下校の時、まおは玄関で立ち止まりました。朝は晴れていたのに、外は雨です。まおが空を見上げていると、はなが「いっしょに入ろう」と、かさを広げました。\n道の途中で、はなの右の肩がぬれていることに、まおは気づきました。まおは、かさのえを持つはなの手に、そっと自分の手をそえました。「もう少し、まん中にしよう。」\n分かれ道で、まおは言いました。「明日は、わたしが大きいかさを持ってくるね。」はなは、にっこりうなずきました。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "まおが玄関で立ち止まったのは、どんなことに困っていたからだと考えられますか。",
+          "answer": "雨が降っているのに、使えるかさがなく、帰るのに困っていたから。",
+          "hint": "朝の天気と、はながかさに入れてくれたことをつなげよう。",
+          "explanation": "本文に「かさを忘れた」とは書かれていない。忘れたと決めつけず、雨の中を帰れず困っていたことを読み取ろう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "まおが「もう少し、まん中にしよう」と言ったのはなぜですか。直前の出来事を使って答えましょう。",
+          "answer": "はなの右の肩がぬれていることに気づき、はなもぬれないようにしたかったから。",
+          "hint": "まおが「気づきました」とある文を探そう。",
+          "explanation": "「はなの肩がぬれていた」と「ぬれないようにしたい」をつなぐと、言葉の理由がはっきりする。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "「明日は、わたしが大きいかさを持ってくるね」には、どんな気持ちがこめられていると考えられますか。今日してもらったこととつなげて書きましょう。",
+          "answer": "今日かさに入れてもらってうれしかったので、明日は自分がはなを助けたいという気持ち。",
+          "hint": "今日、だれがだれを助けたかな。明日はどうしたいのかな。",
+          "explanation": "「お礼をしたい」「今度は自分がかさに入れてあげたい」などもよい。本文の出来事に合う理由を書こう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "言葉に書かれていない気持ちを、行動と言葉の手がかりから見つけよう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "J02",
+      "week": 1,
+      "title": "掲示板の読みちがいを防げ",
+      "subject": "国語",
+      "level": "小3〜4・必要な情報を読む",
+      "time": "10〜15分",
+      "passage": "【図書館のお知らせ】\n土曜日に「本のしゅうり体験」を行います。\n・時間：午前10時から11時まで\n・場所：図書館の2階、工作室\n・持ち物：古いタオル1まい\n・参加できる人数：12人\n・申しこみ：金曜日までに、1階の受付で名前を書いてください。\n※本や道具は図書館で用意します。定員になったら、申しこみをしめ切ります。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "参加するためには、いつまでに、どこで、何をすればよいですか。三つとも書きましょう。",
+          "answer": "金曜日までに、1階の受付で、名前を書く。",
+          "hint": "体験をする「場所」と、申しこむ「場所」は同じかな。",
+          "explanation": "2階の工作室は体験会の場所。申しこみは1階の受付なので、目的に合う情報を選ぶ。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "「自分の古い本を必ず持っていかなければならない」という考えは正しいですか。お知らせの言葉を根拠に答えましょう。",
+          "answer": "正しくない。「本や道具は図書館で用意します」と書いてあるから。",
+          "hint": "持ち物の行と、※のついた行を両方読もう。",
+          "explanation": "持っていくように書かれているのは古いタオル1まい。本を持っていくことは、このお知らせでは求められていない。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "友だちに、申しこみを早めにした方がよい理由を説明しましょう。",
+          "answer": "参加できるのは12人で、定員になったら金曜日より前でも申しこみがしめ切られるから。",
+          "hint": "しめ切りには「曜日」以外の条件もあるね。",
+          "explanation": "期限内なら必ず申しこめるわけではない。「金曜日まで」と「定員になったら」を組み合わせて読む。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "参加したい友だちのために、見落としやすい条件を見つけよう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "J03",
+      "week": 1,
+      "title": "伝わる案内文に直そう",
+      "subject": "国語",
+      "level": "小3〜4・文章を整える",
+      "time": "10〜15分",
+      "passage": "公園の入口には、青いポストがあります。入口からまっすぐ進むと、右側に大きな木があります。集合場所は、その木の下です。\n案内係のメモ：\n「公園に来てください。あそこの下で待っています。」",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "初めて公園に来る人にとって、メモの「あそこ」が分かりにくいのはなぜですか。",
+          "answer": "どの場所や物を指しているか、メモだけでは分からないから。",
+          "hint": "読んだ人は、案内係と同じ場所を見ているかな。",
+          "explanation": "「あそこ」は、その場を一緒に見ていれば分かることがある。離れた人への案内では、具体的な場所を書く必要がある。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "「あそこの下で待っています」を、集合場所が分かる一文に書き直しましょう。",
+          "answer": "公園の入口からまっすぐ進んだ右側にある、大きな木の下で待っています。",
+          "hint": "入口からの行き方と、目印の木を入れよう。",
+          "explanation": "「大きな木の下」だけでなく、どの木か分かる情報があると、初めての人もたどり着ける。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "友だちは「公園には入口が二つある」と言いました。案内にどんな情報を足すとよいですか。本文の目印を使って書きましょう。",
+          "answer": "青いポストがある入口から入ってください、という情報を足す。",
+          "hint": "二つの入口を区別できる目印が、最初の文にあるよ。",
+          "explanation": "相手が迷う理由に合わせて情報を足そう。本文にない目印を勝手につけ足す必要はない。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "名探偵の報告は、相手に伝わってこそ。あいまいな言葉を、たどれる案内に変えよう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "E1",
+      "week": 1,
+      "title": "ことば探偵：消えた言葉",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "空らんに入る言葉を一つ選びましょう。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "I (     ) my grandmother last Sunday.",
+          "answer": "2. visited",
+          "hint": "last Sunday は、これから？ それとも、もう終わった日？",
+          "explanation": "last Sunday（この前の日曜日）は過去のこと。visitの過去形visitedを使う。「この前の日曜日、おばあさんを訪ねました。」",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "visit",
+            "visited",
+            "visits",
+            "visiting"
+          ],
+          "audio": "I, blank, my grandmother last Sunday."
+        },
+        {
+          "id": "q2",
+          "question": "We have no bread at home. Let’s go to the (     ) to buy some.",
+          "answer": "3. supermarket",
+          "hint": "買い物をする場所はどこかな。",
+          "explanation": "buy someは「いくらか買う」。breadとbuyが手がかりなのでsupermarket（スーパー）が合う。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "hospital",
+            "library",
+            "supermarket",
+            "station"
+          ],
+          "audio": "We have no bread at home. Let us go to the, blank, to buy some."
+        },
+        {
+          "id": "q3",
+          "question": "My brother is taller (     ) me.",
+          "answer": "1. than",
+          "hint": "taller は、二人の高さをくらべる言い方だよ。",
+          "explanation": "taller than ...で「…より背が高い」。比べる相手meの前にthanを置く。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "than",
+            "from",
+            "with",
+            "at"
+          ],
+          "audio": "My brother is taller, blank, me."
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "英文に、言葉のぬけた場所があるよ。「いつ」「どこで」「何を」を手がかりに、合う言葉を見つけよう。",
+      "level": "英検4級"
+    },
+    {
+      "id": "E2",
+      "week": 1,
+      "title": "会話のバトンをつなごう",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "空らんに入る返事を一つ選びましょう。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "A: How long does it take to walk to the park?\nB: (     )",
+          "answer": "4. About ten minutes.",
+          "hint": "How long と take が一緒に出てきたら、かかる時間を考えよう。",
+          "explanation": "公園まで歩くのにかかる時間を聞いている。「約10分」が合う。場所や行った日は答えにならない。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "Near the station.",
+            "Last Sunday.",
+            "With my sister.",
+            "About ten minutes."
+          ],
+          "audio": "How long does it take to walk to the park?"
+        },
+        {
+          "id": "q2",
+          "question": "A: Would you like some orange juice?\nB: (     ) I’m very thirsty.",
+          "answer": "2. Yes, please.",
+          "hint": "thirsty は「のどがかわいている」。ジュースをすすめられたら？",
+          "explanation": "飲みたい気持ちに合う返事はYes, please.（はい、お願いします）。後ろの文も読んで選ぼう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "No, thank you.",
+            "Yes, please.",
+            "You’re welcome.",
+            "See you tomorrow."
+          ],
+          "audio": "Would you like some orange juice? Blank. I am very thirsty."
+        },
+        {
+          "id": "q3",
+          "question": "A: Where did you put my bag?\nB: (     )",
+          "answer": "3. Under your chair.",
+          "hint": "Where は何をたずねているかな。",
+          "explanation": "場所をたずねているので「あなたのいすの下」が合う。Yesterdayは時、It is blueは色の説明。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "Yesterday.",
+            "It is blue.",
+            "Under your chair.",
+            "I like it."
+          ],
+          "audio": "Where did you put my bag?"
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "相手の言葉を受け取って、ぴったりの返事を選ぼう。後ろに続く言葉も大事なヒント！",
+      "level": "英検4級"
+    },
+    {
+      "id": "E3",
+      "week": 1,
+      "title": "お出かけ探偵：待ち合わせを守れ",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "Hi Emma,\nLet’s go to the zoo on Saturday. It opens at nine. Please meet me at the station at eight thirty. We can take a bus from there. Bring your lunch. We will eat in the park near the zoo.\nLucy",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "What time will Emma and Lucy meet?",
+          "answer": "1. At eight thirty.",
+          "hint": "動物園が開く時間と、二人が会う時間は同じかな。",
+          "explanation": "meet me ... at eight thirtyが答えの根拠。nineは動物園の開く時間なので区別しよう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "At eight thirty.",
+            "At nine.",
+            "At ten.",
+            "At twelve."
+          ],
+          "audio": "What time will Emma and Lucy meet?"
+        },
+        {
+          "id": "q2",
+          "question": "How will they go from the station to the zoo?",
+          "answer": "4. By bus.",
+          "hint": "from the station と from there の there は、同じ場所を表しているよ。",
+          "explanation": "We can take a bus from there.のthereはstation。駅からバスで向かう。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "By train.",
+            "By bike.",
+            "On foot.",
+            "By bus."
+          ],
+          "audio": "How will they go from the station to the zoo?"
+        },
+        {
+          "id": "q3",
+          "question": "What should Emma bring?",
+          "answer": "2. Her lunch.",
+          "hint": "Bring の後ろを探そう。",
+          "explanation": "Bring your lunch.は「お昼ごはんを持ってきて」。公園で食べる予定も書いてある。",
+          "optional": false,
+          "workspace": "text",
+          "choices": [
+            "A map.",
+            "Her lunch.",
+            "A ball.",
+            "A camera."
+          ],
+          "audio": "What should Emma bring?"
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "Lucyからメモが届いたよ。時間や場所を取りちがえないように、三つの情報を見つけよう。",
+      "audio": "Hi Emma,\nLet’s go to the zoo on Saturday. It opens at nine. Please meet me at the station at eight thirty. We can take a bus from there. Bring your lunch. We will eat in the park near the zoo.\nLucy",
+      "level": "英検4級"
+    },
+    {
+      "id": "E4",
+      "week": 1,
+      "title": "ばらばら英文を組み立てよう",
+      "subject": "英語",
+      "time": "10〜15分",
+      "passage": "すべての語を1回ずつ使い、日本語に合う英文を書きましょう。文のはじめは大文字にします。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "「私はきのう、ピアノを練習しました。」\n[ the / practiced / I / yesterday / piano ]",
+          "answer": "I practiced the piano yesterday.",
+          "hint": "だれが→何をした→何を→いつ、の順に考えよう。",
+          "explanation": "Iが主語、practicedが過去の動作。楽器はthe pianoという形にする。Yesterday, I practiced the piano.も意味は同じ。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "the. practiced. I. yesterday. piano."
+        },
+        {
+          "id": "q2",
+          "question": "「あなたは放課後、何をするつもりですか。」\n[ you / after school / what / to / going / do / are ]",
+          "answer": "What are you going to do after school?",
+          "hint": "What の後ろは are you。be going to をひとかたまりにしよう。",
+          "explanation": "What + are you going to doで「何をするつもりですか」。toの後ろのdoは、する予定の動作。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "you. after school. what. to. going. do. are."
+        },
+        {
+          "id": "q3",
+          "question": "「私は本を読むことが好きです。」\n[ books / like / I / reading ]",
+          "answer": "I like reading books.",
+          "hint": "I like の後ろに、「本を読むこと」をつなげよう。",
+          "explanation": "reading booksは「本を読むこと」。I like books.だけではreadingが残り、聞かれた意味を全部表せない。",
+          "optional": false,
+          "workspace": "text",
+          "audio": "books. like. I. reading."
+        }
+      ],
+      "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
+      "mission": "言葉のカードがばらばらになったよ。全部使って、意味の通る文を完成させよう。",
+      "level": "英検4級"
+    },
+    {
+      "id": "S01",
+      "week": 1,
+      "title": "氷がとけたのはなぜ？",
+      "subject": "理科",
+      "level": "小3〜4・くらべ方",
+      "time": "10〜15分",
+      "passage": "同じ形・同じ大きさの氷を、同じ皿に1こずつのせました。同じ時こくに、Aは日なた、Bは日かげに置きました。10分後、Aの氷は小さくなり、Bの氷はAより大きく残っていました。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "この実験で、AとBで変えたことは何ですか。",
+          "answer": "置く場所を日なたと日かげに変えた。",
+          "hint": "氷や皿ではなく、どこに置いたかに注目。",
+          "explanation": "くらべたい条件を一つ変え、氷の形・大きさ・皿・調べる時間はそろえている。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "この記録では、どちらの氷が多くとけましたか。見た結果を使って答えましょう。",
+          "answer": "A。はじめは同じ大きさで、10分後にはAの方が小さく残っていたから。",
+          "hint": "残った氷が小さいということは、とけた量はどうなるかな。",
+          "explanation": "「日なたの方」と知識だけで答えるのでなく、同じ大きさで始めて残りが小さかった、という結果を根拠にしよう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "次に、Aは小さい氷、Bは大きい氷でくらべました。置く場所だけのちがいを調べる実験として、どこを直せばよいですか。",
+          "answer": "AとBの氷を、はじめに同じ形・同じ大きさにそろえる。",
+          "hint": "氷の大きさと置く場所が、両方変わっていないかな。",
+          "explanation": "二つの条件が変わると、結果のちがいがどちらによるものか判断しにくい。知りたいことに合わせて条件をそろえる。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "観察記録を使って、実験のくらべ方を点検しよう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "S02",
+      "week": 1,
+      "title": "磁石の調査メモ",
+      "subject": "理科",
+      "level": "小3・磁石と物の性質",
+      "time": "10〜15分",
+      "passage": "同じ磁石で調べました。\n鉄のくぎ：ついた\nアルミニウムのはく：つかなかった\n木の棒：つかなかった\n鉄のゼムクリップ：ついた\n調べたものは、名前のとおりの材料でできています。",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "磁石についた二つのものに共通する材料は何ですか。",
+          "answer": "鉄。",
+          "hint": "物の名前の前にある材料をくらべよう。",
+          "explanation": "くぎとゼムクリップは形がちがうが、どちらも鉄でできている。形だけでなく材料に注目しよう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "「金属なら、どれも磁石につく」という考えに合わないものを、この記録から一つ選びましょう。",
+          "answer": "アルミニウムのはく。",
+          "hint": "アルミニウムも金属の仲間だけれど、結果はどうだったかな。",
+          "explanation": "アルミニウムは金属だが、この記録ではつかなかった。「金属なら全部」という考えを見直す手がかりになる。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "紙で包んだ鉄のクリップでも、磁石につくか調べたいです。包む前と後で、何を同じにして試しますか。一つ書きましょう。",
+          "answer": "例：同じ磁石と同じクリップを使う。",
+          "hint": "包んだこと以外は、できるだけ変えないようにするには？",
+          "explanation": "磁石の近づけ方をそろえるという答えもよい。予想と実際の結果を分けて記録しよう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "形にまどわされず、材料という手がかりで記録を整理しよう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "C01",
+      "week": 1,
+      "title": "町の地図で待ち合わせ",
+      "subject": "社会",
+      "level": "小3・地図と方位",
+      "time": "10〜15分",
+      "passage": "地図の上が北です。道は、となり合う場所を横・たてにつないでいます。ななめの道はありません。となりまで歩く時間は、どこも5分です。\n北の列：公園 ― 図書館 ― 駅\n南の列：家　 ― 学校　 ― 店",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "学校から見て、図書館はどの方角にありますか。",
+          "answer": "北。",
+          "hint": "図書館は学校の上にあるね。地図の上はどの方角？",
+          "explanation": "方角は見る場所を基準にする。地図の上が北なら、右は東、下は南、左は西。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "家から学校を通って図書館へ行きます。合計何分かかりますか。",
+          "answer": "10分。5＋5＝10。",
+          "hint": "家→学校、学校→図書館の二つの道を通る。",
+          "explanation": "行き先を一つずつたどり、それぞれの時間を足そう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "駅から学校への道を一つ選び、方角と曲がる場所を使って説明しましょう。",
+          "answer": "例：駅から西へ図書館まで進み、図書館で南に曲がると学校。",
+          "hint": "「右へ」より「西へ」の方が、向きの違う人にも伝わるよ。",
+          "explanation": "駅から南へ店に進み、店で西に曲がって学校へ行く道も正解。地図の道を使っていればよい。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "方角と目印を使って、友だちが迷わない道案内を作ろう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    },
+    {
+      "id": "C02",
+      "week": 1,
+      "title": "店の売り場を調べよう",
+      "subject": "社会",
+      "level": "小3・店ではたらく人",
+      "time": "10〜15分",
+      "passage": "町の店の人に聞きました。\n「入口には、今の季節の果物を置いています。野菜の名前と、とれた場所も書いています。夕方は買い物に来る人が多いので、レジを使う人を増やしています。」",
+      "questions": [
+        {
+          "id": "q1",
+          "question": "買う人が、野菜のとれた場所を知るには、店のどんな工夫を見るとよいですか。",
+          "answer": "野菜の名前と、とれた場所を書いた表示。",
+          "hint": "商品のそばに、どんな情報が書かれているかな。",
+          "explanation": "表示は、買う人が商品を選ぶための情報になる。本文にある工夫を答えよう。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q2",
+          "question": "夕方にレジを使う人を増やすのはなぜですか。本文の情報を使って説明しましょう。",
+          "answer": "夕方は買い物客が多いので、会計で待つ人を少なくするため。",
+          "hint": "客の多さと、レジで待つ時間をつなげよう。",
+          "explanation": "店の人のはたらき方は、来る人の数に合わせて工夫されている。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        },
+        {
+          "id": "q3",
+          "question": "入口に季節の果物を置く理由を、店の人に聞きたいです。たずねる文を一つ書きましょう。",
+          "answer": "例：季節の果物を入口に置くと、どんなよいことがあるのですか。",
+          "hint": "本文に書かれていない「理由」を聞く文にしよう。",
+          "explanation": "「たくさん売れるから」と決めつける前に聞いて確かめる。観察したことと、自分の予想を分けるのが調査のコツ。",
+          "workspace": "text",
+          "optional": false,
+          "diagram": ""
+        }
+      ],
+      "mission": "売り場の工夫と、そこで働く人の理由を探ろう。",
+      "source": "オリジナル教材。問題文と解答を対応させ、本文・資料にある条件から考える。"
+    }
+  ]
+}
