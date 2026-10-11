@@ -1,0 +1,68 @@
+/* Reviewed lesson packs are data, never executable HTML. Responses stay on this device. */
+(function(root){
+  'use strict';
+  var KEY='rihoko-learning-content-v1';
+  function text(v,max,required){if(typeof v!=='string'||v.length>max||(required&&!v.trim()))throw Error('教材の文字数・必須項目を確認してください。');return v;}
+  function id(v){if(typeof v!=='string'||! /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(v))throw Error('教材IDが不正です。');return v;}
+  function validate(p){
+    if(!p||p.format!=='rihoko-lesson-pack'||p.version!==1||!Number.isInteger(p.revision)||p.revision<1)throw Error('対応していない教材形式です。');
+    if(!Array.isArray(p.lessons)||!p.lessons.length||p.lessons.length>60)throw Error('教材は1〜60レッスンにしてください。');
+    var seen=new Set(),out={format:p.format,version:1,id:id(p.id),revision:p.revision,title:text(p.title,120,true),description:text(p.description||'',1200),lessons:[]};
+    out.lessons=p.lessons.map(function(l){
+      if(!l||seen.has(l.id))throw Error('レッスンIDが重複しています。');seen.add(l.id);
+      if(!Number.isInteger(l.week)||l.week<1||l.week>52||!Array.isArray(l.questions)||!l.questions.length||l.questions.length>12)throw Error('週または問題数が不正です。');
+      var qs=new Set();return {id:id(l.id),week:l.week,title:text(l.title,120,true),subject:text(l.subject,30,true),time:text(l.time||'',100),passage:text(l.passage||'',8000),source:text(l.source||'',1200),questions:l.questions.map(function(q){
+        if(!q||qs.has(q.id))throw Error('問題IDが重複しています。');qs.add(q.id);
+        return {id:id(q.id),question:text(q.question,4000,true),answer:text(q.answer,4000,true),hint:text(q.hint||'',2000),explanation:text(q.explanation||'',4000),optional:q.optional===true};
+      })};
+    });return out;
+  }
+  function create(storage,bundled){
+    var base=(bundled||[]).map(validate);
+    function read(){var s=JSON.parse(storage.getItem(KEY)||'{"packs":[],"responses":{}}');if(!s||!Array.isArray(s.packs)||!s.responses||typeof s.responses!=='object'||Array.isArray(s.responses))throw Error('学習記録を読み込めません。');return s;}
+    function write(s){storage.setItem(KEY,JSON.stringify(s));}
+    function packs(){var map=new Map(base.map(function(p){return [p.id,p];}));read().packs.map(validate).forEach(function(p){var old=map.get(p.id);if(!old||p.revision>old.revision)map.set(p.id,p);});return Array.from(map.values());}
+    function importPack(raw){if(typeof raw!=='string'||raw.length>500000)throw Error('教材ファイルは500KB以内にしてください。');var p=validate(JSON.parse(raw)),old=packs().find(function(x){return x.id===p.id;});if(old&&old.revision>=p.revision)throw Error('同じ版、または新しい版を取り込み済みです。');var s=read();s.packs.push(p);write(s);return p;}
+    function key(p,l,q){return [p.id,p.revision,l.id,q.id].join('/');}
+    function response(p,l,q){return read().responses[key(p,l,q)]||{};}
+    function save(p,l,q,patch){var s=read(),k=key(p,l,q),r=Object.assign({},s.responses[k]||{});if('answer'in patch)r.answer=text(patch.answer,6000);if('rating'in patch){if(!['self','help','again','unlearned'].includes(patch.rating))throw Error('記録の選択が不正です。');r.rating=patch.rating;}if(patch.hintUsed)r.hintUsed=true;if(patch.answerSeen)r.answerSeen=true;r.updatedAt=new Date().toISOString();s.responses[k]=r;write(s);return r;}
+    function exportResults(){var s=read(),versions=new Map();base.concat(s.packs.map(validate)).forEach(function(p){versions.set(p.id+'/'+p.revision,p);});return {format:'rihoko-learning-results',version:1,exportedAt:new Date().toISOString(),packs:Array.from(versions.values()),responses:s.responses};}
+    return {packs:packs,importPack:importPack,response:response,save:save,exportResults:exportResults};
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function printHtml(p,l,answers){return '<!doctype html><html lang="ja"><meta charset="utf-8"><title>'+esc(l.title)+'</title><style>body{font:16px/1.9 sans-serif;max-width:780px;margin:30px auto;padding:20px;color:#222}p{white-space:pre-wrap}section{break-inside:avoid;margin:25px 0}.space{height:100px;border-bottom:1px solid #aaa}button{padding:12px}@media print{button{display:none}}</style><button onclick="window.print()">印刷 / PDFとして保存</button><h1>'+esc(l.title)+(answers?'：解答・解説':'')+'</h1><p>'+esc(p.title)+' · 第'+l.week+'週</p>'+(answers?'':'<p>なまえ：________________　日づけ：________________</p>')+'<p>'+esc(l.passage)+'</p>'+l.questions.map(function(q,i){return '<section><h2>問'+(i+1)+(q.optional?'（できそうなら）':'')+'</h2><p>'+esc(q.question)+'</p>'+(answers?'<p><b>解答例</b>　'+esc(q.answer)+'</p><p>'+esc(q.explanation)+'</p><p>ヒント：'+esc(q.hint)+'</p>':'<div class="space"></div>')+'</section>';}).join('')+'</html>';}
+  var api={create:create,validate:validate,printHtml:printHtml};
+  if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
+  var store=create(root.localStorage,root.RihokoLessonPacks||[]),selection=null,opened={},drafts={},importDraft='',message='',exportText='';
+  var ratings={self:'自分でできた',help:'ヒントでできた',again:'もう一度',unlearned:'まだ習っていない'};
+  function download(value,name,type){var url=URL.createObjectURL(new Blob([value],{type:type})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+  function mount(host,parent){
+    if(!host)return;
+    host.className='learning-content';
+    try{
+      var packs=store.packs(),p=selection&&packs.find(function(x){return x.id===selection.pack;}),l=p&&p.lessons.find(function(x){return x.id===selection.lesson;});
+      if(parent){
+        host.innerHTML='<h2>ここで作った教材</h2><p>チャットで作成した教材ファイルを取り込むと、「まなぶ」から使えます。取り込みはこの端末に保存されます。</p><p>回答・ヒント・ふり返りもこの端末だけに保存します。次の教材を相談するときは記録を保存してチャットへ添付してください。</p><button data-export>学習記録をファイルに保存</button><details data-results><summary>記録をコピーして渡す</summary><p>ファイル保存ができない場合は、下のデータを全選択してコピーし、チャットに貼り付けてください。</p><button data-show-results>記録データを表示</button><label>書き出した学習記録<textarea data-results-text readonly rows="5">'+esc(exportText)+'</textarea></label></details><h3>教材を追加する</h3><label>教材ファイル（JSON）<input type="file" accept=".json,application/json" data-import-file></label><details><summary>教材データを貼り付けて取り込む</summary><label>教材データ<textarea data-import-text rows="5" maxlength="500000">'+esc(importDraft)+'</textarea></label><button data-import>取り込む</button></details><p role="status" data-message>'+esc(message)+'</p><h3>使える教材</h3>'+packs.map(function(pack){var done=0;pack.lessons.forEach(function(lesson){lesson.questions.forEach(function(q){if(store.response(pack,lesson,q).rating)done++;});});return '<article><h4>'+esc(pack.title)+'</h4><p>'+pack.lessons.length+'レッスン · ふり返り '+done+'問</p><button data-export-pack="'+esc(pack.id)+'">この教材をファイルに保存</button></article>';}).join('');
+        function prepareResults(){exportText=JSON.stringify(store.exportResults(),null,2);host.querySelector('[data-results-text]').value=exportText;host.querySelector('[data-results]').open=true;} host.querySelector('[data-show-results]').onclick=function(){try{prepareResults();}catch(e){host.querySelector('[data-message]').textContent='読み込めませんでした：'+e.message;}}; host.querySelector('[data-export]').onclick=function(){try{prepareResults();download(exportText,'Rihoko-学習記録.json','application/json');host.querySelector('[data-message]').textContent='ファイルの保存先を確認してください。保存できない場合は記録データをコピーできます。';}catch(e){host.querySelector('[data-message]').textContent='保存できませんでした：'+e.message;}};
+        host.querySelector('[data-import-text]').oninput=function(e){importDraft=e.target.value;};
+        function take(raw){try{var pack=store.importPack(raw);message=pack.title+'を取り込みました。';importDraft='';}catch(e){message='取り込めませんでした：'+e.message;}mount(host,true);}
+        host.querySelector('[data-import]').onclick=function(){take(importDraft);};
+        host.querySelector('[data-import-file]').onchange=async function(e){var f=e.target.files[0];if(!f)return;if(f.size>500000){message='教材ファイルは500KB以内にしてください。';mount(host,true);return;}try{take(await f.text());}catch(err){message='ファイルを読み込めませんでした。';mount(host,true);}};
+        host.querySelectorAll('[data-export-pack]').forEach(function(b){b.onclick=function(){var pack=packs.find(function(x){return x.id===b.dataset.exportPack;});download(JSON.stringify(pack,null,2),pack.id+'.json','application/json');};});return;
+      }
+      if(!l){
+        host.innerHTML='<header><span class="lc-eyebrow">週末のまなび</span><h2>考える力をそだてよう</h2><p>1回10〜20分。今週できるところから、えらんでね。</p></header>'+packs.map(function(pack){var weeks=Array.from(new Set(pack.lessons.map(function(x){return x.week;})));return '<h3>'+esc(pack.title)+'</h3><p>'+esc(pack.description)+'</p>'+weeks.map(function(week){return '<details class="lc-week" '+(week===1?'open':'')+'><summary>第'+week+'週</summary><div class="lc-lessons">'+pack.lessons.filter(function(x){return x.week===week;}).map(function(lesson){var n=lesson.questions.filter(function(q){return !!store.response(pack,lesson,q).rating;}).length;return '<button class="lc-lesson" data-pack="'+esc(pack.id)+'" data-lesson="'+esc(lesson.id)+'"><small>'+esc(lesson.subject)+' · '+esc(lesson.time)+'</small><strong>'+esc(lesson.title)+'</strong><span>ふり返り '+n+' / '+lesson.questions.length+'問　→</span></button>';}).join('')+'</div></details>';}).join('');}).join('')+'<p class="lc-note">書いた答えとふり返りは、この端末に保存されるよ。</p>';
+        host.querySelectorAll('[data-lesson]').forEach(function(b){b.onclick=function(){selection={pack:b.dataset.pack,lesson:b.dataset.lesson};mount(host,false);host.scrollIntoView({block:'start'});};});return;
+      }
+      var prefix=p.id+'/'+p.revision+'/'+l.id+'/';
+      host.innerHTML='<button data-back>← 教材一覧へ</button><p class="lc-eyebrow">第'+l.week+'週 · '+esc(l.subject)+' · '+esc(l.time)+'</p><h2>'+esc(l.title)+'</h2><p>図は紙にかいても、ことばで説明してもいいよ。むずかしい漢字はおうちの人に読んでもらおう。</p>'+(l.passage?'<div class="lc-passage">'+esc(l.passage)+'</div>':'')+l.questions.map(function(q,i){var r=store.response(p,l,q),key=prefix+q.id,v=Object.prototype.hasOwnProperty.call(drafts,key)?drafts[key]:(r.answer||'');return '<article class="lc-question"><h3>問'+(i+1)+(q.optional?' <small>できそうなら</small>':'')+'</h3><p>'+esc(q.question)+'</p><label>自分の答え・考え<textarea rows="3" maxlength="6000" data-answer="'+esc(q.id)+'">'+esc(v)+'</textarea></label><div class="lc-actions"><button data-hint="'+esc(q.id)+'" aria-expanded="'+!!opened[key+'hint']+'">ヒント</button><button data-solution="'+esc(q.id)+'" aria-expanded="'+!!opened[key+'solution']+'">答え・解説</button></div>'+(opened[key+'hint']?'<div class="lc-hint">'+esc(q.hint||'図や表にして、分かっていることから考えよう。')+'</div>':'')+(opened[key+'solution']?'<div class="lc-solution"><b>解答例</b><p>'+esc(q.answer)+'</p><p>'+esc(q.explanation)+'</p><small>記述の答えは、意味と理由が合っていれば大丈夫。</small></div>':'')+'<fieldset><legend>解答例とくらべて、ふり返ろう</legend><div class="lc-ratings">'+Object.keys(ratings).map(function(k){return '<button data-rate="'+k+'" data-q="'+esc(q.id)+'" aria-pressed="'+(r.rating===k)+'">'+ratings[k]+'</button>';}).join('')+'</div></fieldset><p role="status" data-save-status="'+esc(q.id)+'">'+(Object.prototype.hasOwnProperty.call(drafts,key)?'未保存の入力があります。書き直すと保存を再試行します。':r.updatedAt?'この端末に保存済み':'')+'</p></article>';}).join('')+'<div class="lc-actions"><button data-print="questions">問題を印刷 / PDF保存</button><button data-print="answers">解答を印刷 / PDF保存</button></div><p role="status" data-print-status></p><details><summary>この教材のねらい</summary><p>'+esc(l.source)+'</p><p>入試問題の文章は転載せず、考え方を練習する新しい問題を作っています。</p></details>';
+      host.querySelector('[data-back]').onclick=function(){selection=null;mount(host,false);};
+      function save(q,patch){try{store.save(p,l,q,patch);return true;}catch(e){var node=Array.from(host.querySelectorAll('[data-save-status]')).find(function(n){return n.dataset.saveStatus===q.id;});if(node)node.textContent='保存できませんでした。入力をコピーして残してください。';return false;}}
+      host.querySelectorAll('[data-answer]').forEach(function(el){el.oninput=function(){var q=l.questions.find(function(q){return q.id===el.dataset.answer;}),key=prefix+q.id;drafts[key]=el.value;if(save(q,{answer:el.value})){delete drafts[key];el.closest('article').querySelector('[data-save-status]').textContent='この端末に保存済み';}};});
+      ['hint','solution'].forEach(function(kind){host.querySelectorAll('[data-'+kind+']').forEach(function(b){b.onclick=function(){var q=l.questions.find(function(q){return q.id===b.dataset[kind];}),key=prefix+q.id+kind;opened[key]=!opened[key];if(opened[key]&&!save(q,kind==='hint'?{hintUsed:true}:{answerSeen:true}))return;mount(host,false);};});});
+      host.querySelectorAll('[data-rate]').forEach(function(b){b.onclick=function(){var q=l.questions.find(function(q){return q.id===b.dataset.q;});if(save(q,{rating:b.dataset.rate}))mount(host,false);};});
+      host.querySelectorAll('[data-print]').forEach(function(b){b.onclick=function(){var popup=root.open('','_blank');if(!popup){host.querySelector('[data-print-status]').textContent='印刷画面を開けませんでした。ポップアップの設定を確認してください。';return;}popup.opener=null;popup.document.write(printHtml(p,l,b.dataset.print==='answers'));popup.document.close();};});
+    }catch(e){host.innerHTML='<p role="alert">教材を読み込めませんでした。保存データは消さずに、おうちの人に伝えてね。</p>';}
+  }
+  api.mount=mount;root.LearningContent=api;
+})(typeof window!=='undefined'?window:globalThis);
