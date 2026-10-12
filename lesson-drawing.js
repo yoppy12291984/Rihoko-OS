@@ -2,11 +2,11 @@
 (function(root){
  'use strict';
  function validate(value){
-  if(!Array.isArray(value)||value.length>160)throw Error('図が大きすぎます。');
+  if(!Array.isArray(value)||value.length>1500)throw Error('図が大きすぎます。');
   var count=0;
   return value.map(function(s){
    if(!s||!['pen','rect'].includes(s.tool)||!Array.isArray(s.points)||!s.points.length)throw Error('図の形式が不正です。');
-   count+=s.points.length;if(count>24000)throw Error('図が大きすぎます。');
+   count+=s.points.length;if(count>120000)throw Error('図が大きすぎます。');
    var out={tool:s.tool,points:s.points.map(function(p){if(!Array.isArray(p)||p.length!==2||!p.every(Number.isFinite)||p[0]<0||p[0]>600||p[1]<0||p[1]>300)throw Error('図の座標が不正です。');return p.map(function(n){return Math.round(n*10)/10;});})};
    if(s.color!==undefined){if(!/^#[0-9a-f]{6}$/i.test(s.color))throw Error('図の色が不正です。');out.color=s.color;}
    if(s.width!==undefined){if(![3,12].includes(s.width))throw Error('線の太さが不正です。');out.width=s.width;}return out;
