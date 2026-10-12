@@ -8,3 +8,10 @@
 @media(max-width:700px){.lc-friends{grid-template-columns:repeat(2,minmax(0,1fr))}.lc-friend:first-child{grid-column:1/-1}.lc-friend:first-child img{height:100px}.lc-badge-list{grid-template-columns:1fr}.lc-lesson-reward{padding:14px;gap:10px}.lc-reward-medal{width:36px;height:36px;font-size:24px}.lc-album-body{padding:12px}.lc-album summary{gap:8px;padding:12px}.lc-album summary b{font-size:14px}}
 @media(prefers-reduced-motion:reduce){.lc-earned .lc-reward-medal{animation:none}}
 @media print{.lc-album,.lc-lesson-reward{display:none}}
+
+/* One clear daily assignment; the full library is optional. */
+.lc-today{display:flex;gap:20px;align-items:flex-start;padding:26px;margin:16px 0 24px;border:2px solid #52796f;border-radius:22px;background:#fffdf3;box-shadow:0 6px 20px #244c4010;color:#254d43}
+.lc-today img{object-fit:contain;flex-shrink:0}.lc-today h2{margin:6px 0;font-size:26px}.lc-today h3{margin:12px 0;font-size:21px}.lc-today p{line-height:1.8;margin:8px 0}.lc-today-meta{font-weight:700}.lc-today button{background:#285b4c;color:#fff;border:0;border-radius:14px;padding:15px 22px;font:inherit;font-weight:700;min-height:48px;cursor:pointer}.lc-today button:focus-visible{outline:3px solid #b97819;outline-offset:3px}.lc-library{margin:20px 0}.lc-library>summary{cursor:pointer;padding:18px;border:1px solid #d4dbce;border-radius:14px;font-weight:700}.lc-library[open]>summary{margin-bottom:18px}
+@media(max-width:540px){.lc-today{padding:18px;gap:12px}.lc-today img{width:58px;height:70px}.lc-today h2{font-size:23px}.lc-today h3{font-size:19px}.lc-today button{width:100%;padding:14px}.lc-today>div{min-width:0}}
+
+.lc-today .lc-case-label{color:#765716}
