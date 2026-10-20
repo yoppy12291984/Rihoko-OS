@@ -12,3 +12,5 @@
 .lc-scratchpad.lc-drawing-expanded{box-sizing:border-box;overscroll-behavior:contain}.lc-draw-tools label{display:inline-flex;align-items:center;gap:6px;min-height:44px}.lc-draw-tools input[type=checkbox]{width:22px;height:22px}.lc-keyboard-answer{margin:12px 0}.lc-keyboard-answer summary{cursor:pointer;padding:12px;min-height:44px}.lc-draw-header b{font-size:16px}.lc-draw-header button{flex:none}
 
 .lc-scratchpad.lc-drawing-expanded .lc-drawing{width:min(100%,calc((100dvh - 220px) * 2));margin-inline:auto}
+
+.learning-content .lc-draw-tools button[aria-pressed="true"],.learning-content .lc-draw-tools button[aria-pressed="true"]:hover{background:#286b57;color:#fff;border-color:#286b57}

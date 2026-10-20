@@ -99,3 +99,5 @@ body[data-theme="planner"] .todo-card { padding: 12px 16px; }
 @media (max-width: 480px) { .daily-hero { padding: 22px; } .home-shortcuts { gap: 10px; } .home-shortcuts button { padding: 14px 10px; gap: 8px; } .shortcut-symbol { display: none; } .theme-options { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 @media print { body[data-theme] { background: white !important; } #app { max-width: 100%; padding-bottom: 0; } }
+
+.day-navigation{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 20px 20px}.day-navigation button,.day-navigation input{font:inherit;min-height:44px;padding:8px 12px;border:1px solid #a9c5b9;border-radius:10px;background:white;color:#285a4b;min-width:0}.day-navigation button:disabled{opacity:.4}.day-navigation input{max-width:180px}
