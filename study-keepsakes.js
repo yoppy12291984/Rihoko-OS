@@ -21,7 +21,16 @@
       if(shared)return shared.save("rewards",entry);
       list.push(entry);storage.setItem(rewardKey,JSON.stringify(list));return entry;
     }
-    return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim};
+    function reconcile(today,todos,routineDone,itemsForDate){
+      var dates=new Set([today]),earned=new Set(rewards().map(function(r){return r.date;})),added=[];
+      todos.forEach(function(t){if(t.date)dates.add(t.date);});
+      Object.keys(routineDone).forEach(function(key){dates.add(key.slice(key.lastIndexOf('|')+1));});
+      Array.from(dates).filter(function(date){return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date<=today&&!earned.has(date);}).sort().forEach(function(date){
+        var entry=claim(date,itemsForDate(date));if(entry)added.push(entry);
+      });
+      return added;
+    }
+    return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim,reconcile:reconcile};
   }
   if(typeof module!=='undefined'&&module.exports)module.exports={create:create};
   else root.StudyKeepsakes=create(root.localStorage,root.KeepsakeSync);

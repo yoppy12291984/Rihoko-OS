@@ -284,7 +284,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.20.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.20.2</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4342,7 +4342,16 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
       if(shared)return shared.save("rewards",entry);
       list.push(entry);storage.setItem(rewardKey,JSON.stringify(list));return entry;
     }
-    return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim};
+    function reconcile(today,todos,routineDone,itemsForDate){
+      var dates=new Set([today]),earned=new Set(rewards().map(function(r){return r.date;})),added=[];
+      todos.forEach(function(t){if(t.date)dates.add(t.date);});
+      Object.keys(routineDone).forEach(function(key){dates.add(key.slice(key.lastIndexOf('|')+1));});
+      Array.from(dates).filter(function(date){return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date<=today&&!earned.has(date);}).sort().forEach(function(date){
+        var entry=claim(date,itemsForDate(date));if(entry)added.push(entry);
+      });
+      return added;
+    }
+    return {worksheets:worksheets,saveWorksheet:saveWorksheet,rewards:rewards,claim:claim,reconcile:reconcile};
   }
   if(typeof module!=='undefined'&&module.exports)module.exports={create:create};
   else root.StudyKeepsakes=create(root.localStorage,root.KeepsakeSync);
@@ -4778,7 +4787,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.12.4";
+  var APP_VERSION = "2026.10.20.2";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -4909,6 +4918,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
         db.collection(col).onSnapshot(function(snap){
           state[col] = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
           saveLocal();
+          reconcileRewards();
           render();
         }, function(){ /* fall back silently to local state */ });
       });
@@ -4937,6 +4947,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
         apply:function(data){
           ['todos','events','units','routines','routineDone'].forEach(function(c){state[c] = data[c];});
           saveLocal();
+          reconcileRewards();
           // 入力途中のフォームは再描画しない。画面遷移時に最新状態を表示する。
           if (state.view !== 'parent') render();
         },
@@ -5007,7 +5018,26 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     return t.content.firstElementChild;
   }
 
+  var reconcilingRewards=false;
+  function reconcileRewards(){
+    if(reconcilingRewards)return;
+    reconcilingRewards=true;
+    try{
+      var before=StudyKeepsakes.rewards().length;
+      var added=StudyKeepsakes.reconcile(todayStr(),state.todos,state.routineDone,combinedItemsForDate);
+      rewardError="";
+      if(added.length){
+        rewardJustClaimed=true;
+        var after=StudyKeepsakes.rewards().length;
+        if(added.some(function(r){return r.date===todayStr();})&&Math.floor(after/10)>Math.floor(before/10)&&typeof RewardCelebration!=="undefined"){
+          setTimeout(function(){RewardCelebration.show(RewardCelebration.levelFor(after));},0);
+        }
+      }
+    }catch(e){rewardError="スタンプを保存できませんでした。記録はそのままに、画面を開き直すともう一度ためします。";}
+    finally{reconcilingRewards=false;}
+  }
   function render(){
+    reconcileRewards();
     // Keep the live input/drawing DOM during background sync. Explicit navigation still renders.
     if(state.view === "manabu" && !state.worksheetSubject && window.LearningContent && LearningContent.isWorking() && document.querySelector("#learningContent .lc-question")) return;
     if(window.LearningContent)LearningContent.setActive(state.view === "manabu" && !state.worksheetSubject);
@@ -5277,8 +5307,8 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var stickers=['🐨','🌈','🚀','🌸','🐬','👑'];
     var html='<section class="reward-card '+(rewardJustClaimed?'reward-pop':'')+'"><p class="reward-eyebrow">まいにち スタンプラリー</p>';
     if(earned)html+='<h2>この日のスタンプ、できた！</h2><p>よくがんばったね。また次の1マスへ。</p>';
-    else if(complete)html+='<h2>この日の分、ぜんぶできた！ 🎉</h2><p>完了した日のスタンプを押そう。</p><button class="btn-primary" id="rewardClaim" data-date="'+today+'">スタンプをおす</button>';
-    else html+='<h2>10このスタンプでゴール！</h2><p>'+(tasks.length?'きょうの分をぜんぶ終えて、1マス進もう。':'やることがある日に、ぜんぶ終えるとスタンプを押せるよ。')+'</p>';
+    else if(complete)html+='<h2>この日の分、ぜんぶできた！ 🎉</h2><p>スタンプを自動で保存します。</p>';
+    else html+='<h2>10このスタンプでゴール！</h2><p>'+(tasks.length?'この日のやることをぜんぶチェックすると、自動で1マス進むよ。':'やることがある日に、ぜんぶチェックすると自動でスタンプがつくよ。')+'</p>';
     var cardIndex=Math.floor(list.length/10), progress=list.length-cardIndex*10;
     function rallyCard(index){
       var entries=list.slice(index*10,index*10+10);
@@ -5291,7 +5321,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     html+='<p class="reward-total">これまで <b>'+list.length+'</b> こ・ゴール '+Math.floor(list.length/10)+'回</p>';
     if(collection&&cardIndex>0)html+='<details class="rally-history"><summary>これまでの台紙を見る</summary>'+Array.from({length:cardIndex},function(_,i){return rallyCard(i);}).join('')+'</details>';
     if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
-    return html+'<p class="reward-help">1日1こ。お休みしてもスタンプは消えないよ。ご家族の端末でも同じ台紙が見られるよ。</p></section>';
+    return html+'<p class="reward-help">1日1こ、自動でつくよ。過去の全完了の記録も自動で反映。お休みしてもスタンプは消えないよ。ご家族の端末でも同じ台紙が見られるよ。</p></section>';
   }
 
   function renderDekita(){
@@ -6083,8 +6113,6 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
     app.querySelectorAll('[data-reward-game]').forEach(function(b){b.onclick=function(){RewardGames.open(b.dataset.rewardGame,gamesAvailable);};});
     app.querySelectorAll('[data-rihoko-preview]').forEach(function(b){b.onclick=function(){if(typeof RewardCelebration!=="undefined")RewardCelebration.showPortrait();};});
-    var rewardClaim = document.getElementById("rewardClaim");
-    if(rewardClaim)rewardClaim.onclick=function(){try{var before=StudyKeepsakes.rewards().length;var claimed=StudyKeepsakes.claim(rewardClaim.dataset.date,combinedItemsForDate(rewardClaim.dataset.date));var after=StudyKeepsakes.rewards().length;rewardError="";rewardJustClaimed=true;render();if(claimed&&after>before&&after%10===0&&typeof RewardCelebration!=="undefined")RewardCelebration.show(RewardCelebration.levelFor(after));}catch(e){rewardError="ごほうびを保存できませんでした。もう一度ためしてね。";render();}};
     var adventureRoll=document.getElementById("adventureRoll");
     if(adventureRoll&&typeof RewardCelebration!=="undefined")adventureRoll.onclick=function(){var rewards=StudyKeepsakes.rewards(),trip=RewardCelebration.journey(rewards),value=trip.steps[trip.steps.length-1];RewardCelebration.roll(adventureRoll,todayStr(),value,render);};
     var worksheetBack = document.getElementById("worksheetBack");
