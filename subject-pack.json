@@ -43,7 +43,12 @@
           "explanation": "1こ増えて30こなら5箱に入る。2こ増えて31こになると入らない。答えの前後を確かめると、間違いを見つけられる。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "2",
+            "2こ",
+            "2個"
+          ]
         }
       ],
       "mission": "バッジを一つも残さず届けよう。計算の「あまり」を、場面に合う答えに変えるのが今回の手がかり。",
@@ -66,7 +71,12 @@
           "explanation": "11時まで15分。20分のうち残り5分を進めて11時5分。1時間は60分なので、10時65分とは書かない。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "午前11時5分",
+            "11時5分",
+            "11:05"
+          ]
         },
         {
           "id": "q2",
@@ -76,7 +86,12 @@
           "explanation": "11時5分から35分後は11時40分。出発時刻ではなく、調べものを始めた時刻を使おう。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "午前11時40分",
+            "11時40分",
+            "11:40"
+          ]
         },
         {
           "id": "q3",
@@ -86,7 +101,12 @@
           "explanation": "12時から20分もどると11時40分。問2の調べものが終わったらすぐ出れば間に合う。時間は、進めるだけでなく逆にも考えられる。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "午前11時40分",
+            "11時40分",
+            "11:40"
+          ]
         }
       ],
       "mission": "時間メモをつないで、正午までに戻る計画を完成させよう。",
@@ -109,7 +129,11 @@
           "explanation": "全体の500円から、えんぴつの210円を引く。確かめは210＋290＝500。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "290",
+            "290円"
+          ]
         },
         {
           "id": "q2",
@@ -119,7 +143,11 @@
           "explanation": "350円を70円ずつに分けると5本。5×70＋650＝1000でも確かめられる。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "5",
+            "5本"
+          ]
         },
         {
           "id": "q3",
@@ -152,7 +180,12 @@
           "explanation": "広さは青い1cm²のマスの数で表せる。周りの線の長さをたすのとは、ちがう量を調べているよ。",
           "workspace": "text",
           "optional": false,
-          "diagram": "area12"
+          "diagram": "area12",
+          "acceptedAnswers": [
+            "12",
+            "12cm²",
+            "12平方センチメートル"
+          ]
         },
         {
           "id": "q2",
@@ -162,7 +195,12 @@
           "explanation": "上の段は3マス、下の2段は5マスずつなので、3＋5＋5＝13と分けてもよい。",
           "workspace": "text",
           "optional": false,
-          "diagram": "area13"
+          "diagram": "area13",
+          "acceptedAnswers": [
+            "13",
+            "13cm²",
+            "13平方センチメートル"
+          ]
         },
         {
           "id": "q3",
@@ -329,7 +367,8 @@
             "visits",
             "visiting"
           ],
-          "audio": "I, blank, my grandmother last Sunday."
+          "audio": "I, blank, my grandmother last Sunday.",
+          "correctChoice": 1
         },
         {
           "id": "q2",
@@ -345,7 +384,8 @@
             "supermarket",
             "station"
           ],
-          "audio": "We have no bread at home. Let us go to the, blank, to buy some."
+          "audio": "We have no bread at home. Let us go to the, blank, to buy some.",
+          "correctChoice": 2
         },
         {
           "id": "q3",
@@ -361,7 +401,8 @@
             "with",
             "at"
           ],
-          "audio": "My brother is taller, blank, me."
+          "audio": "My brother is taller, blank, me.",
+          "correctChoice": 0
         }
       ],
       "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
@@ -390,7 +431,8 @@
             "With my sister.",
             "About ten minutes."
           ],
-          "audio": "How long does it take to walk to the park?"
+          "audio": "How long does it take to walk to the park?",
+          "correctChoice": 3
         },
         {
           "id": "q2",
@@ -406,7 +448,8 @@
             "You’re welcome.",
             "See you tomorrow."
           ],
-          "audio": "Would you like some orange juice? Blank. I am very thirsty."
+          "audio": "Would you like some orange juice? Blank. I am very thirsty.",
+          "correctChoice": 1
         },
         {
           "id": "q3",
@@ -422,7 +465,8 @@
             "Under your chair.",
             "I like it."
           ],
-          "audio": "Where did you put my bag?"
+          "audio": "Where did you put my bag?",
+          "correctChoice": 2
         }
       ],
       "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
@@ -451,7 +495,8 @@
             "At ten.",
             "At twelve."
           ],
-          "audio": "What time will Emma and Lucy meet?"
+          "audio": "What time will Emma and Lucy meet?",
+          "correctChoice": 0
         },
         {
           "id": "q2",
@@ -467,7 +512,8 @@
             "On foot.",
             "By bus."
           ],
-          "audio": "How will they go from the station to the zoo?"
+          "audio": "How will they go from the station to the zoo?",
+          "correctChoice": 3
         },
         {
           "id": "q3",
@@ -483,7 +529,8 @@
             "A ball.",
             "A camera."
           ],
-          "audio": "What should Emma bring?"
+          "audio": "What should Emma bring?",
+          "correctChoice": 1
         }
       ],
       "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
@@ -507,7 +554,10 @@
           "explanation": "Iが主語、practicedが過去の動作。楽器はthe pianoという形にする。Yesterday, I practiced the piano.も意味は同じ。",
           "optional": false,
           "workspace": "text",
-          "audio": "the. practiced. I. yesterday. piano."
+          "audio": "the. practiced. I. yesterday. piano.",
+          "acceptedAnswers": [
+            "I practiced the piano yesterday."
+          ]
         },
         {
           "id": "q2",
@@ -517,7 +567,10 @@
           "explanation": "What + are you going to doで「何をするつもりですか」。toの後ろのdoは、する予定の動作。",
           "optional": false,
           "workspace": "text",
-          "audio": "you. after school. what. to. going. do. are."
+          "audio": "you. after school. what. to. going. do. are.",
+          "acceptedAnswers": [
+            "What are you going to do after school?"
+          ]
         },
         {
           "id": "q3",
@@ -527,7 +580,10 @@
           "explanation": "reading booksは「本を読むこと」。I like books.だけではreadingが残り、聞かれた意味を全部表せない。",
           "optional": false,
           "workspace": "text",
-          "audio": "books. like. I. reading."
+          "audio": "books. like. I. reading.",
+          "acceptedAnswers": [
+            "I like reading books."
+          ]
         }
       ],
       "source": "英検4級の公式出題形式を参考にしたオリジナル練習。https://www.eiken.or.jp/eiken/exam/grade_4/solutions.html\n今回は語句・会話・読解・語順を練習します。リスニングはこの教材には含みません。",
@@ -594,7 +650,11 @@
           "explanation": "くぎとゼムクリップは形がちがうが、どちらも鉄でできている。形だけでなく材料に注目しよう。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "鉄",
+            "てつ"
+          ]
         },
         {
           "id": "q2",
@@ -604,7 +664,14 @@
           "explanation": "アルミニウムは金属だが、この記録ではつかなかった。「金属なら全部」という考えを見直す手がかりになる。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "アルミニウムのはく",
+            "アルミニウムはく",
+            "アルミはく",
+            "アルミ箔",
+            "アルミニウム箔"
+          ]
         },
         {
           "id": "q3",
@@ -637,7 +704,11 @@
           "explanation": "方角は見る場所を基準にする。地図の上が北なら、右は東、下は南、左は西。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "北",
+            "きた"
+          ]
         },
         {
           "id": "q2",
@@ -647,7 +718,11 @@
           "explanation": "行き先を一つずつたどり、それぞれの時間を足そう。",
           "workspace": "text",
           "optional": false,
-          "diagram": ""
+          "diagram": "",
+          "acceptedAnswers": [
+            "10",
+            "10分"
+          ]
         },
         {
           "id": "q3",
