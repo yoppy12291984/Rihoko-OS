@@ -284,7 +284,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.20.5</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.20.6</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4840,7 +4840,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.20.5";
+  var APP_VERSION = "2026.10.20.6";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5181,7 +5181,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var todays = combinedItemsForDate(today);
     if(today !== todayStr()){
       var count=todays.filter(function(t){return t.done;}).length;
-      return '<div class="greeting"><p class="hello">前の日の記録</p><p class="date">'+fmtDateLong(today)+'</p></div>'+dayNavigation(today)+'<section class="panel"><h2>'+count+' / '+todays.length+' できた</h2><p>'+(todays.length?(count===todays.length?'この日のやることは全部できています。':'まだ完了チェックのない項目があります。'):'この日のやることは登録されていません。')+'</p><p>保存されているToDoと、現在の曜日設定に基づくルーチンの記録です。</p></section>'+renderCalendarDayDetail_(today)+renderRewardCard(true,today);
+      return '<div class="greeting"><p class="hello">前の日の記録</p><p class="date">'+fmtDateLong(today)+'</p></div>'+dayNavigation(today)+'<section class="panel"><h2>'+count+' / '+todays.length+' できた</h2><p>'+(todays.length?(count===todays.length?'この日のやることは全部できています。':'まだ完了チェックのない項目があります。'):'この日のやることは登録されていません。')+'</p><p>保存されているToDoと、現在の曜日設定に基づくルーチンの記録です。</p></section>'+renderCalendarDayDetail_(today,true)+renderRewardCard(true,today);
     }
 
     var html = '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
@@ -5241,10 +5241,11 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     return '<div id="voiceStudio"></div>';
   }
 
-  function renderTodoCard(t){
+  function renderTodoCard(t, readOnly){
     var cat = CATS[t.category] || CATS["その他"];
     return '<div class="todo-card ' + (t.done?"done":"") + '" data-id="' + t.id + '">' +
-      '<button class="check" aria-label="' + escapeHtml(t.title) + '" aria-pressed="' + !!t.done + '" data-toggle="' + escapeHtml(t.id) + '">' + (t.done ? "✓" : "") + '</button>' +
+      (readOnly===true ? '<span class="check" role="img" style="cursor:default" aria-label="'+(t.done?'完了':'未完了')+'">'+(t.done?'✓':'')+'</span>' :
+      '<button class="check" aria-label="' + escapeHtml(t.title) + '" aria-pressed="' + !!t.done + '" data-toggle="' + escapeHtml(t.id) + '">' + (t.done ? "✓" : "") + '</button>') +
       '<div class="todo-body">' +
       '<p class="todo-title">' + (t.dailyLife ? '' : cat.icon + ' ') + addFurigana(t.title) + '</p>' +
       '<p class="todo-meta"><span class="tag">' + (t.dailyLife ? (DailySupport.periods[t.period] || 'いつでも') : addFurigana(t.category||"その他")) + '</span>' + (t.done ? 'できたよ' : t.dailyLife ? 'まだチェックしていないよ' : t.minutes ? t.minutes + '分' : '') + '</p>' +
@@ -5578,7 +5579,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     return html;
   }
 
-  function renderCalendarDayDetail_(dateStr){
+  function renderCalendarDayDetail_(dateStr, homeCards){
     var items = combinedItemsForDate(dateStr);
     var events = state.events.filter(function(e){ return eventOccursOnDate(e, dateStr); });
     var html = '<div class="panel"><h2>' + fmtDateLong(dateStr) + '</h2>';
@@ -5586,7 +5587,8 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       html += '<div class="future-note">この日の予定・ToDoはありません。</div>';
     }
     if (items.length > 0) {
-      html += '<h3>ToDo・ルーチン</h3><div class="row-list">' + items.map(function(t){
+      if(homeCards)html+='<h3 class="section-label">この日のやること</h3><div class="todo-list">'+items.map(function(t){return renderTodoCard(t,true);}).join('')+'</div>';
+      else html += '<h3>ToDo・ルーチン</h3><div class="row-list">' + items.map(function(t){
         return '<div class="row-item"><div class="ri-main"><div class="ri-title">' + (t.done?"✅ ":"") + escapeHtml(t.title) + '</div>' +
           '<div class="ri-sub">' + escapeHtml(t.category) + (t.isRoutine?" ・ ルーチン":"") + '</div></div></div>';
       }).join("") + '</div>';
