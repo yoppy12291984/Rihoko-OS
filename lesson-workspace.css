@@ -14,3 +14,5 @@
 .lc-scratchpad.lc-drawing-expanded .lc-drawing{width:min(100%,calc((100dvh - 220px) * 2));margin-inline:auto}
 
 .learning-content .lc-draw-tools button[aria-pressed="true"],.learning-content .lc-draw-tools button[aria-pressed="true"]:hover{background:#286b57;color:#fff;border-color:#286b57}
+
+.lc-handwriting:not(.lc-drawing-expanded) .lc-draw-tools{display:none}.lc-handwriting:not(.lc-drawing-expanded) .lc-drawing{pointer-events:none;touch-action:auto;cursor:default}.lc-handwriting:not(.lc-drawing-expanded){touch-action:pan-y}
