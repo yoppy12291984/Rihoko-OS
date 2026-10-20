@@ -114,3 +114,7 @@
 ## 2026-10-20 過去日のカード表示（v2026.10.20.6）
 - 前日・前々日のホーム一覧を小さなカレンダー詳細の行から、今日と同じrenderTodoCard/todo-listへ変更。タイトルの文字サイズ・太さ・行間・完了時のチェックと取り消し線を共通化。過去日は従来通り閲覧専用。カレンダーの詳細は維持。
 - 今日/過去のtodo-body出力一致、過去にdata-toggleなし、今日のmapコールバックでチェック可能を確認。daily-historyとlearning-content、公開16インラインJS構文成功。
+
+## 2026-10-20 文字回答欄へのペン入力を抑止（v2026.10.20.7）
+- 「自分の答え・考え」をキーボード専用と明記し、初期readonly。「キーボードで入力する」で明示的に編集開始し、blurでreadonlyへ戻す。penのpointerdownはpreventDefault・readonly・blurとして手書き入力を抑止。専用SVGは引き続き大きく開いたときだけ描画可能。既存の回答・選択肢・保存は維持。
+- learning-content/answer-feedbackテストと公開16インラインJS構文成功。実ハンドラーのpenイベント拒否・blur復帰をVM確認。iPadのOS標準Scribble実機は未検証。
