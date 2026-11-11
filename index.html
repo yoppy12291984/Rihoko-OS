@@ -247,7 +247,8 @@
 .rally-board{margin-top:22px;padding:16px 8px;border:2px solid #e0c780;border-radius:18px;background:#fffdf5}.rally-board h3{font-size:16px;margin:0 0 18px}.rally-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px 6px;position:relative}.rally-track:before{content:"";position:absolute;left:8%;right:8%;top:30px;bottom:30px;border:3px dashed #dfce9c;border-left:0;border-radius:0 20px 20px 0}.rally-stop{position:relative;z-index:1;display:flex;align-items:center;flex-direction:column;gap:3px;min-width:0}.rally-stop span{display:flex;align-items:center;justify-content:center;width:clamp(30px,8vw,54px);height:clamp(30px,8vw,54px);border:2px dashed #d6caa6;border-radius:50%;background:#fffdf5;font-size:20px;color:#aa9a72}.rally-stop small{font-size:9px;background:#fffdf5}.rally-stop.stamped span{border:2px solid #86b2a0;background:#e6f2e8;font-size:27px;transform:rotate(-8deg)}.rally-stop.next span{border:2px solid #d88c39;background:#fff0cd;color:#795319}.rally-stop:nth-child(6){grid-row:2;grid-column:5}.rally-stop:nth-child(7){grid-row:2;grid-column:4}.rally-stop:nth-child(8){grid-row:2;grid-column:3}.rally-stop:nth-child(9){grid-row:2;grid-column:2}.rally-stop:nth-child(10){grid-row:2;grid-column:1}.rally-history summary{cursor:pointer;padding:12px;font-weight:bold}.rally-board p{font-size:13px;margin:16px 0 0}
 </style>
 <link rel="stylesheet" href="study-theme.css">
-<style>.level-hero{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px auto 4px;padding:10px 14px;max-width:280px;border:2px solid #dbc16d;border-radius:16px;background:#fffdf2;box-shadow:0 4px 0 #e6d69f}
+<style>.adventure-treasures{padding:14px;border:2px solid #e3c774;border-radius:16px;background:#fff9e5;margin-top:16px;text-align:left;color:#533d20}.adventure-treasures h4{margin:0 0 10px}.adventure-treasures>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}.adventure-treasures span{padding:9px;border-radius:10px;background:#f0e9d6;font-size:12px}.adventure-treasures span.is-owned{background:#fff;border:1px solid #d0a741}.adventure-treasures b{display:block;font-size:18px}.adventure-treasures small{display:block;margin-top:12px;line-height:1.6}
+.level-hero{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px auto 4px;padding:10px 14px;max-width:280px;border:2px solid #dbc16d;border-radius:16px;background:#fffdf2;box-shadow:0 4px 0 #e6d69f}
 .level-portrait{width:54px;height:54px;flex:0 0 auto;border:3px solid #69502c;border-radius:8px;background:#182332;object-fit:cover;object-position:50% 16%;image-rendering:auto}
 .level-copy{text-align:left}.level-copy strong{display:block;font-size:20px;color:#76551e}.level-copy span{font-size:11px;color:#786b50}
 .level-meter{height:8px;margin-top:5px;border:1px solid #c5ae65;border-radius:2px;background:#eee5c5;overflow:hidden}.level-meter>i{display:block;height:100%;background:linear-gradient(90deg,#57bca8,#f4bf52);border-right:1px solid #fff}
@@ -268,6 +269,8 @@
 .character-preview{position:fixed;inset:0;z-index:11000;display:grid;place-items:center;padding:18px;background:#071126ef;cursor:zoom-out}.character-preview__card{position:relative;width:min(90vw,470px);max-height:92vh;padding:12px;border:3px solid #f4e5a4;border-radius:18px;background:#142b61;box-shadow:0 18px 60px #000b;cursor:default;overflow:hidden}.character-preview__card img{display:block;width:100%;max-height:80vh;object-fit:contain;border-radius:10px}.character-preview__card p{margin:7px 0 0!important;color:#fff4b1;font:800 18px/1.2 system-ui;letter-spacing:.1em;text-align:center}.character-preview__close{position:absolute;top:10px;right:10px;z-index:2;width:44px;height:44px;border:2px solid #fff;border-radius:50%;background:#102250dd;color:#fff;font:800 28px/1 system-ui;cursor:pointer}.character-preview__close:focus-visible{outline:3px solid #ffe56e;outline-offset:2px}
 .rpg-status{margin:10px 20px 20px;padding:8px;border:3px solid #eef4ff;border-radius:10px;background:linear-gradient(135deg,#142b78,#1760ae 55%,#1a398e);color:#fff;box-shadow:0 0 0 3px #7a8dac,0 7px 18px #192a5c55;font-family:"Yu Gothic",system-ui,sans-serif;text-shadow:1px 1px 0 #071744}.rpg-status>header{display:flex;align-items:center;justify-content:space-between;padding:5px 9px 8px;border-bottom:1px solid #91b6ef}.rpg-status>header span{font:700 10px/1 monospace;letter-spacing:.18em;color:#b9d7ff}.rpg-status>header b{font-size:19px;letter-spacing:.08em}.rpg-status__body{display:grid;grid-template-columns:98px 1fr;gap:12px;padding:12px 8px}.rpg-status__portrait{height:118px;border:2px solid #c8dbff;border-radius:5px;background:#0a1d56;overflow:hidden;box-shadow:inset 0 0 18px #06113e}.rpg-status__portrait .level-portrait{width:100%;height:100%;border:0;border-radius:0;object-fit:cover;object-position:50% 16%}.rpg-status__main{text-align:left;min-width:0}.rpg-status__title{margin:0 0 8px!important;font-size:11px;color:#bed8ff}.rpg-status__title span{display:block;margin-top:3px;color:#ffe693;font-size:14px;font-weight:800}.rpg-status__level{display:flex;align-items:baseline;gap:9px}.rpg-status__level span{font:700 13px/1 monospace;color:#b9d7ff}.rpg-status__level b{font:800 34px/1 monospace;color:#fff}.rpg-status__exp{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-top:9px;font:700 10px/1.3 monospace;color:#b9d7ff}.rpg-status__exp b{text-align:right;color:#fff}.rpg-status__exp i{grid-column:1/-1;height:7px;border:1px solid #bcd5ff;background:#081b56}.rpg-status__exp em{display:block;height:100%;background:linear-gradient(90deg,#55e1c3,#ffe16f)}.rpg-status__exp small{grid-column:1/-1;margin-top:3px;text-align:right;color:#dbeaff}.rpg-status__stats{display:grid;grid-template-columns:1fr 1fr;margin:0;border-top:1px solid #91b6ef}.rpg-status__stats>div{display:flex;justify-content:space-between;gap:6px;padding:8px;border-right:1px solid #6c9cdd;border-bottom:1px solid #6c9cdd}.rpg-status__stats dt{font-size:10px;color:#bfd9ff}.rpg-status__stats dd{margin:0;font:800 14px/1 monospace;color:#fff4a8}@media(max-width:380px){.rpg-status{margin-inline:12px}.rpg-status__body{grid-template-columns:82px 1fr}.rpg-status__portrait{height:106px}}
 .rpg-status__portrait{position:relative;padding:0;cursor:zoom-in}.rpg-status__portrait>span{position:absolute;inset:auto 0 0;padding:4px 2px;background:#07184dcc;color:#fff;font:700 8px/1.2 system-ui;text-shadow:none}.rpg-status__portrait:focus-visible{outline:3px solid #ffe693;outline-offset:2px}
+
+.adventure-space .level-portrait--compact{object-fit:cover;object-position:50% 12%}
 </style>
 </head>
 <body>
@@ -284,7 +287,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.10.20.7</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.11.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -4255,12 +4258,14 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     var steps=(rewards||[]).map(function(r,i){return diceFor(r.date,i+1);});
     return {steps:steps,total:steps.reduce(function(a,b){return a+b;},0)};
   }
-  function portrait(compact){
-    return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+(compact?'rihoko-adventurer-compact-v1.png?v=20261006-3':'rihoko-adventurer-v2.png?v=20261006-3')+'" alt="Rihokoの冒険者アイコン">';
+  function lookFor(level){return (Math.max(1,Number(level)||1)-1)%6+1;}
+  function imageFor(level){var look=lookFor(level);return look===1?'rihoko-adventurer-v2.png':'rihoko-level-'+look+'.png';}
+  function portrait(compact,level){
+    return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+imageFor(level)+'" alt="Rihoko Lv. '+(level||1)+'の姿">';
   }
   function badge(count){
     var level=levelFor(count),progress=progressFor(count);
-    return '<div class="level-hero">'+portrait()+'<div class="level-copy"><strong>Rihoko Lv. '+level+'</strong><span>次のレベルまで あと'+(10-progress)+'こ</span><div class="level-meter" aria-label="次のレベルまで '+progress+' / 10"><i style="width:'+progress*10+'%"></i></div></div></div>';
+    return '<div class="level-hero">'+portrait(false,level)+'<div class="level-copy"><strong>Rihoko Lv. '+level+'</strong><span>次のレベルまで あと'+(10-progress)+'こ</span><div class="level-meter" aria-label="次のレベルまで '+progress+' / 10"><i style="width:'+progress*10+'%"></i></div></div></div>';
   }
   function titleFor(level){
     var titles=['はじめの冒険者','こつこつ冒険者','星をあつめる人','まなびの探検家','光のチャレンジャー','伝説をつくる人'];
@@ -4269,38 +4274,54 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
   function status(rewards,stats){
     rewards=rewards||[];stats=stats||{};
     var count=rewards.length,level=levelFor(count),progress=progressFor(count),trip=journey(rewards);
-    return '<section class="rpg-status" aria-label="Rihokoのステータス"><header><span>STATUS</span><b>Rihoko</b></header><div class="rpg-status__body"><button type="button" class="rpg-status__portrait" data-rihoko-preview aria-label="Rihokoの全身画像を大きく見る">'+portrait(false)+'<span>タップで大きく</span></button><div class="rpg-status__main"><p class="rpg-status__title">称号　<span>'+titleFor(level)+'</span></p><div class="rpg-status__level"><span>LV</span><b>'+level+'</b></div><div class="rpg-status__exp"><span>EXP</span><b>'+progress*100+' / 1000</b><i><em style="width:'+progress*10+'%"></em></i><small>NEXT　あと '+(10-progress)+' スタンプ</small></div></div></div><dl class="rpg-status__stats"><div><dt>がんばった日</dt><dd>'+Number(stats.totalDays||0)+'</dd></div><div><dt>できたこと</dt><dd>'+Number(stats.completed||0)+'</dd></div><div><dt>まなび</dt><dd>'+Number(stats.units||0)+'</dd></div><div><dt>ぼうけん</dt><dd>'+trip.total+'マス</dd></div></dl></section>';
+    return '<section class="rpg-status" aria-label="Rihokoのステータス"><header><span>STATUS</span><b>Rihoko</b></header><div class="rpg-status__body"><button type="button" class="rpg-status__portrait" data-rihoko-preview aria-label="Rihokoの全身画像を大きく見る">'+portrait(false,level)+'<span>タップで大きく</span></button><div class="rpg-status__main"><p class="rpg-status__title">称号　<span>'+titleFor(level)+'</span></p><div class="rpg-status__level"><span>LV</span><b>'+level+'</b></div><div class="rpg-status__exp"><span>EXP</span><b>'+progress*100+' / 1000</b><i><em style="width:'+progress*10+'%"></em></i><small>NEXT　あと '+(10-progress)+' スタンプ</small></div></div></div><dl class="rpg-status__stats"><div><dt>がんばった日</dt><dd>'+Number(stats.totalDays||0)+'</dd></div><div><dt>できたこと</dt><dd>'+Number(stats.completed||0)+'</dd></div><div><dt>まなび</dt><dd>'+Number(stats.units||0)+'</dd></div><div><dt>ぼうけん</dt><dd>'+trip.total+'マス</dd></div></dl></section>';
   }
-  function showPortrait(){
+  function showPortrait(level){
     var old=document.getElementById('rihokoPortraitPreview');if(old)old.remove();
     var el=document.createElement('div');el.id='rihokoPortraitPreview';el.className='character-preview';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Rihokoの全身画像');
-    el.innerHTML='<section class="character-preview__card"><button type="button" class="character-preview__close" aria-label="閉じる">×</button><img src="rihoko-adventurer-v2.png?v=20261006-5" alt="Rihokoの冒険者 全身画像"><p>Rihoko</p></section>';
+    el.innerHTML='<section class="character-preview__card"><button type="button" class="character-preview__close" aria-label="閉じる">×</button><img src="'+imageFor(level)+'" alt="Rihokoの冒険者 全身画像"><p>Rihoko</p></section>';
     document.body.appendChild(el);var close=el.querySelector('button');function done(){el.remove();}
     close.onclick=done;el.onclick=function(e){if(e.target===el)done();};document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){document.removeEventListener('keydown',esc);done();}});close.focus();
   }
   function rolledKey(date){return 'riho-adventure-rolled-'+date;}
   function hasRolled(date){try{return root.localStorage.getItem(rolledKey(date))==='1';}catch(e){return false;}}
-  function markRolled(date){try{root.localStorage.setItem(rolledKey(date),'1');}catch(e){}}
+  function markRolled(date){try{root.localStorage.setItem(rolledKey(date),'1');return true;}catch(e){return false;}}
   function adventure(rewards,today){
-    var trip=journey(rewards),count=rewards.length,die=count?trip.steps[count-1]:0,earned=rewards.some(function(r){return r.date===today;}),rolled=earned&&hasRolled(today);
+    var trip=journey(rewards),count=rewards.length,die=trip.steps[rewards.findIndex(function(r){return r.date===today;})]||0,earned=rewards.some(function(r){return r.date===today;}),rolled=earned&&hasRolled(today);
     var shownTotal=trip.total-(earned&&!rolled?die:0);
     trip.total=shownTotal;
     var boardSize=30,map=Math.floor(shownTotal/boardSize)+1,pos=shownTotal%boardSize;
     var events={4:'⭐',9:'🎁',14:'🌈',19:'📚',24:'💎',29:'🏰'};
-    var cells=Array.from({length:boardSize},function(_,i){var n=i+1,current=i===pos;return '<div class="adventure-space '+(current?'is-current ':'')+(events[i]?'is-event':'')+'" style="--order:'+i+'"><small>'+n+'</small>'+(events[i]?'<span class="adventure-event">'+events[i]+'</span>':'')+(current?portrait(true):'')+'</div>';}).join('');
-    var action='';
+    var cells=Array.from({length:boardSize},function(_,i){var n=i+1,current=i===pos;return '<div class="adventure-space '+(current?'is-current ':'')+(events[i]?'is-event':'')+'" style="--order:'+i+'"><small>'+n+'</small>'+(events[i]?'<span class="adventure-event">'+events[i]+'</span>':'')+(current?portrait(true,levelFor(count)):'')+'</div>';}).join('');
+    var action='';var feedback=arrival(shownTotal,die);
     if(earned&&!rolled)action='<button type="button" class="adventure-roll" id="adventureRoll">🎲 今日のサイコロをふる</button>';
-    else if(earned)action='<p class="adventure-result" role="status">🎲 <b>'+die+'</b> が出て、'+die+'マス進んだよ！<br>マップ '+map+'・'+(pos+1)+'マス目に到着！</p>';
+    else if(earned)action='<p class="adventure-result" role="status">🎲 <b>'+die+'</b> が出て、'+die+'マス進んだよ！<br>マップ '+map+'・'+(pos+1)+'マス目に到着！<br>今日もがんばったね！'+feedback.found.map(function(t){return '<br>'+t.icon+' '+t.name+' をゲット！';}).join('')+'</p>';
     else action='<p class="adventure-result">次のスタンプでサイコロをふれるよ。</p>';
-    return '<section class="adventure-map"><div class="adventure-head"><div><p>Rihokoの大冒険</p><h3>ぼうけんマップ '+map+'</h3></div><div class="adventure-distance">合計 <b>'+trip.total+'</b> マス</div></div><div class="adventure-board" aria-label="30マスの冒険マップ">'+cells+'</div>'+action+'<p class="adventure-note">出る目は1〜6。戻るマスや罰ゲームはないよ。</p></section>';
+    return '<section class="adventure-map"><div class="adventure-head"><div><p>Rihokoの大冒険</p><h3>ぼうけんマップ '+map+'</h3></div><div class="adventure-distance">合計 <b>'+trip.total+'</b> マス</div></div><div class="adventure-board" aria-label="30マスの冒険マップ">'+cells+'</div>'+action+collection(shownTotal)+'<p class="adventure-note">出る目は1〜6。戻るマスや罰ゲームはないよ。</p></section>';
+  }
+  var treasures=[{icon:'⭐',name:'がんばりの星'},{icon:'🎁',name:'ひみつのプレゼント'},{icon:'🌈',name:'にじのリボン'},{icon:'📚',name:'知恵の本'},{icon:'💎',name:'きらめく宝石'},{icon:'🏰',name:'お城の勲章'}];
+  function treasureCounts(total){return treasures.map(function(_,i){return Math.max(0,Math.floor((total-(i*5+4))/30)+1);});}
+  function arrival(total,value){
+    var before=treasureCounts(total-value),after=treasureCounts(total);
+    var found=treasures.filter(function(_,i){return after[i]>before[i];});
+    return {found:found,title:found.length?'宝物をみつけた！':'一歩ずつ、前へ！',message:'今日もがんばったね！ '+value+'マス進んだよ。',total:total};
+  }
+  function collection(total){var counts=treasureCounts(total);return '<section class="adventure-treasures"><h4>あつめた宝物</h4><div>'+treasures.map(function(t,i){return '<span class="'+(counts[i]?'is-owned':'')+'">'+t.icon+' '+t.name+' <b>×'+counts[i]+'</b></span>';}).join('')+'</div><small>特別なマスは通っても到着しても獲得。これまでの冒険分も含むよ。</small></section>';}
+  function showArrival(result){
+    var old=document.getElementById('adventureCelebration');if(old)old.remove();
+    var previous=document.activeElement,el=document.createElement('div');el.id='adventureCelebration';el.className='level-celebration';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',result.title);
+    el.innerHTML='<section class="level-celebration__card"><h2>'+result.title+'</h2><div class="level-celebration__trophy">'+(result.found.length?result.found.map(function(t){return t.icon;}).join(''):'👏')+'</div><p>'+result.message+'</p>'+result.found.map(function(t){return '<p><b>'+t.name+' をゲット！</b></p>';}).join('')+'<p>マップ '+(Math.floor(result.total/30)+1)+'・'+(result.total%30+1)+'マス目に到着！</p><button type="button" class="level-celebration__close">やったね！</button></section>';
+    function close(){document.removeEventListener('keydown',key);el.remove();if(previous&&previous.isConnected)previous.focus();}
+    function key(e){if(e.key==='Escape')close();if(e.key==='Tab'){e.preventDefault();el.querySelector('button').focus();}}
+    el.querySelector('button').onclick=close;document.addEventListener('keydown',key);document.body.appendChild(el);el.querySelector('button').focus();
   }
   var rolling=false;
-  function roll(button,date,value,done){
+  function roll(button,date,value,done,total){
     if(!button||button.disabled||rolling||hasRolled(date))return;rolling=true;button.disabled=true;var n=0;
     var timer=setInterval(function(){button.textContent='🎲 '+(n%6+1);n++;if(n>=12){clearInterval(timer);button.textContent='🎲 '+value+'！';
       var board=document.querySelector('.adventure-board'),cells=board?Array.from(board.children):[],start=cells.findIndex(function(c){return c.classList.contains('is-current');}),step=0;
       function advance(){
-        if(step>=value){markRolled(date);rolling=false;done();return;}
+        if(step>=value){var saved=markRolled(date);rolling=false;done();if(saved&&Number.isFinite(total))showArrival(arrival(total,value));else if(!saved){var result=document.querySelector('.adventure-result')||document.getElementById('adventureRoll');if(result)result.textContent='冒険を保存できませんでした。もう一度ためしてね。';}return;}
         var prev=cells[(start+step)%30],next=cells[(start+step+1)%30],hero=prev&&prev.querySelector('img');
         if(hero&&next){prev.classList.remove('is-current');next.classList.add('is-current');next.appendChild(hero);}
         step++;setTimeout(advance,220);
@@ -4311,10 +4332,10 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
   function show(level){
     var old=document.getElementById('levelCelebration');if(old)old.remove();
     var el=document.createElement('div');el.id='levelCelebration';el.className='level-celebration';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-labelledby','levelCelebrationTitle');
-    el.innerHTML='<i class="firework" style="--x:18%;--y:23%;--c:#ffdb61;--d:0s"></i><i class="firework" style="--x:78%;--y:27%;--c:#ff7396;--d:.35s"></i><i class="firework" style="--x:28%;--y:72%;--c:#69e4d1;--d:.7s"></i><i class="firework" style="--x:83%;--y:73%;--c:#88b9ff;--d:1s"></i><section class="level-celebration__card"><h2 class="level-celebration__title" id="levelCelebrationTitle">LEVEL UP!</h2><div class="level-celebration__trophy" aria-hidden="true">🏆</div><div class="level-celebration__hero">'+portrait()+'<div class="level-celebration__level">Rihokoは<b>Lv. '+level+'</b>になった！</div></div><p class="level-celebration__message">スタンプ10こ、ゴールおめでとう！<br>がんばった力が またひとつ増えたよ。</p><button class="level-celebration__close" type="button">つぎの冒険へ！</button></section>';
+    el.innerHTML='<i class="firework" style="--x:18%;--y:23%;--c:#ffdb61;--d:0s"></i><i class="firework" style="--x:78%;--y:27%;--c:#ff7396;--d:.35s"></i><i class="firework" style="--x:28%;--y:72%;--c:#69e4d1;--d:.7s"></i><i class="firework" style="--x:83%;--y:73%;--c:#88b9ff;--d:1s"></i><section class="level-celebration__card"><h2 class="level-celebration__title" id="levelCelebrationTitle">LEVEL UP!</h2><div class="level-celebration__trophy" aria-hidden="true">🏆</div><div class="level-celebration__hero">'+portrait(false,level)+'<div class="level-celebration__level">Rihokoは<b>Lv. '+level+'</b>になった！</div></div><p class="level-celebration__message">スタンプ10こ、ゴールおめでとう！<br>髪型と衣装も変わったよ！ またひとつ成長したね。</p><button class="level-celebration__close" type="button">つぎの冒険へ！</button></section>';
     document.body.appendChild(el);var close=el.querySelector('button');function done(){el.remove();}close.onclick=done;el.onclick=function(e){if(e.target===el)done();};document.addEventListener('keydown',function esc(e){if(e.key==='Escape'){document.removeEventListener('keydown',esc);done();}});close.focus();
   }
-  var api={levelFor:levelFor,progressFor:progressFor,diceFor:diceFor,journey:journey,badge:badge,status:status,showPortrait:showPortrait,adventure:adventure,roll:roll,show:show};
+  var api={lookFor:lookFor,imageFor:imageFor,treasureCounts:treasureCounts,arrival:arrival,levelFor:levelFor,progressFor:progressFor,diceFor:diceFor,journey:journey,badge:badge,status:status,showPortrait:showPortrait,adventure:adventure,roll:roll,show:show};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RewardCelebration=api;
 })(typeof window!=='undefined'?window:this);
 
@@ -4841,7 +4862,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.10.20.7";
+  var APP_VERSION = "2026.11.11.1";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -6168,9 +6189,9 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var worksheetRetrySave = document.getElementById("worksheetRetrySave");
     if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
     app.querySelectorAll('[data-reward-game]').forEach(function(b){b.onclick=function(){RewardGames.open(b.dataset.rewardGame,gamesAvailable);};});
-    app.querySelectorAll('[data-rihoko-preview]').forEach(function(b){b.onclick=function(){if(typeof RewardCelebration!=="undefined")RewardCelebration.showPortrait();};});
+    app.querySelectorAll('[data-rihoko-preview]').forEach(function(b){b.onclick=function(){if(typeof RewardCelebration!=="undefined")RewardCelebration.showPortrait(RewardCelebration.levelFor(StudyKeepsakes.rewards().length));};});
     var adventureRoll=document.getElementById("adventureRoll");
-    if(adventureRoll&&typeof RewardCelebration!=="undefined")adventureRoll.onclick=function(){var rewards=StudyKeepsakes.rewards(),trip=RewardCelebration.journey(rewards),value=trip.steps[trip.steps.length-1];RewardCelebration.roll(adventureRoll,todayStr(),value,render);};
+    if(adventureRoll&&typeof RewardCelebration!=="undefined")adventureRoll.onclick=function(){var rewards=StudyKeepsakes.rewards(),trip=RewardCelebration.journey(rewards),value=trip.steps[rewards.findIndex(function(r){return r.date===todayStr();})];RewardCelebration.roll(adventureRoll,todayStr(),value,render,trip.total);};
     var worksheetBack = document.getElementById("worksheetBack");
     if (worksheetBack) worksheetBack.onclick = function(){
       state.worksheetSubject = null; state.worksheet = null; ++worksheetRequest; render();
