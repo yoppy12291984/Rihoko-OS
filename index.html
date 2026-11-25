@@ -4862,7 +4862,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.11.1";
+  var APP_VERSION = "2026.11.25.1";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5451,7 +5451,8 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var routines = state.routines.filter(function(r){return r.dailyLife;});
     html += routines.length ? routines.map(function(r){
       return '<div class="family-routine"><div class="family-preview-row"><b>' + escapeHtml(r.title) + '</b><button class="backlink" data-family-edit="' + escapeHtml(r.id) + '">変更する</button></div>' +
-        '<p class="ri-sub">' + (r.paused ? 'お休み中 ／ ' : '') + (r.days || []).slice().sort().map(function(d){return WEEK[d];}).join('・') + ' ／ ' + (DailySupport.periods[r.period] || 'いつでも') + '</p><button class="backlink" data-family-pause="' + escapeHtml(r.id) + '">' + (r.paused ? 'また表示する' : 'しばらくお休みする') + '</button><br>' +
+        '<p class="ri-sub">' + (r.paused ? 'お休み中 ／ ' : '') + (r.days || []).slice().sort().map(function(d){return WEEK[d];}).join('・') + ' ／ ' + (DailySupport.periods[r.period] || 'いつでも') + '</p><button class="backlink" data-family-pause="' + escapeHtml(r.id) + '">' + (r.paused ? 'また表示する' : 'しばらくお休みする') + '</button>' +
+        '<button type="button" class="backlink" style="color:var(--danger);min-height:44px;padding:8px 12px;" data-family-delete="' + escapeHtml(r.id) + '" aria-label="' + escapeHtml(r.title) + 'を削除">削除する</button><br>' +
         '<label class="skip-label">お休みの日<input type="date" data-family-skipdate="' + escapeHtml(r.id) + '" aria-label="' + escapeHtml(r.title) + 'のお休みの日"></label><button class="backlink" data-family-skip="' + escapeHtml(r.id) + '">この日は表示しない</button>' +
         '<div class="skip-chips">' + (r.skipDates || []).map(function(d){return '<button data-family-unskip="' + escapeHtml(r.id) + '" data-date="' + escapeHtml(d) + '">' + escapeHtml(d) + ' のお休みを取り消す</button>';}).join('') + '</div></div>';
     }).join('') : '<p class="ri-sub">上の「おくすり」「学校のじゅんび」から登録できます。</p>';
@@ -5459,6 +5460,20 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       (location.hostname === '127.0.0.1' || location.hostname === 'localhost' ? '<p class="ri-sub">いまはPC専用のプレビューです。ここでの登録は公開版に反映されません。新しい画面を家族で使うには公開版の更新が必要です。</p>' : '') +
       '<h3>お知らせについて</h3><p class="ri-sub">今は、ホームを開いたときに未チェックの項目を目立たせる仕組みです。アプリを閉じている間に音や通知で知らせる機能は未対応です。</p></div>';
     return html;
+  }
+
+  function requestRoutineDelete(id){
+    var routine = state.routines.find(function(r){return r.id === id;});
+    if (!routine) return false;
+    if (!window.confirm('「' + routine.title + '」を削除しますか？')) return false;
+    if (state.familyDraft && state.familyDraft.id === id) state.familyDraft = null;
+    if (state.editingRoutineId === id) {
+      state.editingRoutineId = null;
+      state.routineDaysSelected = [0,1,2,3,4,5,6];
+    }
+    state.familyMessage = '習慣を削除しました。';
+    persistDelete('routines',id);
+    return true;
   }
 
   function bindFamilyEvents(app){
@@ -5480,6 +5495,9 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       state.familyDraft = Object.assign({}, r, {days:(r.days || []).slice()}); state.familyMessage = ''; render();
       document.getElementById('familyTitle').focus();
     }; });
+    app.querySelectorAll('[data-family-delete]').forEach(function(b){b.onclick = function(){
+      requestRoutineDelete(b.getAttribute('data-family-delete'));
+    };});
     var cancel = document.getElementById('familyCancel');
     if (cancel) cancel.onclick = function(){state.familyDraft = null; render();};
     var form = document.getElementById('familyForm');
@@ -6480,7 +6498,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       };
     });
     app.querySelectorAll("[data-delroutine]").forEach(function(b){
-      b.onclick = function(){ persistDelete("routines", b.getAttribute("data-delroutine")); };
+      b.onclick = function(){ requestRoutineDelete(b.getAttribute("data-delroutine")); };
     });
     app.querySelectorAll("[data-addskip]").forEach(function(b){
       b.onclick = function(){
