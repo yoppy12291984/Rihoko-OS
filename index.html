@@ -286,6 +286,16 @@
 @media(max-width:480px){.review-study{padding:14px 14px 100px}.rs-card,.rs-question{padding:16px}.rs-prompt{font-size:18px}.rs-hero{padding:20px}.tabbar-inner{padding:6px 3px}.tab-item{font-size:10px}}
 
 </style>
+<style>
+.hc-card{display:flex;align-items:center;gap:20px;margin:18px 0 24px;padding:20px 24px;background:linear-gradient(120deg,#eff8f4,#f5f1ff);border:1px solid #d9e7e2;border-radius:24px;color:#304942;overflow:hidden}
+.hc-character{flex:0 0 128px;text-align:center}.hc-character img{display:block;width:128px;height:150px;object-fit:contain;object-position:bottom}.hc-character span{display:block;font-size:13px;color:#526760;margin-top:4px}
+.hc-bubble{position:relative;flex:1;min-width:0;border-radius:20px;background:#fff;padding:20px 24px;box-shadow:0 3px 14px #39544b08}.hc-bubble:before{content:"";position:absolute;left:-12px;top:40%;border-top:10px solid transparent;border-bottom:10px solid transparent;border-right:14px solid white}.hc-bubble h2{font-size:22px;line-height:1.5;margin:0 0 8px;color:#304942}.hc-bubble p{font-size:17px;line-height:1.9;margin:0;overflow-wrap:anywhere}.hc-bubble small{display:block;font-size:12px;color:#68766f;margin-top:10px}
+.hc-settings{margin:16px 0;padding:18px;border:1px solid #d9e7e2;border-radius:16px}.hc-settings summary{cursor:pointer;font-size:17px;font-weight:700}.hc-settings p{line-height:1.7}.hc-settings label{display:block;margin:14px 0}.hc-settings textarea{display:block;width:100%;box-sizing:border-box}.hc-times{display:grid;grid-template-columns:32px minmax(0,1fr) minmax(0,1fr);gap:10px;margin:18px 0;align-items:center}.hc-times input{min-width:0;width:100%;box-sizing:border-box}.hc-times b{font-size:14px}.hc-settings pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:300px;overflow:auto}
+@media(max-width:560px){.hc-card{gap:12px;padding:16px 12px;align-items:flex-start}.hc-character{flex-basis:76px;padding-top:8px}.hc-character img{width:76px;height:100px}.hc-character span{font-size:11px}.hc-bubble{padding:14px}.hc-bubble h2{font-size:19px}.hc-bubble p{font-size:16px;line-height:1.8}}
+@media print{.hc-card,.hc-settings{display:none}}
+.hc-event{margin:16px 0;padding:14px;border:1px solid #c8dad2;border-radius:12px;min-width:0}.hc-event input:not([type=checkbox]),.hc-event select{display:block;box-sizing:border-box;width:100%;min-width:0}.hc-event-times{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hc-event-settings{margin:20px 0}.hc-event input[type=checkbox]{width:auto}
+
+</style>
 </head>
 <body>
 <style>
@@ -4990,10 +5000,84 @@ window.ReviewPacks=[{"format":"rihoko-review-v1","id":"review-foundations","revi
 
 </script>
 <script>
+(function(root){
+  'use strict';
+  var KEY='rihoko-home-companion-v1', DAYS=['日','月','火','水','木','金','土'];
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function minute(v){if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(v||''))return null;return +v.slice(0,2)*60 + +v.slice(3);}
+  function dayKey(v){return /^\d{4}-\d{2}-\d{2}$/.test(v||'')&&!isNaN(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;}
+  function clock(now){var parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now||new Date()),p={};parts.forEach(function(x){p[x.type]=x.value;});var date=p.year+'-'+p.month+'-'+p.day;return {date:date,day:new Date(date+'T12:00:00+09:00').getUTCDay(),minute:+p.hour*60 + +p.minute};}
+  function defaults(){return {format:KEY,enabled:true,school:{},events:[],skipDates:[]};}
+  function validate(input){
+    var p=typeof input==='string'?JSON.parse(input):input;
+    if(!p||p.format!==KEY)throw Error('声かけ用の予定ファイルではありません。');
+    var result=defaults();result.enabled=p.enabled!==false;
+    if(!p.school||typeof p.school!=='object'||Array.isArray(p.school))throw Error('曜日ごとの時刻を確認してください。');
+    Object.keys(p.school).forEach(function(d){var v=p.school[d];if(!/^[0-6]$/.test(d)||!v||typeof v!=='object')throw Error('曜日を確認してください。');var depart=v.depart||'',home=v.home||'';if((depart&&minute(depart)===null)||(home&&minute(home)===null)||(depart&&home&&minute(depart)>=minute(home)))throw Error('登校・帰宅時刻を確認してください。');result.school[d]={depart:depart,home:home};});
+    if(!Array.isArray(p.skipDates)||p.skipDates.length>400||p.skipDates.some(function(d){return !dayKey(d);}))throw Error('お休みの日付を確認してください。');
+    result.skipDates=p.skipDates.slice();
+    if(!Array.isArray(p.events)||p.events.length>100)throw Error('予定は100件までです。');
+    result.events=p.events.map(function(e){
+      if(!e||typeof e.title!=='string'||!e.title.trim()||e.title.length>60||minute(e.time)===null||(e.endTime&&minute(e.endTime)===null)||(e.endTime&&minute(e.endTime)<=minute(e.time))||(e.departTime&&(minute(e.departTime)===null||minute(e.departTime)>minute(e.time)))||(e.homeTime&&(minute(e.homeTime)===null||minute(e.homeTime)<minute(e.endTime||e.time))))throw Error('予定の名前・開始・終了・出発・帰宅時刻を確認してください。');
+      if(e.recurring){if(!Array.isArray(e.days)||!e.days.length||e.days.some(function(d){return !Number.isInteger(d)||d<0||d>6;}))throw Error('予定の曜日を確認してください。');}else if(!dayKey(e.date))throw Error('予定の日付を確認してください。');
+      ['startDate','endDate'].forEach(function(k){if(e[k]&&!dayKey(e[k]))throw Error('予定の期間を確認してください。');});
+      if(e.startDate&&e.endDate&&e.startDate>e.endDate)throw Error('予定の期間が逆になっています。');
+      var skip=e.skipDates||[];if(!Array.isArray(skip)||skip.some(function(d){return !dayKey(d);}))throw Error('予定のお休みの日を確認してください。');
+      return {title:e.title.trim(),time:e.time,endTime:e.endTime||'',departTime:e.departTime||'',homeTime:e.homeTime||'',recurring:!!e.recurring,days:e.recurring?e.days.slice():[],date:e.date||'',startDate:e.startDate||'',endDate:e.endDate||'',skipDates:skip.slice(),paused:!!e.paused};
+    });
+    return result;
+  }
+  function createStore(storage){var config=defaults(),error='';try{var raw=storage.getItem(KEY);if(raw)config=validate(raw);}catch(e){error='保存した声かけの設定を読めませんでした。元の記録はそのまま残しています。';}
+    return {get:function(){return JSON.parse(JSON.stringify(config));},error:function(){return error;},save:function(p){var next=validate(p);storage.setItem(KEY,JSON.stringify(next));config=next;error='';return next;}};
+  }
+  function occurs(e,c){if(!e||e.paused||e.deleted||(e.skipDates||[]).indexOf(c.date)>=0)return false;if(e.startDate&&c.date<e.startDate)return false;if(e.endDate&&c.date>e.endDate)return false;return e.recurring?(e.days||[]).indexOf(c.day)>=0:e.date===c.date;}
+  function choose(now,config,events){
+    var c=clock(now),p=config||defaults(),m=c.minute,off=(p.skipDates||[]).indexOf(c.date)>=0,school=(p.school||{})[c.day]||{};
+    function msg(kind,title,text,context){return {kind:kind,title:title,text:text,context:context||'',date:c.date};}
+    if(m<300||m>=1260)return msg('night','今日も、おつかれさま。','今日はここまででも大丈夫。あたたかくして、ゆっくり休もうね。');
+    if(off)return msg('rest','今日は、ゆったりいこう。','予定の声かけはお休み。自分のペースで過ごしてね。');
+    var list=(events||[]).concat(p.events||[]).filter(function(e){return occurs(e,c)&&minute(e.time)!==null;});
+    function prep(e){var d=minute(e.departTime);return d===null?minute(e.time):d;}
+    var upcoming=list.filter(function(e){return m>=prep(e)-45&&m<=minute(e.time);}).sort(function(a,b){return minute(a.time)-minute(b.time);})[0];
+    if(upcoming)return msg('before','そろそろ、じゅんびの時間。','「'+upcoming.title+'」の予定が近づいてきたね。あわてず、持ち物をたしかめよう。',upcoming.departTime?upcoming.departTime+' ごろ出発のめやす':upcoming.time+' の予定');
+    var active=list.some(function(e){return minute(e.time)<=m&&minute(e.endTime)!==null&&m<minute(e.endTime);});
+    var returned=list.filter(function(e){var h=minute(e.homeTime);return h!==null&&m>=h&&m<h+90;}).sort(function(a,b){return minute(b.homeTime)-minute(a.homeTime);})[0];
+    if(!active&&returned)return msg('home','おかえり！','「'+returned.title+'」から帰ってきたら、まずはひと休み。ゆっくり過ごそうね。','帰宅のめやすに合わせて');
+    var after=list.filter(function(e){var end=minute(e.endTime);return !e.homeTime&&end!==null&&end>minute(e.time)&&m>=end&&m<end+90;}).sort(function(a,b){return minute(b.endTime)-minute(a.endTime);})[0];
+    if(!active&&after)return msg('after','ひと息つこう。','「'+after.title+'」の予定がひと区切りのころだね。まずは、ゆっくりしてね。','予定に合わせた声かけ');
+    var home=minute(school.home),depart=minute(school.depart);
+    if(!active&&home!==null&&m>=home&&m<home+90)return msg('home','おかえり！','帰ってきたら、まずはひと休み。今日はどんな一日だったかな？','帰宅のめやすに合わせて');
+    if(depart!==null&&m>=depart-60&&m<depart)return msg('school','おはよう！ いってらっしゃい。','今日も、自分のペースでいこうね。持ち物はそろったかな？');
+    if(m<660)return msg('morning','おはよう！','今日も一日、自分のペースでいこう。小さな「できた」が見つかるといいね。');
+    if(m>=1080)return msg('evening','今日も、おつかれさま。','がんばる時間も、休む時間も大切。今は、ほっとひと息ついてね。');
+    var variants=['会えてうれしいな。今日はどんなことがあった？','あわてなくて大丈夫。ひとつずつ、自分のペースでいこう。','ちょっとひと休みするのもいいね。今の気分を大切にしよう。'];
+    return msg('day','こんにちは！',variants[Number(c.date.replace(/-/g,''))%variants.length]);
+  }
+  function card(message){return '<section class="hc-card" aria-label="キャラクターからのひとこと"><div class="hc-character"><img src="detective-kotone-v2.png" alt="やさしくほほえむキャラクター" width="128" height="150"><span>きょうのひとこと</span></div><div class="hc-bubble"><h2>'+esc(message.title)+'</h2><p>'+esc(message.text)+'</p>'+(message.context?'<small>'+esc(message.context)+'</small>':'')+'</div></section>';}
+  var store=null,eventsProvider=function(){return [];};
+  function getStore(){if(!store)store=createStore(root.localStorage);return store;}
+  function refresh(){var host=root.document&&root.document.getElementById('homeCompanion');if(!host)return;var p=getStore().get();var html=p.enabled?card(choose(new Date(),p,eventsProvider())):'';if(host.innerHTML!==html)host.innerHTML=html;}
+  function mount(provider){eventsProvider=provider||eventsProvider;refresh();var admin=root.document.getElementById('homeCompanionAdmin');if(admin)mountAdmin(admin);}
+  function eventEditor(e){return '<fieldset class="hc-event"><legend>習い事・お出かけ</legend><label>予定の名前<input data-hc-field="title" maxlength="60" value="'+esc(e.title)+'"></label><label>曜日（複数選べます）<select data-hc-field="days" multiple size="3">'+DAYS.map(function(d,i){return '<option value="'+i+'" '+((e.days||[]).indexOf(i)>=0?'selected':'')+'>'+d+'曜日</option>';}).join('')+'</select></label><div class="hc-event-times">'+[['time','開始'],['endTime','終了（任意）'],['departTime','出発のめやす（任意）'],['homeTime','帰宅のめやす（任意）']].map(function(x){return '<label>'+x[1]+'<input type="time" data-hc-field="'+x[0]+'" value="'+esc(e[x[0]])+'"></label>';}).join('')+'</div><label>この日だけの予定（毎週なら空欄）<input type="date" data-hc-field="date" value="'+esc(e.recurring?'':e.date)+'"></label><label>開始日（任意）<input type="date" data-hc-field="startDate" value="'+esc(e.startDate)+'"></label><label>終了日（決まったときに）<input type="date" data-hc-field="endDate" value="'+esc(e.endDate)+'"></label><label>この予定を休む日（1行に1日）<textarea data-hc-field="skipDates" rows="2">'+esc((e.skipDates||[]).join('\n'))+'</textarea></label><label><input type="checkbox" data-hc-field="paused" '+(e.paused?'checked':'')+'> この予定をしばらく休む</label><label><input type="checkbox" data-hc-field="remove"> 保存するときにこの予定を削除する</label></fieldset>';}
+  function mountAdmin(host){var db=getStore(),p=db.get();host.innerHTML='<details class="hc-settings"><summary>キャラクターの声かけと予定</summary><p>日本時間の時間帯と、このアプリの「予定・ToDo」に登録した予定に合わせます。帰宅は時刻からの目安です。位置や実際の出席は確認しません。</p><p>ここで追加する設定はこの端末だけに保存します。チャットで作った予定ファイルも取り込めます。</p><form data-hc-form><label><input type="checkbox" name="enabled" '+(p.enabled?'checked':'')+'> 声かけを表示する</label><div class="hc-times"><b>曜日</b><b>登校のめやす</b><b>帰宅のめやす</b>'+DAYS.map(function(d,i){var s=p.school[i]||{};return '<span>'+d+'</span><input aria-label="'+d+'曜の登校時刻" type="time" name="depart'+i+'" value="'+esc(s.depart)+'"><input aria-label="'+d+'曜の帰宅時刻" type="time" name="home'+i+'" value="'+esc(s.home)+'">';}).join('')+'</div><label>予定に合わせた声かけを休む日（1行に1日、例：2026-12-01）<textarea name="skipDates" rows="3">'+esc(p.skipDates.join('\n'))+'</textarea></label><button class="btn-primary" type="submit">声かけの設定を保存</button></form><p data-hc-status role="status">'+esc(db.error())+'</p><p>追加の予定：'+p.events.length+'件</p>'+(p.events.length?'<ul>'+p.events.map(function(e){return '<li>'+esc(e.title)+' / '+esc(e.recurring?e.days.map(function(d){return DAYS[d];}).join('・'):e.date)+' '+esc(e.time)+(e.endTime?'〜'+esc(e.endTime):'')+'</li>';}).join('')+'</ul>':'')+'<label>チャットで作った予定ファイルを取り込む<input data-hc-import type="file" accept=".json,application/json"></label><p>取り込み前に内容を表示します。今の声かけ用設定と置き換わります。アプリの予定・ToDoは変更しません。</p><div data-hc-preview></div></details>';
+    var status=host.querySelector('[data-hc-status]');
+    host.querySelector('[type="submit"]').insertAdjacentHTML('beforebegin','<details class="hc-event-settings"><summary>習い事・お出かけの予定を編集（'+p.events.length+'件）</summary><p>時刻は声かけのめやすです。終了時刻が分からない予定は空欄にできます。</p><div data-hc-events>'+p.events.map(eventEditor).join('')+'</div><button type="button" data-hc-add>予定を追加する</button></details>');
+    host.querySelector('[data-hc-add]').onclick=function(){host.querySelector('[data-hc-events]').insertAdjacentHTML('beforeend',eventEditor({days:[]}));};
+    host.querySelector('form').onsubmit=function(e){e.preventDefault();var f=e.currentTarget,next=db.get();next.enabled=f.elements.enabled.checked;next.school={};DAYS.forEach(function(_,i){next.school[i]={depart:f.elements['depart'+i].value,home:f.elements['home'+i].value};});next.skipDates=f.elements.skipDates.value.split(/\s+/).filter(Boolean);
+      next.events=Array.from(host.querySelectorAll('.hc-event')).filter(function(row){return !row.querySelector('[data-hc-field="remove"]').checked;}).map(function(row){var x={};row.querySelectorAll('[data-hc-field]').forEach(function(el){var k=el.dataset.hcField;if(k==='remove')return;x[k]=k==='paused'?el.checked:k==='days'?Array.from(el.selectedOptions).map(function(o){return +o.value;}):k==='skipDates'?el.value.split(/\s+/).filter(Boolean):el.value.trim();});x.recurring=!x.date;return x;});
+      try{db.save(next);mountAdmin(host);host.querySelector('details').open=true;host.querySelector('[data-hc-status]').textContent='この端末に保存しました。';}catch(err){status.textContent='保存できませんでした。'+err.message;}};
+    host.querySelector('[data-hc-import]').onchange=async function(e){var file=e.target.files[0],preview=host.querySelector('[data-hc-preview]');preview.innerHTML='';if(!file)return;try{if(file.size>100000)throw Error('ファイルが大きすぎます。');var next=validate(await file.text());preview.innerHTML='<p>この内容で声かけの設定を置き換えます。</p><pre>'+esc(JSON.stringify(next,null,2))+'</pre><button type="button" data-hc-apply>この予定を使う</button>';preview.querySelector('button').onclick=function(){try{db.save(next);mountAdmin(host);host.querySelector('details').open=true;host.querySelector('[data-hc-status]').textContent='予定を取り込みました。';}catch(err){status.textContent='保存できませんでした。'+err.message;}};}catch(err){status.textContent='取り込めませんでした。'+err.message;}};
+  }
+  var api={clock:clock,defaults:defaults,validate:validate,createStore:createStore,choose:choose,card:card,mount:mount,refresh:refresh};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else {root.HomeCompanion=api;root.document.addEventListener('visibilitychange',function(){if(!root.document.hidden)refresh();});root.addEventListener('pageshow',refresh);root.setInterval(function(){if(!root.document.hidden)refresh();},60000);}
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.25.2";
+  var APP_VERSION = "2026.11.25.3";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5260,6 +5344,7 @@ window.ReviewPacks=[{"format":"rihoko-review-v1","id":"review-foundations","revi
     document.body.classList.toggle("hide-reading", !isParent && !state.showReading);
     app.innerHTML = isParent ? renderParent() : renderChild();
     bindEvents();
+    if(window.HomeCompanion) HomeCompanion.mount(function(){return state.events;});
     if (window.LearningContent) LearningContent.mount(document.getElementById('learningContent'),isParent);
     if (window.ReviewStudy) ReviewStudy.mount(document.getElementById(isParent?'reviewAdmin':'reviewContent'),isParent);
     if(contentSelection){var restored=Array.from(app.querySelectorAll('#learningContent textarea')).find(function(el){return contentSelection.isImport?el.hasAttribute('data-import-text'):el.getAttribute('data-answer')===contentSelection.answer;});if(restored){restored.focus({preventScroll:true});restored.setSelectionRange(contentSelection.start,contentSelection.end);}}
@@ -5342,6 +5427,7 @@ window.ReviewPacks=[{"format":"rihoko-review-v1","id":"review-foundations","revi
     var html = '<div class="greeting"><p class="hello">' + greetingWord() + '</p>' +
       '<p class="date">' + fmtDateLong(today) + '</p></div>';
 
+    html += '<div id="homeCompanion"></div>';
     html += dayNavigation(today);
     var completed = todays.filter(function(t){ return t.done; }).length;
     var pending = todays.filter(function(t){ return !t.done; });
@@ -5679,7 +5765,7 @@ window.ReviewPacks=[{"format":"rihoko-review-v1","id":"review-foundations","revi
       ptab("history","学習履歴") + ptab("content","教材・学習記録") + ptab("more","その他の設定") +
       '</div>';
 
-    if (state.parentTab === "family") html += renderFamily();
+    if (state.parentTab === "family") html += renderFamily()+'<section id="homeCompanionAdmin"></section>';
     else if (state.parentTab === "schedule") html += renderParentSchedule();
     else if (state.parentTab === "calendar") html += renderParentCalendar();
     else if (state.parentTab === "units") html += renderParentUnits();
