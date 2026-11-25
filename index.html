@@ -272,6 +272,20 @@
 
 .adventure-space .level-portrait--compact{object-fit:cover;object-position:50% 12%}
 </style>
+<style>
+.review-study{max-width:820px;margin:0 auto;padding:18px 22px 110px;color:var(--ink,#263b37);line-height:1.85}
+.review-study button{min-height:44px;padding:10px 16px;border:1px solid #b7d5cc;border-radius:14px;background:#fff;color:#235b4f;cursor:pointer;font:inherit;touch-action:manipulation}
+.review-study button:disabled{opacity:.45;cursor:default}.review-study button[aria-pressed=true],.review-study button[aria-current=step]{background:#dcefe8;border-color:#28735d;font-weight:700}
+.review-study h2{font-size:24px;line-height:1.5}.review-study h3{font-size:19px}.review-study textarea{display:block;width:100%;box-sizing:border-box;font:inherit;min-height:90px;padding:12px;border:1px solid #b7d5cc;border-radius:10px;background:#fff;color:#263b37}
+.review-study label{display:block}.review-study blockquote{margin:10px 0;padding:18px;background:#f3f6f4;border-left:4px solid #77a795;white-space:pre-wrap}
+.rs-hero{padding:24px;border-radius:24px;background:linear-gradient(120deg,#e8f4ed,#fff5de)}.rs-eyebrow{font-size:13px;letter-spacing:.08em;color:#427460}.rs-note,.rs-card small{font-size:13px;color:#5f716a}
+.rs-card,.rs-question{margin:14px 0;padding:22px;border:1px solid #d2e2dc;border-radius:20px;background:var(--card,#fff)}.rs-card h3{margin:6px 0}.rs-card p{font-size:14px}.rs-card button{margin:4px}.review-study .rs-quiet{border:0;background:transparent;font-size:13px}
+.rs-prompt{font-size:19px;white-space:pre-wrap;line-height:1.9}.rs-cubes{display:block;width:min(100%,380px);height:auto;margin:15px auto}.rs-actions,.rs-ratings,.rs-steps{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.rs-hint,.rs-solution{padding:18px;border-radius:14px;margin:16px 0;white-space:pre-wrap}.rs-hint{background:#fff5d9}.rs-solution{background:#eaf4ef}.review-study details{padding:12px 0}.review-study summary{cursor:pointer;min-height:38px}.review-study fieldset{border:1px solid #d2e2dc;border-radius:14px;padding:12px;margin-top:20px}.review-study legend{font-size:14px}.review-study [role=status]{font-size:13px}
+.tabbar-inner{gap:2px}.tab-item{font-size:11px;white-space:nowrap}.nav-art--review{background:#e9f3df;color:#49752f}
+@media(max-width:480px){.review-study{padding:14px 14px 100px}.rs-card,.rs-question{padding:16px}.rs-prompt{font-size:18px}.rs-hero{padding:20px}.tabbar-inner{padding:6px 3px}.tab-item{font-size:10px}}
+
+</style>
 </head>
 <body>
 <style>
@@ -4786,7 +4800,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       var packs=store.packs(),p=selection&&packs.find(function(x){return x.id===selection.pack;}),l=p&&p.lessons.find(function(x){return x.id===selection.lesson;});
       document.body.classList.toggle('app--lesson-active',!!l&&!parent);
       if(parent){
-        host.innerHTML='<h2>ここで作った教材</h2><p>チャットで作成した教材ファイルを取り込むと、「まなぶ」から使えます。取り込みはこの端末に保存されます。</p><p>回答・ヒント・ふり返りもこの端末だけに保存します。次の教材を相談するときは記録を保存してチャットへ添付してください。</p><button data-export>学習記録をファイルに保存</button><details data-results><summary>記録をコピーして渡す</summary><p>ファイル保存ができない場合は、下のデータを全選択してコピーし、チャットに貼り付けてください。</p><button data-show-results>記録データを表示</button><label>書き出した学習記録<textarea data-results-text readonly rows="5">'+esc(exportText)+'</textarea></label></details><h3>教材を追加する</h3><label>教材ファイル（JSON）<input type="file" accept=".json,application/json" data-import-file></label><details><summary>教材データを貼り付けて取り込む</summary><label>教材データ<textarea data-import-text rows="5" maxlength="500000">'+esc(importDraft)+'</textarea></label><button data-import>取り込む</button></details><p role="status" data-message>'+esc(message)+'</p><h3>使える教材</h3>'+packs.map(function(pack){var done=0;pack.lessons.forEach(function(lesson){lesson.questions.forEach(function(q){if(store.response(pack,lesson,q).rating)done++;});});return '<article><h4>'+esc(pack.title)+'</h4><p>'+pack.lessons.length+'レッスン · ふり返り '+done+'問</p><button data-export-pack="'+esc(pack.id)+'">この教材をファイルに保存</button></article>';}).join('');
+        host.innerHTML='<h2>ここで作った教材</h2><p>チャットで作成した教材ファイルを取り込むと、「探偵クイズ」から使えます。取り込みはこの端末に保存されます。</p><p>回答・ヒント・ふり返りもこの端末だけに保存します。次の教材を相談するときは記録を保存してチャットへ添付してください。</p><button data-export>学習記録をファイルに保存</button><details data-results><summary>記録をコピーして渡す</summary><p>ファイル保存ができない場合は、下のデータを全選択してコピーし、チャットに貼り付けてください。</p><button data-show-results>記録データを表示</button><label>書き出した学習記録<textarea data-results-text readonly rows="5">'+esc(exportText)+'</textarea></label></details><h3>教材を追加する</h3><label>教材ファイル（JSON）<input type="file" accept=".json,application/json" data-import-file></label><details><summary>教材データを貼り付けて取り込む</summary><label>教材データ<textarea data-import-text rows="5" maxlength="500000">'+esc(importDraft)+'</textarea></label><button data-import>取り込む</button></details><p role="status" data-message>'+esc(message)+'</p><h3>使える教材</h3>'+packs.map(function(pack){var done=0;pack.lessons.forEach(function(lesson){lesson.questions.forEach(function(q){if(store.response(pack,lesson,q).rating)done++;});});return '<article><h4>'+esc(pack.title)+'</h4><p>'+pack.lessons.length+'レッスン · ふり返り '+done+'問</p><button data-export-pack="'+esc(pack.id)+'">この教材をファイルに保存</button></article>';}).join('');
         function prepareResults(){exportText=JSON.stringify(store.exportResults(),null,2);host.querySelector('[data-results-text]').value=exportText;host.querySelector('[data-results]').open=true;} host.querySelector('[data-show-results]').onclick=function(){try{prepareResults();}catch(e){host.querySelector('[data-message]').textContent='読み込めませんでした：'+e.message;}}; host.querySelector('[data-export]').onclick=function(){try{prepareResults();download(exportText,'Rihoko-学習記録.json','application/json');host.querySelector('[data-message]').textContent='ファイルの保存先を確認してください。保存できない場合は記録データをコピーできます。';}catch(e){host.querySelector('[data-message]').textContent='保存できませんでした：'+e.message;}};
         host.querySelector('[data-import-text]').oninput=function(e){importDraft=e.target.value;};
         function take(raw){try{var pack=store.importPack(raw);message=pack.title+'を取り込みました。';importDraft='';}catch(e){message='取り込めませんでした：'+e.message;}mount(host,true);}
@@ -4799,7 +4813,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
         var subjects=['算数','国語','英語','理科','社会'],icons=['123','文','ABC','葉','地図'];
         var entries=[];packs.forEach(function(pack){pack.lessons.forEach(function(lesson){entries.push({pack:pack,lesson:lesson});});});
         var available=entries.filter(function(e){return e.lesson.subject===subjectSelection;});
-        host.innerHTML=todayHtml()+'<details class="lc-library"><summary>ほかの問題を選ぶ（やりたいときだけ）</summary><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>教科をえらんで、今日のなぞを一つ。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+'の調査ファイル</h3><div class="lc-file-list">'+available.map(function(entry,i){var pack=entry.pack,lesson=entry.lesson,n=lesson.questions.filter(function(q){return !!store.response(pack,lesson,q).rating;}).length;return '<button class="lc-lesson lc-case-file" data-pack="'+esc(pack.id)+'" data-lesson="'+esc(lesson.id)+'"><small>FILE '+String(i+1).padStart(2,'0')+' · '+esc(lesson.level||lesson.subject)+'</small><strong>'+esc(lesson.title)+'</strong><span>'+esc(lesson.time)+' · '+lesson.questions.length+'問'+(n?' · 記録 '+n+'/'+lesson.questions.length:'')+(store.progress(pack,lesson).earned?' · ★ 獲得済み':'')+' →</span></button>';}).join('')+'</div>'+(available.length?'':'<p>この教科の教材は、まだありません。</p>')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></details>'+albumHtml();
+        host.innerHTML='<section class="lc-library"><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>教科をえらんで、気になるなぞを一つ。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+'の調査ファイル</h3><div class="lc-file-list">'+available.map(function(entry,i){var pack=entry.pack,lesson=entry.lesson,n=lesson.questions.filter(function(q){return !!store.response(pack,lesson,q).rating;}).length;return '<button class="lc-lesson lc-case-file" data-pack="'+esc(pack.id)+'" data-lesson="'+esc(lesson.id)+'"><small>FILE '+String(i+1).padStart(2,'0')+' · '+esc(lesson.level||lesson.subject)+'</small><strong>'+esc(lesson.title)+'</strong><span>'+esc(lesson.time)+' · '+lesson.questions.length+'問'+(n?' · 記録 '+n+'/'+lesson.questions.length:'')+(store.progress(pack,lesson).earned?' · ★ 獲得済み':'')+' →</span></button>';}).join('')+'</div>'+(available.length?'':'<p>この教科の教材は、まだありません。</p>')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></section>'+albumHtml();
         var todayButton=host.querySelector('[data-start-today]');if(todayButton)todayButton.onclick=function(){startToday();mount(host,false);host.scrollIntoView({block:'start'});};
         bindAlbum(host);
         host.querySelectorAll('[data-subject]').forEach(function(b){b.onclick=function(){subjectSelection=b.dataset.subject;mount(host,false);host.querySelector('.lc-library').open=true;};});
@@ -4859,10 +4873,127 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 
 </script>
 <script>
+window.ReviewPacks=[{"format":"rihoko-review-v1","id":"review-foundations","revision":1,"title":"ひとつずつ、考え方のおさらい","lessons":[{"id":"gaps","subject":"算数","title":"あいだは、いくつ？","minutes":3,"questions":[{"prompt":"赤い石を8こ、横一列にならべます。赤い石と赤い石のあいだ全部に、白い石を1こずつ入れます。石は全部で何こになりますか。","hint":"まず赤い石を3こだけかいて、あいだの数をたしかめてみよう。","answer":"15こ","explanation":"赤い石が8こなら、あいだは8−1＝7か所。白い石は7こです。全部で8＋7＝15こ。両はしの外には置かないので、白い石は赤い石より1こ少なくなります。"},{"prompt":"青い石を11こ、横一列にならべます。青い石と青い石のあいだ全部に、白い石を1こずつ入れます。石は全部で何こになりますか。","hint":"白い石を入れる「あいだ」は何か所かな。","answer":"21こ","explanation":"あいだは11−1＝10か所。青11こ＋白10こ＝21こです。"}]},{"id":"groups","subject":"算数","title":"何の人数を聞かれたかな","minutes":3,"questions":[{"prompt":"クラスは32人で、女の子は15人です。男の子のうち、ぼうしをかぶっている人は5人です。ぼうしをかぶっていない男の子は何人ですか。","hint":"答えるのはクラス全員のこと？ 男の子だけのこと？","answer":"12人","explanation":"まず男の子の人数を調べます。32−15＝17人。その17人から、ぼうしをかぶった5人を引いて、17−5＝12人です。"},{"prompt":"クラスは30人で、女の子は16人です。男の子のうち、青いかばんを持っている人は6人です。青いかばんを持っていない男の子は何人ですか。","hint":"まず、男の子は全部で何人かな。","answer":"8人","explanation":"男の子は30−16＝14人。そのうち青いかばんを持っていない人は14−6＝8人です。"}]},{"id":"shared-edges","subject":"算数","title":"つながるところは一度だけ","minutes":4,"questions":[{"prompt":"竹ひごとねんど玉で、図のように立方体を2こ、横につなぎます。となり合う面の竹ひごとねんど玉は共通で使います。ねんど玉は全部で何こ、竹ひごは全部で何本いりますか。","diagram":2,"hint":"つながる面にあるねんど玉と竹ひごは、2回数えていないかな。","answer":"ねんど玉12こ、竹ひご20本","explanation":"立方体1こは、玉8こ・竹ひご12本です。2こ目では、つながる面の玉4こ・竹ひご4本を共通で使います。玉は8＋4＝12こ、竹ひごは12＋8＝20本です。"},{"prompt":"同じ作り方で、立方体を3こ、横につなぎます。ねんど玉は全部で何こ、竹ひごは全部で何本いりますか。","diagram":3,"hint":"立方体をもう1こつなぐと、新しく必要になる玉と竹ひごはいくつかな。","answer":"ねんど玉16こ、竹ひご28本","explanation":"1こつなぐたびに玉は4こ、竹ひごは8本ふえます。玉は8＋4＋4＝16こ、竹ひごは12＋8＋8＝28本です。"}]},{"id":"containers","subject":"算数","title":"箱の外もわすれずに","minutes":4,"questions":[{"prompt":"あめを2こずつ袋に入れ、その袋を3袋ずつかごに入れます。かごは4こずつ箱に入れます。箱が1箱、箱の外にかごが1こ、さらに袋が2袋あります。あめの入った袋は全部で何袋ですか。","hint":"聞かれているのは、あめの数？ 袋の数？ 箱の中と外に分けてみよう。","answer":"17袋","explanation":"1箱の中は3×4＝12袋。外のかごに3袋、さらに2袋あります。12＋3＋2＝17袋です。袋の数を聞かれているので、1袋のあめ2こは使いません。"},{"prompt":"あめを2こずつ袋に入れ、その袋を3袋ずつかごに入れます。かごは4こずつ箱に入れます。箱が1箱、箱の外にかごが2こ、さらに袋が2袋あります。あめは全部で何こありますか。","hint":"先に袋の数を出して、そのあと1袋に何こ入っているか考えよう。","answer":"40こ","explanation":"袋は、箱の中12袋＋外のかごの6袋＋2袋＝20袋。1袋に2こなので、20＋20＝40こです。"}]},{"id":"balance","subject":"算数","title":"同じ重さにおきかえる","minutes":3,"questions":[{"prompt":"赤いおもり2こと青いおもり3こは、同じ重さです。赤いおもり4こと黄色いおもり2こも、同じ重さです。黄色いおもり1こは、青いおもり何こと同じ重さですか。","hint":"赤いおもりの数をそろえると、くらべやすくならないかな。","answer":"3こ","explanation":"赤2こ＝青3こなので、赤4こ＝青6こです。赤4こ＝黄2こでもあるので、黄2こ＝青6こ。半分ずつにすると黄1こ＝青3こになります。"},{"prompt":"丸いおもり2こと四角いおもり4こは、同じ重さです。丸いおもり6こと三角のおもり3こも、同じ重さです。三角のおもり1こは、四角いおもり何こと同じ重さですか。","hint":"丸6こは、丸2この何組分かな。","answer":"4こ","explanation":"丸2こ＝四角4この3組分で、丸6こ＝四角12こ。三角3こ＝四角12こだから、三角1こ＝四角4こです。"}]},{"id":"quote","subject":"国語","title":"文の言葉？ 自分の言葉？","minutes":3,"questions":[{"passage":"あやは公園に向かっていました。雨がふってきたので、近くの木の下で雨やどりをしました。しばらくすると、お母さんがかさを持って来てくれました。","prompt":"あやが雨やどりをした理由がわかる言葉を、文からそのまま抜き出しましょう。","hint":"答えは、文の中の言葉を使う？ 自分の言葉で書く？","answer":"雨がふってきたので","explanation":"「抜き出す」は、文に書いてある言葉をそのまま使うことです。「雨がふってきた」でも理由は表せます。「雨にぬれたくなかったから」は考えとして自然でも、文にそのまま書かれていないので、この問いの答え方とは違います。"},{"passage":"ゆいは家の前で、小さなねこを見つけました。ねこがふるえていたので、ゆいはお母さんを呼びました。お母さんはタオルを持って来ました。","prompt":"ゆいがお母さんを呼んだ理由がわかる言葉を、文からそのまま抜き出しましょう。","hint":"「抜き出しましょう」とあるね。答え方をもう一度たしかめよう。","answer":"ねこがふるえていたので","explanation":"理由が書かれている言葉をそのまま使います。「ねこがふるえていた」でも理由を表しています。書いた答えと文の言葉を一文字ずつくらべてみましょう。"}]}]}];
+</script>
+<script>
+/* 塾の復習。問題・初回の答え・援助・再挑戦を分け、端末内に保存する。 */
+(function(root){
+  'use strict';
+  var KEY='rihoko-review-v1', ratings={self:'自分でできた',reread:'設問を読み直すとできた',hint:'ヒントでできた',explain:'解説を読んでわかった',later:'また今度ためす'};
+  function copy(v){return JSON.parse(JSON.stringify(v));}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function text(v,max){if(typeof v!=='string'||!v.trim()||v.length>max)throw Error('教材の文字数・形式を確認してください。');return v;}
+  function ident(v){if(typeof v!=='string'||!/^[a-z0-9][a-z0-9-]{0,79}$/.test(v))throw Error('教材IDの形式が違います。');return v;}
+  function validatePack(raw){
+    if(typeof raw==='string'){if(raw.length>300000)throw Error('教材は300KB以内にしてください。');raw=JSON.parse(raw);}
+    if(!raw||raw.format!=='rihoko-review-v1'||!Number.isInteger(raw.revision)||raw.revision<1||raw.revision>9999)throw Error('復習教材の形式・版が違います。');
+    var p={format:raw.format,id:ident(raw.id),revision:raw.revision,title:text(raw.title,120),lessons:[]};
+    if(!Array.isArray(raw.lessons)||!raw.lessons.length||raw.lessons.length>50)throw Error('教材は1〜50件にしてください。');
+    var seen=[];
+    p.lessons=raw.lessons.map(function(l){
+      var id=ident(l.id);if(seen.includes(id))throw Error('問題IDが重複しています。');seen.push(id);
+      if(!['算数','国語','理科','社会','英語'].includes(l.subject)||!Number.isInteger(l.minutes)||l.minutes<1||l.minutes>10||!Array.isArray(l.questions)||l.questions.length!==2)throw Error('教科・時間・2問の構成を確認してください。');
+      return {id:id,subject:l.subject,title:text(l.title,120),minutes:l.minutes,questions:l.questions.map(function(q){
+        var out={prompt:text(q.prompt,2000),hint:text(q.hint,800),answer:text(q.answer,1500),explanation:text(q.explanation,3000)};
+        if(q.passage)out.passage=text(q.passage,4000);
+        if(q.diagram!==undefined){if(![2,3,4].includes(q.diagram))throw Error('図の形式が違います。');out.diagram=q.diagram;}return out;
+      })};
+    });return p;
+  }
+  function createStore(storage,bundled){
+    var data={format:KEY,packs:[],sessions:[]},loadError='';
+    try{var raw=storage.getItem(KEY);if(raw){var parsed=JSON.parse(raw);if(parsed.format!==KEY||!Array.isArray(parsed.packs)||!Array.isArray(parsed.sessions))throw Error();data=parsed;}}catch(e){loadError='保存した復習記録を読み込めません。記録を上書きせず停止しています。';}
+    bundled=bundled.map(validatePack);
+    function commit(next){if(loadError)throw Error(loadError);storage.setItem(KEY,JSON.stringify(next));data=next;}
+    function packs(){var all=bundled.concat(data.packs),by=Object.create(null);all.forEach(function(p){if(!by[p.id]||by[p.id].revision<p.revision)by[p.id]=p;});return Object.keys(by).map(function(k){return by[k];});}
+    function start(p,l,fresh){
+      var old=data.sessions.filter(function(s){return s.pack.id===p.id&&s.pack.revision===p.revision&&s.lesson.id===l.id;}).slice(-1)[0];
+      if(old&&!fresh)return copy(old);
+      var now=new Date().toISOString(),s={id:'r-'+Date.now()+'-'+Math.random().toString(36).slice(2,10),pack:{id:p.id,revision:p.revision,title:p.title},lesson:copy(l),startedAt:now,updatedAt:now,step:0,responses:[{},{}],events:[]};
+      var next=copy(data);next.sessions.push(s);commit(next);return copy(s);
+    }
+    function session(id){var s=data.sessions.find(function(x){return x.id===id;});return s?copy(s):null;}
+    function update(id,step,patch,event){
+      var next=copy(data),s=next.sessions.find(function(x){return x.id===id;});if(!s||![0,1].includes(step))throw Error('復習記録が見つかりません。');
+      var r=s.responses[step],now=new Date().toISOString();
+      if(['hint','solution','rating'].includes(event)&&r.initial===undefined)r.initial={answer:r.answer||'',drawing:copy(r.drawing||[]),at:now};
+      if(patch.answer!==undefined){if(typeof patch.answer!=='string'||patch.answer.length>6000)throw Error('答えは6000文字以内にしてください。');r.answer=patch.answer;delete r.rating;}
+      if(patch.drawing!==undefined){r.drawing=root.LessonDrawing.validate(patch.drawing);delete r.rating;}
+      if(patch.hintSeen){r.hintSeen=true;delete r.rating;}
+      if(patch.solutionSeen){r.solutionSeen=true;delete r.rating;}
+      if(patch.rating){if(!ratings[patch.rating])throw Error('ふり返りの形式が違います。');if(patch.rating==='self'&&(r.hintSeen||r.solutionSeen))throw Error('ヒントや解説を使った記録を選んでください。');r.rating=patch.rating;}
+      if(patch.note!==undefined)r.note=String(patch.note).slice(0,2000);
+      if(patch.step!==undefined){if(![0,1].includes(patch.step))throw Error('段階の形式が違います。');s.step=patch.step;}
+      if(event)s.events.push({at:now,step:step,action:event,answer:r.answer||'',rating:r.rating||''});
+      s.updatedAt=now;commit(next);return copy(s);
+    }
+    function importPack(raw){var p=validatePack(raw),all=packs(),old=all.find(function(x){return x.id===p.id;});if(old&&old.revision>=p.revision)throw Error('同じ教材は、今より新しい版番号で取り込んでください。');var next=copy(data);next.packs.push(p);commit(next);return p;}
+    return {packs:packs,start:start,session:session,update:update,importPack:importPack,error:function(){return loadError;},exportData:function(){return copy({format:KEY,exportedAt:new Date().toISOString(),packs:packs(),sessions:data.sessions});}};
+  }
+  function diagram(n){
+    if(!n)return '';var w=n*80+60,lines='',dots='';
+    for(var i=0;i<=n;i++){var x=20+i*80;lines+='<path d="M'+x+' 130V50l30 -25v80l-30 25m30 -105v80"/>';[[x,50],[x,130],[x+30,25],[x+30,105]].forEach(function(p){dots+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4"/>';});}
+    [[20,50],[20,130],[50,25],[50,105]].forEach(function(p){lines+='<path d="M'+p[0]+' '+p[1]+'h'+n*80+'"/>';});
+    return '<svg class="rs-cubes" viewBox="0 0 '+w+' 155" role="img" aria-label="立方体'+n+'こを横につなぎ、となり合う面を共通に使った図"><g fill="none" stroke="currentColor" stroke-width="2">'+lines+'</g><g fill="currentColor">'+dots+'</g></svg>';
+  }
+  function questionHtml(q){return (q.passage?'<blockquote>'+esc(q.passage)+'</blockquote>':'')+'<p class="rs-prompt">'+esc(q.prompt)+'</p>'+diagram(q.diagram);}
+  function printHtml(l,answers){return '<!doctype html><html lang="ja"><meta charset="utf-8"><title>'+esc(l.title)+(answers?'・解答解説':'・問題')+'</title><style>@page{size:A4;margin:18mm}body{font-family:sans-serif;line-height:1.8;color:#263b37}h1{font-size:20px}h2{font-size:17px}.rs-prompt,blockquote{white-space:pre-wrap}.rs-cubes{width:240px;height:130px}.space{height:65mm;border-bottom:1px solid #aaa}article+article{break-before:page}button{padding:12px}@media print{button{display:none}}</style><body><button onclick="window.print()">印刷 / PDF保存</button>'+l.questions.map(function(q,i){return '<article><h1>'+esc(l.title)+(answers?' — 保護者用解答・解説':'')+'</h1><p>なまえ：________________　日づけ：________________</p><h2>'+(i?'数字・場面をかえた1問':'まず1問')+'</h2>'+questionHtml(q)+(answers?'<h3>答え</h3><p>'+esc(q.answer)+'</p><h3>考え方</h3><p>'+esc(q.explanation)+'</p><h3>迷ったときの小さなヒント</h3><p>'+esc(q.hint)+'</p>':'<div class="space"></div><p>自分で ／ 設問の読み直し ／ ヒントで ／ 解説のあと ／ また今度</p>')+'</article>';}).join('')+'</body></html>';}
+  var store=null,selected=null,host=null,parentMode=false,message='',importDraft='',exportText='';
+  function getStore(){if(!store)store=createStore(root.localStorage,root.ReviewPacks||[]);return store;}
+  function status(s){return s.responses.every(function(r){return !!r.rating;})?'ふり返り済み':'続きから';}
+  function dateLabel(iso){return new Date(iso).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});}
+  function draw(){
+    if(!host)return;var db=getStore();host.className='review-study learning-content';
+    if(db.error()){host.innerHTML='<p role="alert">'+esc(db.error())+'</p>';return;}
+    if(parentMode){admin();return;}
+    var s=selected&&db.session(selected);
+    document.body.classList.toggle('app--lesson-active',!!s);
+    if(!s){
+      var sessions=db.exportData().sessions;
+      host.innerHTML='<header class="rs-hero"><p class="rs-eyebrow">ちょっとだけ、おさらい</p><h2>今日は、ひとつだけでも。</h2><p>まずは自分で。迷ったら小さなヒント。<br>元気がない日は、お休みでだいじょうぶ。</p></header><div class="rs-list">'+db.packs().map(function(p){return '<section><h3>'+esc(p.title)+'</h3>'+p.lessons.map(function(l){var last=sessions.filter(function(x){return x.pack.id===p.id&&x.pack.revision===p.revision&&x.lesson.id===l.id;}).slice(-1)[0];return '<article class="rs-card"><small>'+esc(l.subject)+' · めやす'+l.minutes+'分</small><h3>'+esc(l.title)+'</h3><p>まず1問 → 解説 → できそうなら別の1問</p><button data-review-open="'+p.id+'/'+l.id+'">'+(last?status(last):'1問やってみる')+' →</button>'+(last?'<button class="rs-quiet" data-review-fresh="'+p.id+'/'+l.id+'">日をあけて、もう一度</button>':'')+'</article>';}).join('')+'</section>';}).join('')+'</div><p class="rs-note">答えやふり返りは、この端末・ブラウザーに保存されます。毎日やる必要はありません。</p><p role="status" data-rs-status>'+esc(message)+'</p>';
+      ['open','fresh'].forEach(function(kind){host.querySelectorAll('[data-review-'+kind+']').forEach(function(b){b.onclick=function(){var parts=b.getAttribute('data-review-'+kind).split('/'),p=db.packs().find(function(x){return x.id===parts[0];}),l=p.lessons.find(function(x){return x.id===parts[1];});try{selected=db.start(p,l,kind==='fresh').id;message='';draw();}catch(e){notice(e.message);}};});});return;
+    }
+    var i=s.step,q=s.lesson.questions[i],r=s.responses[i];
+    host.innerHTML='<button data-rs-back>← 一覧にもどる・今日はここまで</button><header><p class="rs-eyebrow">'+esc(s.lesson.subject)+' · '+(i?'考え方を使って、もう1問':'まずは自分で1問')+'</p><h2>'+esc(s.lesson.title)+'</h2></header><nav class="rs-steps" aria-label="復習の段階"><button data-rs-step="0" aria-current="'+(!i?'step':'false')+'">1. まず1問</button><button data-rs-step="1" aria-current="'+(i?'step':'false')+'">2. 別の1問</button></nav><article class="rs-question">'+questionHtml(q)+'<p class="rs-note">紙に書いても、下の手書き欄を大きく開いて書いてもいいよ。</p><div data-rs-drawing></div><details '+(r.answer?'open':'')+'><summary>キーボードで答える</summary><label>自分の答え・考え<textarea data-rs-answer rows="3" maxlength="6000">'+esc(r.answer||'')+'</textarea></label></details><div class="rs-actions"><button data-rs-hint>小さなヒントを1つ</button><button data-rs-solution>答え・解説を見る</button></div>'+(r.hintSeen?'<aside class="rs-hint"><b>小さなヒント</b><p>'+esc(q.hint)+'</p></aside>':'')+(r.solutionSeen?'<section class="rs-solution"><h3>答え：'+esc(q.answer)+'</h3><p>'+esc(q.explanation)+'</p><p class="rs-note">自分の答えとくらべてみよう。手書きや言葉の答えは、おうちの人とたしかめてもいいよ。</p></section>':'')+'<fieldset><legend>どこまでできた？（正解の自動判定ではありません）</legend><div class="rs-ratings">'+Object.keys(ratings).map(function(k){return '<button data-rs-rating="'+k+'" '+(k==='self'&&(r.hintSeen||r.solutionSeen)?'disabled ':'')+'aria-pressed="'+(r.rating===k)+'">'+ratings[k]+'</button>';}).join('')+'</div></fieldset><p role="status" data-rs-status>'+esc(message||'この端末に保存しています')+'</p></article><div class="rs-actions">'+(!i?'<button data-rs-step="1">できそうなら、別の1問へ →</button>':'<p>今日はここまででも十分。別の日にも、またためしてみよう。</p>')+'<button data-rs-back>今日はここまで</button></div><details><summary>おうちの人へ・記録と印刷</summary><p>最初の答えや、ヒント・解説を開いた時点を記録します。紙の答えや声かけは下に補足できます。</p><label>最初の答え・迷った点・声かけ・その後の変化<textarea data-rs-note rows="3" maxlength="2000">'+esc(r.note||'')+'</textarea></label><button data-rs-print="questions">問題をA4で印刷</button><button data-rs-print="answers">解答・解説を印刷</button><p>1問ずつ別ページ。初回用の問題にはヒントや答えを載せません。</p></details>';
+    function update(patch,event,redraw){try{db.update(s.id,i,patch,event);message='この端末に保存しました';if(redraw)draw();else notice(message);return true;}catch(e){notice('保存できませんでした：'+e.message);return false;}}
+    var drawingError=false;
+    function saveAnswer(){
+      if(drawingError){notice('手書きを保存できていません。手書き欄で線を追加するなどして、もう一度保存してください。');return false;}
+      var value=host.querySelector('[data-rs-answer]').value,current=db.session(s.id).responses[i];
+      if(value!==(current.answer||'')&&!update({answer:value},null,false))return false;
+      var note=host.querySelector('[data-rs-note]').value;
+      return note===(current.note||'')||update({note:note},null,false);
+    }
+    host.querySelector('[data-rs-answer]').oninput=function(e){update({answer:e.target.value},null,false);host.querySelectorAll('[data-rs-rating]').forEach(function(b){b.setAttribute('aria-pressed','false');});};
+    host.querySelector('[data-rs-note]').oninput=function(e){update({note:e.target.value},null,false);};
+    root.LessonDrawing.mount(host.querySelector('[data-rs-drawing]'),r.drawing||[],function(lines){try{db.update(s.id,i,{drawing:lines});drawingError=false;}catch(e){drawingError=true;notice('手書きを保存できませんでした。画面を閉じず、保存をやり直してください。');throw e;}message='この端末に保存しました';notice(message);host.querySelectorAll('[data-rs-rating]').forEach(function(b){b.setAttribute('aria-pressed','false');});});
+    host.querySelectorAll('[data-rs-back]').forEach(function(b){b.onclick=function(){if(!saveAnswer())return;selected=null;message='今日はここまで。続きはいつでも。';draw();};});
+    host.querySelectorAll('[data-rs-step]').forEach(function(b){b.onclick=function(){if(saveAnswer())update({step:Number(b.dataset.rsStep)},'step',true);};});
+    host.querySelector('[data-rs-hint]').onclick=function(){if(saveAnswer())update({hintSeen:true},'hint',true);};
+    host.querySelector('[data-rs-solution]').onclick=function(){if(saveAnswer())update({solutionSeen:true},'solution',true);};
+    host.querySelectorAll('[data-rs-rating]').forEach(function(b){b.onclick=function(){if(saveAnswer())update({rating:b.dataset.rsRating},'rating',true);};});
+    host.querySelectorAll('[data-rs-print]').forEach(function(b){b.onclick=function(){var popup=root.open('','_blank');if(!popup){notice('印刷画面を開けませんでした。ポップアップを許可してください。');return;}popup.opener=null;popup.document.write(printHtml(s.lesson,b.dataset.rsPrint==='answers'));popup.document.close();};});
+  }
+  function notice(value){var n=host&&host.querySelector('[data-rs-status]');if(n)n.textContent=value;}
+  function admin(){
+    var db=getStore(),sessions=db.exportData().sessions;
+    host.innerHTML='<h2>塾の復習：教材と記録</h2><p>このチャットで作った復習教材を追加できます。内蔵教材はアプリの更新で届きます。個別の教材ファイルを取り込む場合は、使うiPadでも取り込んでください。</p><p>回答・手書き・ふり返りは端末内保存です。家族の端末には自動共有されません。</p><details><summary>復習教材を追加する</summary><label>教材ファイル（JSON）<input data-rs-import-file type="file" accept=".json,application/json"></label><label>教材データを貼り付ける<textarea data-rs-import rows="4" maxlength="300000">'+esc(importDraft)+'</textarea></label><button data-rs-take>取り込む</button></details><button data-rs-export>復習記録を書き出す</button><details data-rs-export-box><summary>書き出した記録をコピーする</summary><textarea readonly data-rs-export-text rows="5">'+esc(exportText)+'</textarea></details><p role="status" data-rs-status>'+esc(message)+'</p><h3>取り組みの記録</h3>'+(sessions.length?sessions.slice().reverse().map(function(s){return '<details><summary>'+esc(dateLabel(s.startedAt))+' · '+esc(s.lesson.title)+' · '+status(s)+'</summary>'+s.responses.map(function(r,i){return '<section><h4>'+(i?'別の1問':'最初の1問')+'</h4><p>初回：'+esc(r.initial?(r.initial.answer||((r.initial.drawing||[]).length?'手書きあり':'未入力')):'まだ確定していません')+'</p><p>現在：'+esc(r.answer||((r.drawing||[]).length?'手書きあり':'未入力'))+'</p><p>ヒント：'+(r.hintSeen?'開いた':'開いていない')+' ／ 解説：'+(r.solutionSeen?'開いた':'開いていない')+'</p><p>ふり返り：'+esc(ratings[r.rating]||'未記録')+'</p><p>'+esc(r.note||'')+'</p></section>';}).join('')+'</details>';}).join(''):'<p>まだ取り組みの記録はありません。</p>');
+    host.querySelector('[data-rs-import]').oninput=function(e){importDraft=e.target.value;};
+    function take(raw){try{var p=db.importPack(raw);message=p.title+'を取り込みました。';importDraft='';}catch(e){message='取り込めませんでした：'+e.message;}draw();}
+    host.querySelector('[data-rs-take]').onclick=function(){take(importDraft);};
+    host.querySelector('[data-rs-import-file]').onchange=async function(e){var f=e.target.files[0];if(!f)return;if(f.size>300000){notice('教材は300KB以内にしてください。');return;}try{take(await f.text());}catch(err){notice('ファイルを読み込めませんでした。');}};
+    host.querySelector('[data-rs-export]').onclick=function(){exportText=JSON.stringify(db.exportData(),null,2);host.querySelector('[data-rs-export-text]').value=exportText;host.querySelector('[data-rs-export-box]').open=true;var url=URL.createObjectURL(new Blob([exportText],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='塾の復習記録.json';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);notice('保存できない場合は、表示した記録をコピーしてこのチャットへ渡せます。');};
+  }
+  var api={createStore:createStore,validatePack:validatePack,printHtml:printHtml,diagram:diagram,mount:function(el,parent){if(!el)return;host=el;parentMode=!!parent;draw();},isWorking:function(){return !!selected&&!parentMode;}};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.ReviewStudy=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.25.1";
+  var APP_VERSION = "2026.11.25.2";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5113,12 +5244,12 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
   }
   function render(){
     reconcileRewards();
+    if(state.view === "review" && window.ReviewStudy && ReviewStudy.isWorking() && document.querySelector("#reviewContent .rs-question")) return;
     // Keep the live input/drawing DOM during background sync. Explicit navigation still renders.
     if(state.view === "manabu" && !state.worksheetSubject && window.LearningContent && LearningContent.isWorking() && document.querySelector("#learningContent .lc-question")) return;
     if(window.LearningContent)LearningContent.setActive(state.view === "manabu" && !state.worksheetSubject);
     var contentFocus=document.activeElement,contentSelection=null;
     if(contentFocus&&contentFocus.tagName==='TEXTAREA'&&contentFocus.closest('#learningContent')) contentSelection={answer:contentFocus.getAttribute('data-answer'),isImport:contentFocus.hasAttribute('data-import-text'),start:contentFocus.selectionStart,end:contentFocus.selectionEnd};
-    if(window.RewardGames)RewardGames.check();
     if(state.view !== 'parent' && getVisibleTabs().indexOf(state.view) === -1) state.view = getVisibleTabs()[0];
     var app = document.getElementById("app");
     var isParent = state.view === "parent";
@@ -5130,19 +5261,19 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     app.innerHTML = isParent ? renderParent() : renderChild();
     bindEvents();
     if (window.LearningContent) LearningContent.mount(document.getElementById('learningContent'),isParent);
+    if (window.ReviewStudy) ReviewStudy.mount(document.getElementById(isParent?'reviewAdmin':'reviewContent'),isParent);
     if(contentSelection){var restored=Array.from(app.querySelectorAll('#learningContent textarea')).find(function(el){return contentSelection.isImport?el.hasAttribute('data-import-text'):el.getAttribute('data-answer')===contentSelection.answer;});if(restored){restored.focus({preventScroll:true});restored.setSelectionRange(contentSelection.start,contentSelection.end);}}
-    if (window.VoiceStudio) VoiceStudio.mount(document.getElementById("voiceStudio"),state.view === "sora" ? "sola" : state.view === "kumi" ? "kumi" : null);
+    if (window.VoiceStudio) VoiceStudio.mount(null,null); // 音声機能は休止中。
   }
 
   var TAB_DEFS = {
     home:     { icon: "🏠", label: "きょう" },
-    manabu:   { icon: "📚", label: "まなぶ" },
+    review:   { icon: "📝", label: "塾の復習" },
+    manabu:   { icon: "📚", label: "探偵クイズ" },
     dekita:   { icon: "🌟", label: "できた" },
-    sora:     { icon: "☁️", label: "Sola" },
-    kumi:     { icon: "📖", label: "Kumi" },
     calendar: { icon: "📅", label: "カレンダー" }
   };
-  var DEFAULT_TAB_ORDER = ["home","manabu","dekita","sora","kumi","calendar"];
+  var DEFAULT_TAB_ORDER = ["home","review","manabu","dekita","calendar"];
   var tabPreferences = {hidden:[],start:'home'};
   function getVisibleTabs(){
     var order=getTabOrder().filter(function(id){return tabPreferences.hidden.indexOf(id)===-1;});
@@ -5160,15 +5291,17 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
   function getTabOrder(){
     var order = Array.isArray(state.tabOrder) ? state.tabOrder.filter(function(id,i,a){return TAB_DEFS[id] && a.indexOf(id) === i;}) : [];
     DEFAULT_TAB_ORDER.forEach(function(id){if(order.indexOf(id) === -1)order.push(id);});
+    order=order.filter(function(id){return id!=='review';});
+    order.splice(order.indexOf('manabu'),0,'review');
     return order;
   }
 
   function renderChild(){
     var body = "";
     if (state.view === "home") body = renderHome();
+    else if (state.view === "review") body = '<div class="greeting"><p class="hello">塾の復習</p><p class="date">短いおさらいを、自分のペースで</p></div><section id="reviewContent" aria-label="塾の復習"></section>';
     else if (state.view === "manabu") body = renderManabu();
     else if (state.view === "dekita") body = renderDekita();
-    else if (state.view === "sora" || state.view === "kumi") body = renderSoraTab();
     else if (state.view === "calendar") body = renderParentCalendar();
 
     var order = getVisibleTabs();
@@ -5210,7 +5343,6 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
       '<p class="date">' + fmtDateLong(today) + '</p></div>';
 
     html += dayNavigation(today);
-    if(window.LearningContent)html += LearningContent.todayHtml();
     var completed = todays.filter(function(t){ return t.done; }).length;
     var pending = todays.filter(function(t){ return !t.done; });
     var dailyLife = todays.filter(function(t){ return t.dailyLife; });
@@ -5232,14 +5364,13 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     } else {
       state.focusedTaskId = null;
       html += '<h2>' + (todays.length ? 'きょうの分、できたね！' : 'きょうは何をしてみよう？') + '</h2>' +
-        '<p class="hero-detail">' + (todays.length ? 'がんばったね。ゆっくり休もう。' : '問題や英会話をえらんではじめられるよ。') + '</p>' +
-        '<button class="hero-start" data-tab="' + (todays.length ? 'dekita' : 'manabu') + '">' + (todays.length ? 'できたことを見る' : 'まなぶを開く →') + '</button>';
+        '<p class="hero-detail">' + (todays.length ? 'がんばったね。ゆっくり休もう。' : '気になる問題をえらんではじめられるよ。') + '</p>' +
+        '<button class="hero-start" data-tab="' + (todays.length ? 'dekita' : 'manabu') + '">' + (todays.length ? 'できたことを見る' : '探偵クイズを開く →') + '</button>';
     }
     if (todays.length) html += '<div class="daily-progress"><span>' + completed + ' / ' + todays.length + ' できた</span><progress value="' + completed + '" max="' + todays.length + '" aria-label="きょうの完了数"></progress></div>';
     html += '</section>';
     }
-    html += renderRewardCard(false) + renderGameEntry() + '<div class="home-shortcuts"><button data-tab="sora"><span class="shortcut-symbol">S</span><span><b>Solaと話す</b><small>えいごで、ひとこと</small></span><span aria-hidden="true">↗</span></button>' +
-      '<button data-tab="kumi"><span class="shortcut-symbol">K</span><span><b>Kumiと日記</b><small>きょうのことを、日本語で</small></span><span aria-hidden="true">↗</span></button></div>';
+    html += renderRewardCard(false);
     html += '<div class="home-columns"><section><h2 class="section-label">きょうやること</h2>';
     if (todays.length === 0) {
       html += '<div class="empty-state">追加のやることは、まだないよ。</div>';
@@ -5303,7 +5434,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 
   function renderManabu(){
     if (state.worksheetSubject) return renderWorksheetView();
-    return '<div class="greeting"><p class="hello">まなぶ</p><p class="date">きょうの学習</p></div>' +
+    return '<div class="greeting"><p class="hello">探偵クイズ</p><p class="date">好きななぞを、自分のペースで</p></div>' +
       '<section id="learningContent" aria-label="教科別の教材"></section>' + renderWorksheetLibrary();
   }
 
@@ -5315,13 +5446,13 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var w = state.worksheet;
     var html = '<div class="greeting no-print"><p class="hello">' + addFurigana(subject) + 'のプリント</p>' +
       '<p class="date">以前に保存したプリント</p></div>';
-    html += '<div style="padding:0 20px;" class="no-print"><button class="btn-primary" id="worksheetBack" style="background:var(--ink-soft);">← まなぶにもどる</button></div>';
+    html += '<div style="padding:0 20px;" class="no-print"><button class="btn-primary" id="worksheetBack" style="background:var(--ink-soft);">← 探偵クイズにもどる</button></div>';
 
     if (!w || !Array.isArray(w.questions) || !w.questions.length) {
       return html + '<div class="empty-state">保存したプリントを読み込めませんでした。一覧にもどって選び直してください。</div>';
     }
 
-    html += '<div class="no-print keepsake-note" role="status">' + escapeHtml(worksheetSaveError || 'この端末に保存しました。「まなぶ」の保存したプリントから開けます。') + '</div>';
+    html += '<div class="no-print keepsake-note" role="status">' + escapeHtml(worksheetSaveError || 'この端末に保存しました。「探偵クイズ」の保存したプリントから開けます。') + '</div>';
     html += '<div class="no-print keepsake-actions"><button class="btn-primary" id="worksheetDownload">ファイルに保存</button>' + (worksheetSaveError ? '<button class="btn-primary" id="worksheetRetrySave">もう一度保存</button>' : '') + '</div>';
     html += '<div class="worksheet-print">' +
       '<div class="worksheet-head">' +
@@ -5371,11 +5502,8 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var page='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+escapeHtml(w.title||'プリント')+'</title><style>body{max-width:800px;margin:30px auto;padding:20px;font-family:sans-serif;line-height:1.9}li{margin-bottom:24px;white-space:pre-wrap}summary{cursor:pointer}@media print{details{break-before:page}}<'+ '/style><h1>'+escapeHtml(w.title||'プリント')+'</h1><p>なまえ：________________　日づけ：________________</p><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.question)+worksheetChoicesHtml(q,false)+'<p>こたえ：________________________________</p></li>';}).join('')+'</ol><details><summary>こたえを見る（印刷するときは開いてね）</summary><ol>'+w.questions.map(function(q){return '<li>'+escapeHtml(q.answer)+'</li>';}).join('')+'</ol></details>';
     var url=URL.createObjectURL(new Blob([page],{type:'text/html;charset=utf-8'}));var a=document.createElement('a');a.href=url;a.download='Rihoko-プリント-'+(worksheetEntry?worksheetEntry.date:todayStr())+'.html';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
   }
-  function gamesAvailable(){return RewardGames.allowed(combinedItemsForDate(todayStr()));}
-  function renderGameEntry(){
-    var ready=gamesAvailable();
-    return '<section class="game-unlock"><h2>🎮 ごほうびゲーム</h2><p>'+(ready?'今日のやること、ぜんぶできたね！ 好きなゲームであそぼう。':'今日のやることをぜんぶ終えたら、あそべるよ。')+'</p><div class="game-choices"><button data-reward-game="othello" '+(ready?'':'disabled')+'>● オセロ</button><button data-reward-game="memory" '+(ready?'':'disabled')+'>🃏 神経衰弱（24枚）</button><button data-reward-game="chess" '+(ready?'':'disabled')+'>♟ チェス</button></div></section>';
-  }
+  function gamesAvailable(){return false;}
+  function renderGameEntry(){return "";} // ゲームは休止。保存記録は保持する。
   function renderRewardCard(collection,date){
     var list=[];try{list=StudyKeepsakes.rewards();}catch(e){return '<div class="keepsake-note">ごほうびを読み込めません。ブラウザーの保存設定を確認してね。</div>';}
     var today=date||todayStr(), earned=list.find(function(e){return e.date===today;}), tasks=combinedItemsForDate(today);
@@ -5393,7 +5521,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     html+=rallyCard(cardIndex);
     if(list.length>0&&progress===0)html+='<p>前の台紙はゴール！ 新しい台紙の最初のマスへ進もう。</p>';
     if(typeof RewardCelebration!=="undefined")html+=RewardCelebration.badge(list.length);
-    if(!date&&typeof RewardCelebration!=="undefined")html+=RewardCelebration.adventure(list,today);
+    // サイコロと冒険マップも休止。スタンプの記録は継続する。
     html+='<p class="reward-total">これまで <b>'+list.length+'</b> こ・ゴール '+Math.floor(list.length/10)+'回</p>';
     if(collection&&cardIndex>0)html+='<details class="rally-history"><summary>これまでの台紙を見る</summary>'+Array.from({length:cardIndex},function(_,i){return rallyCard(i);}).join('')+'</details>';
     if(rewardError)html+='<p role="alert">'+escapeHtml(rewardError)+'</p>';
@@ -5557,7 +5685,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     else if (state.parentTab === "units") html += renderParentUnits();
     else if (state.parentTab === "dashboard") html += renderParentDashboard();
     else if (state.parentTab === "history") html += renderParentHistory();
-    else if (state.parentTab === "content") html += '<section id="learningContent" aria-label="教材・学習記録"></section>';
+    else if (state.parentTab === "content") html += '<section id="reviewAdmin" aria-label="塾の復習の教材と記録"></section><section id="learningContent" aria-label="探偵クイズの教材・学習記録"></section>';
     else html += renderParentMore();
     return html;
   }
@@ -6115,7 +6243,6 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     var back = document.getElementById("backToChild");
     if (back) back.onclick = function(){ state.view = "home"; render(); };
 
-    app.querySelectorAll('[data-start-today]').forEach(function(b){b.onclick=function(){try{LearningContent.startToday();state.view='manabu';state.worksheetSubject=null;render();}catch(e){b.textContent='保存できませんでした。もう一度押してね。';}};});
     app.querySelectorAll("[data-tab]").forEach(function(b){
       b.onclick = function(){ state.view = b.getAttribute("data-tab"); render(); };
     });
@@ -6206,7 +6333,6 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
     if(worksheetDownload)worksheetDownload.onclick=downloadWorksheet;
     var worksheetRetrySave = document.getElementById("worksheetRetrySave");
     if(worksheetRetrySave)worksheetRetrySave.onclick=function(){try{StudyKeepsakes.saveWorksheet(worksheetEntry);worksheetSaveError="";}catch(e){worksheetSaveError="まだ保存できません。ファイルに保存して残してください。";}render();};
-    app.querySelectorAll('[data-reward-game]').forEach(function(b){b.onclick=function(){RewardGames.open(b.dataset.rewardGame,gamesAvailable);};});
     app.querySelectorAll('[data-rihoko-preview]').forEach(function(b){b.onclick=function(){if(typeof RewardCelebration!=="undefined")RewardCelebration.showPortrait(RewardCelebration.levelFor(StudyKeepsakes.rewards().length));};});
     var adventureRoll=document.getElementById("adventureRoll");
     if(adventureRoll&&typeof RewardCelebration!=="undefined")adventureRoll.onclick=function(){var rewards=StudyKeepsakes.rewards(),trip=RewardCelebration.journey(rewards),value=trip.steps[rewards.findIndex(function(r){return r.date===todayStr();})];RewardCelebration.roll(adventureRoll,todayStr(),value,render,trip.total);};
@@ -6552,6 +6678,11 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
   function startApp(){
   loadLocal();
   try{var savedTabs=JSON.parse(localStorage.getItem('riho-study-tab-preferences-v1')||'null');if(savedTabs&&Array.isArray(savedTabs.hidden))tabPreferences=savedTabs;}catch(e){}
+  if(tabPreferences.studyLayout!=='review-v1'){
+    tabPreferences.hidden=tabPreferences.hidden.filter(function(id){return id!=='review'&&id!=='manabu';});
+    if(['sora','kumi'].includes(tabPreferences.start))tabPreferences.start='home';
+    tabPreferences.studyLayout='review-v1';saveTabPreferences();
+  }
   state.view=(window.LearningContent && LearningContent.shouldResume() && getVisibleTabs().includes("manabu"))?"manabu":startupView();
   initFamilySync();
   var localPreview=['127.0.0.1','localhost'].includes(location.hostname);
