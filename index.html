@@ -501,7 +501,25 @@ body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
 .display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
 .settings-topbar{position:sticky;top:0;z-index:1000;background:var(--bg-parent)}
 .settings-topbar .icon-btn{width:44px;height:44px;flex-shrink:0}
-@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar{display:none!important}}
+.topbar{gap:12px}
+.app-brand{display:flex;flex:1 1 auto;flex-direction:column;gap:4px;min-width:0}
+.topbar .app-brand h1{line-height:1.4;overflow-wrap:anywhere}
+.app-version{display:block;color:var(--ink-soft);font-size:11px;font-weight:500;line-height:1.4;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.app-brand .app-version{align-self:flex-start;background:none;border:0;border-radius:0;padding:0;color:var(--ink-soft);font-size:11px;line-height:1.4}
+.header-actions{display:flex;flex:0 0 auto;align-items:center;gap:8px}
+.header-actions .icon-btn{width:44px;height:44px;flex:0 0 44px;color:var(--teal)}
+.header-actions .icon-btn svg{width:24px;height:24px}
+.header-actions .header-mode-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;width:auto;height:auto;margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--ink);font-family:inherit;font-size:13px;font-weight:600;line-height:1.4;white-space:nowrap;cursor:pointer;box-shadow:none}
+.header-actions .header-mode-button svg{display:block;flex:0 0 20px;width:20px;height:20px}
+.header-actions .header-mode-button:hover{background:var(--teal-soft)}
+.header-actions .header-mode-button:focus-visible,.header-actions .icon-btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.header-mode-status{margin:0 20px 10px;color:var(--ink);font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.header-mode-status:empty{display:none}
+body.dark-mode .app-version{color:var(--ink-soft)}
+body.dark-mode .header-actions .header-mode-button{background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode .header-actions .header-mode-button:hover{background:#304c54}
+@media(max-width:360px){.topbar{gap:8px;padding-left:16px;padding-right:16px}.topbar .app-brand h1{font-size:14px;letter-spacing:.02em}.header-actions{gap:6px}.header-actions .header-mode-button{padding-left:9px;padding-right:9px}.header-mode-status{margin-left:16px;margin-right:16px}}
+@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar,.header-mode-status{display:none!important}}
 
 </style>
 <script id="science-guides">
@@ -1491,7 +1509,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.11.1</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.26.5</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -6821,7 +6839,7 @@ window.ReviewPacks=[
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.26.4";
+  var APP_VERSION = "2026.11.26.5";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -7074,6 +7092,24 @@ window.ReviewPacks=[
     var dark=DisplaySettings.isDark(state.colorMode,window.matchMedia('(prefers-color-scheme: dark)').matches);
     document.body.classList.toggle('dark-mode',dark);
     document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#111d22':'#2F8F86');
+    var toggle=document.getElementById('headerColorToggle');
+    if(toggle){toggle.innerHTML=colorToggleContents(dark);toggle.setAttribute('aria-label',dark?'ライトモードに切り替える':'ダークモードに切り替える');toggle.title=dark?'ライトモードに切り替える':'ダークモードに切り替える';}
+    var select=document.getElementById('colorModeSelect');if(select)select.value=state.colorMode;
+  }
+  function colorToggleContents(dark){
+    var drawing=dark?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>':'<path d="M20.5 14.2A8.6 8.6 0 0 1 9.8 3.5 8.7 8.7 0 1 0 20.5 14.2Z"/>';
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+drawing+'</svg><span>'+(dark?'ライト':'ダーク')+'</span>';
+  }
+  function renderAppHeader(settings){
+    var dark=DisplaySettings.isDark(state.colorMode,window.matchMedia('(prefers-color-scheme: dark)').matches),modeLabel=dark?'ライトモードに切り替える':'ダークモードに切り替える';
+    var gear='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2h5l.6 2.7 2.1 1.2 2.6-.8 2.5 4.3-2 1.9v2.4l2 1.9-2.5 4.3-2.6-.8-2.1 1.2-.6 2.7h-5l-.6-2.7-2.1-1.2-2.6.8-2.5-4.3 2-1.9v-2.4l-2-1.9 2.5-4.3 2.6.8 2.1-1.2Z"/><circle cx="12" cy="12" r="3.2"/></svg>';
+    return '<div class="topbar'+(settings?' settings-topbar':'')+'"><div class="app-brand"><h1>'+(settings?'設定':'Rihoko Study')+'</h1><span class="app-version" aria-label="アプリのバージョン '+APP_VERSION+'">v'+APP_VERSION+'</span></div><div class="header-actions"><button type="button" class="header-mode-button" id="headerColorToggle" aria-label="'+modeLabel+'" title="'+modeLabel+'">'+colorToggleContents(dark)+'</button><button type="button" class="icon-btn" id="gotoParent" title="'+(settings?'元の画面に戻る':'設定')+'" aria-label="'+(settings?'設定を閉じて元の画面に戻る':'保護者用の設定を開く')+'" aria-expanded="'+!!settings+'">'+gear+'</button></div></div><p id="headerColorStatus" class="header-mode-status" role="status"></p>';
+  }
+  function toggleHeaderColorMode(){
+    var next=DisplaySettings.isDark(state.colorMode,window.matchMedia('(prefers-color-scheme: dark)').matches)?'light':'dark';
+    var status=document.getElementById('headerColorStatus');
+    try{DisplaySettings.save(localStorage,next);state.colorMode=next;applyColorMode();status.textContent='';var settingsStatus=document.getElementById('colorModeStatus');if(settingsStatus)settingsStatus.textContent='この端末に保存しました';}
+    catch(e){status.textContent='表示設定を保存できませんでした。もう一度ためしてください。';}
   }
   function toggleSettings(){
     var result=DisplaySettings.toggle(state,getVisibleTabs(),startupView(),window.scrollY);
@@ -7146,12 +7182,7 @@ window.ReviewPacks=[
 
     var order = getVisibleTabs();
     return (
-      '<div class="topbar"><h1>Rihoko Study</h1>' +
-      '<button class="icon-btn" id="gotoParent" title="保護者用" aria-label="保護者用の設定を開く">' +
-        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<circle cx="12" cy="12" r="3.2" stroke="#2F8F86" stroke-width="1.8"/>' +
-        '<path d="M12 3.5v2.1M12 18.4v2.1M20.5 12h-2.1M5.6 12H3.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5M17.7 17.7l-1.5-1.5M7.8 7.8L6.3 6.3" stroke="#2F8F86" stroke-width="1.8" stroke-linecap="round"/>' +
-        '</svg></button></div>' +
+      renderAppHeader(false) +
       body +
       '<div class="tabbar"><div class="tabbar-inner">' +
         order.map(function(id){ return tabBtn(id, TAB_DEFS[id].icon, TAB_DEFS[id].label); }).join("") +
@@ -7512,7 +7543,7 @@ window.ReviewPacks=[
   }
 
   function renderParent(){
-    var html = '<div class="topbar settings-topbar"><h1>設定</h1><button class="icon-btn" id="gotoParent" aria-label="設定を閉じて元の画面に戻る" aria-expanded="true" title="元の画面に戻る"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.2 2.2m8.4 8.4l2.2 2.2M5.6 18.4l2.2-2.2m8.4-8.4l2.2-2.2" stroke="currentColor" stroke-width="1.8"/></svg></button></div><div class="parent-header"><button class="backlink" id="backToChild">元の画面へ戻る</button></div>'+renderDisplaySettings()+'<section id="adaptiveSettings" aria-label="学習の調整"></section>';
+    var html = renderAppHeader(true)+'<div class="parent-header"><button class="backlink" id="backToChild">元の画面へ戻る</button></div>'+renderDisplaySettings()+'<section id="adaptiveSettings" aria-label="学習の調整"></section>';
     html += '<div class="parent-header" style="padding-top:2px;"><h1>おうちの人のページ</h1></div>';
     html += '<div class="parent-tabs">' + ptab('family','かんたん設定') + '<button class="ptab" id="parentAdvanced" aria-expanded="' + state.parentAdvanced + '">詳しい設定 ' + (state.parentAdvanced ? '−' : '＋') + '</button></div>';
     if (state.parentAdvanced || state.parentTab !== 'family') html += '<div class="parent-tabs">' +
@@ -8076,6 +8107,8 @@ window.ReviewPacks=[
     });
     var gp = document.getElementById("gotoParent");
     if (gp) gp.onclick = toggleSettings;
+    var colorToggle=document.getElementById('headerColorToggle');
+    if(colorToggle)colorToggle.onclick=toggleHeaderColorMode;
     var back = document.getElementById("backToChild");
     if (back) back.onclick = toggleSettings;
 

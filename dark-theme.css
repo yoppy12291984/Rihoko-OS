@@ -36,4 +36,22 @@ body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
 .display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
 .settings-topbar{position:sticky;top:0;z-index:1000;background:var(--bg-parent)}
 .settings-topbar .icon-btn{width:44px;height:44px;flex-shrink:0}
-@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar{display:none!important}}
+.topbar{gap:12px}
+.app-brand{display:flex;flex:1 1 auto;flex-direction:column;gap:4px;min-width:0}
+.topbar .app-brand h1{line-height:1.4;overflow-wrap:anywhere}
+.app-version{display:block;color:var(--ink-soft);font-size:11px;font-weight:500;line-height:1.4;letter-spacing:.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.app-brand .app-version{align-self:flex-start;background:none;border:0;border-radius:0;padding:0;color:var(--ink-soft);font-size:11px;line-height:1.4}
+.header-actions{display:flex;flex:0 0 auto;align-items:center;gap:8px}
+.header-actions .icon-btn{width:44px;height:44px;flex:0 0 44px;color:var(--teal)}
+.header-actions .icon-btn svg{width:24px;height:24px}
+.header-actions .header-mode-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;min-height:44px;width:auto;height:auto;margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:16px;background:var(--card);color:var(--ink);font-family:inherit;font-size:13px;font-weight:600;line-height:1.4;white-space:nowrap;cursor:pointer;box-shadow:none}
+.header-actions .header-mode-button svg{display:block;flex:0 0 20px;width:20px;height:20px}
+.header-actions .header-mode-button:hover{background:var(--teal-soft)}
+.header-actions .header-mode-button:focus-visible,.header-actions .icon-btn:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.header-mode-status{margin:0 20px 10px;color:var(--ink);font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.header-mode-status:empty{display:none}
+body.dark-mode .app-version{color:var(--ink-soft)}
+body.dark-mode .header-actions .header-mode-button{background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode .header-actions .header-mode-button:hover{background:#304c54}
+@media(max-width:360px){.topbar{gap:8px;padding-left:16px;padding-right:16px}.topbar .app-brand h1{font-size:14px;letter-spacing:.02em}.header-actions{gap:6px}.header-actions .header-mode-button{padding-left:9px;padding-right:9px}.header-mode-status{margin-left:16px;margin-right:16px}}
+@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar,.header-mode-status{display:none!important}}
