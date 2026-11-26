@@ -1,0 +1,39 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const P=require('./continuing-learning.js'),L=require('./learning-content.js'),C=require('./weekly-curriculum.js'),A=require('./adaptive-lessons.js');
+function storage(){return {data:{},fail:false,getItem(k){return this.data[k]||null;},setItem(k,v){if(this.fail)throw Error('quota');this.data[k]=v;}};}
+let now=new Date('2026-11-26T00:00:00Z'),s=storage(),db=L.create(s,[],()=>now),base=db.packs(),p=base[0],l=p.lessons[0],q=l.questions[0];
+db.save(p,l,q,{answer:q.answer});assert.equal(db.check(p,l,q),'correct');let r=db.response(p,l,q);assert(r.answerSeen);assert.equal(r.firstAttempt.assisted,false);const initial=JSON.stringify(r.firstAttempt);now=new Date('2026-11-27T00:00:00Z');db.check(p,l,q);assert.equal(JSON.stringify(db.response(p,l,q).firstAttempt),initial);
+const q2=l.questions[1];db.save(p,l,q2,{hintUsed:true,answer:q2.answer});db.check(p,l,q2);assert(db.response(p,l,q2).firstAttempt.assisted);assert.equal(db.learningSummary()[0].independent,1);
+const q3=l.questions[2];db.save(p,l,q3,{answer:q3.choices.find(c=>c!==q3.answer)});db.check(p,l,q3);db.save(p,l,q3,{answer:q3.answer});db.check(p,l,q3);assert.equal(db.response(p,l,q3).firstAttempt.result,'retry');
+const original=JSON.stringify(db.packs());const manual=db.addPractice();assert.equal(manual.lessons.length,2);assert.equal(db.packs().length,base.length+1);for(const lesson of manual.lessons){assert.equal(lesson.questions.length,3);for(const q of lesson.questions){assert(q.studyTitle);assert(q.studyKey);assert.equal(q.choices.length,3);assert.equal(L.judge(q,{answer:q.answer}),'correct');}}
+assert.equal(JSON.stringify(db.packs().filter(x=>!x.id.startsWith('growth-'))),original);
+const fixed=P.preferences();fixed['理科']={level:'3',focus:'review',topic:C.science[20][0],paused:false};fixed['社会'].paused=true;const forced=db.configure(fixed,true);assert.equal(forced.lessons.length,1);assert.equal(new Set(forced.lessons[0].questions.map(q=>q.studyTitle)).size,1);assert.equal(new Set(forced.lessons[0].questions.map(q=>q.question)).size,3);assert(forced.lessons[0].questions.some(q=>q.studyKey==='challenge'));assert.equal(db.preferences()['理科'].level,'3');
+fixed['理科'].level='1';const gentle=db.configure(fixed,true);assert.equal(gentle.lessons[0].questions.length,2);assert(!gentle.lessons[0].questions.some(q=>q.studyKey==='challenge'));
+assert.throws(()=>db.configure({'理科':{level:'99'}},false));const beforeFailure=JSON.stringify(s.data);s.fail=true;assert.throws(()=>db.addPractice());assert.throws(()=>db.configure(P.preferences(),true));assert.equal(JSON.stringify(s.data),beforeFailure);s.fail=false;
+db.configure(P.preferences(),false);now=new Date('2027-11-22T00:00:00Z');let growth=db.packs().filter(p=>p.id.startsWith('growth-v1-2027-11-22'));assert.equal(growth.length,1);const snapshot=JSON.stringify(growth[0]);db.configure(fixed,false);assert.equal(JSON.stringify(db.packs().find(p=>p.id===growth[0].id)),snapshot);assert.equal(db.packs().filter(p=>p.id.startsWith('growth-v1-2027-11-22')).length,1);
+const reloaded=L.create(s,[],()=>now);assert.equal(JSON.stringify(reloaded.packs().find(p=>p.id===growth[0].id)),snapshot);assert.equal(JSON.stringify(reloaded.response(p,l,q).firstAttempt),initial);
+now=new Date('2028-03-06T00:00:00Z');const afterSkip=db.packs().filter(p=>p.id.startsWith('growth-v1-2028-03-06'));assert.equal(afterSkip.length,1);assert.equal(afterSkip[0].lessons.length,1);assert.equal(JSON.stringify(db.packs().find(p=>p.id===growth[0].id)),snapshot);
+const exported=db.exportResults();assert(exported.learningPreferences);assert(exported.responses);assert(exported.packs.some(p=>p.id===growth[0].id));
+const paused=P.preferences();paused['理科'].paused=paused['社会'].paused=true;db.configure(paused,false);now=new Date('2032-01-12T00:00:00Z');const count=db.packs().length;assert.equal(db.packs().length,count);assert.throws(()=>db.addPractice());
+// The source bank remains stable; future snapshots rotate topics and can be made indefinitely.
+const fresh=storage(),freshDB=L.create(fresh,[],()=>new Date('2026-11-26T00:00:00Z')),assigned=[];
+for(let i=0;i<18;i++){const pack=freshDB.addPractice();assigned.push(...pack.lessons[0].questions.map(q=>q.studyTitle));}
+assert.equal(new Set(assigned.slice(0,52)).size,52,'do not oscillate between the first six themes');
+const independent=Array.from({length:8},(_,i)=>({trusted:true,independent:true,needsHelp:false,at:String(i)}));assert.equal(P.levelFor(independent),3);assert.equal(P.levelFor(independent.map(x=>({...x,independent:false,needsHelp:true}))),1);assert.equal(P.levelFor(independent.slice(0,3)),2);assert.equal(P.levelFor(independent.map(x=>({...x,trusted:false}))),1);
+const history=P.evidence(freshDB.packs(),{},'理科');assert.equal(history.length,0);
+// An old latest-check is not reliable first-attempt evidence, even after editing its answer.
+const legacy=storage(),oldKey=[p.id,p.revision,l.id,q.id].join('/');legacy.data['rihoko-learning-content-v1']=JSON.stringify({packs:[],responses:{[oldKey]:{answer:q.answer,check:{result:'correct',checkedAt:'2026-11-25T00:00:00Z'}}}});
+const oldDB=L.create(legacy,[],()=>new Date('2026-11-26T00:00:00Z'));oldDB.save(p,l,q,{answer:q.answer});oldDB.check(p,l,q);assert.equal(oldDB.response(p,l,q).firstAttempt.knownInitial,false);assert.equal(oldDB.learningSummary()[0].independent,0);
+// daily() must not overwrite the pack added by its own packs() call.
+const dailyStorage=storage(),dailyDB=L.create(dailyStorage,[],()=>new Date('2027-11-22T00:00:00Z'));dailyDB.daily(new Date('2027-11-22T00:00:00Z'));assert(JSON.parse(dailyStorage.data['rihoko-learning-content-v1']).packs.some(p=>p.id.startsWith('growth-v1-2027-11-22')));
+// A mastered foundation must permit a supported retry of the weak method, not basic forever.
+const source=C.packs(new Date('2026-11-26T00:00:00Z'),A),lp=source[0],ll=lp.lessons[0],responses={};for(let i=0;i<2;i++){const qq=ll.questions[i];responses[[lp.id,lp.revision,ll.id,qq.id].join('/') ]={firstAttempt:{result:i?'retry':'correct',assisted:false,checkedAt:'2026-11-26T00:00:00Z'}};}
+const retry=P.build(source,responses,P.preferences(),new Date('2026-11-27T00:00:00Z'),1);assert(retry.lessons[0].questions.some(q=>q.studyTitle===ll.title&&q.studyKey==='method'));
+// Strong overall results do not duplicate questions in an unseen focused topic.
+const rich=C.packs(new Date('2027-03-01T00:00:00Z'),A),rs={};for(const pack of rich.slice(0,6)){const lesson=pack.lessons[0],qq=lesson.questions[0];rs[[pack.id,pack.revision,lesson.id,qq.id].join('/') ]={firstAttempt:{result:'correct',assisted:false,checkedAt:'2027-03-02T00:00:00Z'}};}
+const custom=P.preferences();custom['理科'].topic=C.science[31][0];const unseen=P.build(rich,rs,custom,new Date('2027-03-03T00:00:00Z'),1).lessons[0];assert.equal(unseen.questions.length,2);assert.equal(new Set(unseen.questions.map(q=>q.question)).size,2);
+const uiSource=fs.readFileSync('learning-content.js','utf8');assert(uiSource.includes('if(assistanceDrafts[prefix+q.id])'));assert(uiSource.includes('if(store.response(p,l,q).answer===v)return;'));
+assert.equal(P.topicFor('社会',{question:'問'},'店の売り場を調べよう'),'店の品ぞろえ');
+// Browser loading order: rules may load after this module, before the first build.
+const context={window:null,WeeklyCurriculum:C};context.window=context;vm.runInNewContext(fs.readFileSync('continuing-learning.js','utf8'),context);context.AdaptiveLessons=A;context.ScienceGuides=require('./science-guides.js');context.SocialGuides=require('./social-guides.js');assert.equal(context.ContinuingLearning.build([],{},null,now,1).lessons.length,2);
+console.log('PASS: teaching metadata, assisted immutable first attempts, retry history, 53rd-week and skipped-week creation, stable snapshots, manual levels/topics/pause, atomic quota failure, reload/export, 52-topic breadth, level changes and browser load order.');

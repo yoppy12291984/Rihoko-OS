@@ -2,8 +2,10 @@
 (function(root){
   'use strict';
   var Adaptive=typeof module!=='undefined'&&module.exports?require('./adaptive-lessons.js'):root.AdaptiveLessons;
+  var Experience=typeof module!=='undefined'&&module.exports?require('./learning-experience.js'):root.LearningExperience;
   var KEY='rihoko-review-v1', ratings={self:'自分でできた',reread:'設問を読み直すとできた',hint:'ヒントでできた',explain:'解説を読んでわかった',later:'また今度ためす'};
   function copy(v){return JSON.parse(JSON.stringify(v));}
+  function canRateSelf(r){return !r.hadMistake&&(r.check&&r.check.correct&&r.check.assisted===false||!r.hintSeen&&!r.solutionSeen);}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function text(v,max){if(typeof v!=='string'||!v.trim()||v.length>max)throw Error('教材の文字数・形式を確認してください。');return v;}
   function ident(v){if(typeof v!=='string'||!/^[a-z0-9][a-z0-9-]{0,79}$/.test(v))throw Error('教材IDの形式が違います。');return v;}
@@ -41,11 +43,11 @@
       var next=copy(data),s=next.sessions.find(function(x){return x.id===id;});if(!s||![0,1].includes(step))throw Error('復習記録が見つかりません。');
       var r=s.responses[step],now=new Date().toISOString();
       if(['hint','solution','rating'].includes(event)&&r.initial===undefined)r.initial={answer:r.answer||'',drawing:copy(r.drawing||[]),at:now};
-      if(patch.answer!==undefined){if(typeof patch.answer!=='string'||patch.answer.length>6000)throw Error('答えは6000文字以内にしてください。');r.answer=patch.answer;delete r.rating;delete r.check;}
+      if(patch.answer!==undefined){if(typeof patch.answer!=='string'||patch.answer.length>6000)throw Error('答えは6000文字以内にしてください。');if(r.answer!==patch.answer){r.answer=patch.answer;delete r.rating;delete r.check;}}
       if(patch.drawing!==undefined){r.drawing=root.LessonDrawing.validate(patch.drawing);delete r.rating;}
       if(patch.hintSeen){r.hintSeen=true;delete r.rating;}
       if(patch.solutionSeen){r.solutionSeen=true;delete r.rating;}
-      if(patch.rating){if(!ratings[patch.rating])throw Error('ふり返りの形式が違います。');if(patch.rating==='self'&&(r.hintSeen||r.solutionSeen||r.hadMistake))throw Error('ヒントや解説を使った記録を選んでください。');r.rating=patch.rating;}
+      if(patch.rating){if(!ratings[patch.rating])throw Error('ふり返りの形式が違います。');if(patch.rating==='self'&&!canRateSelf(r))throw Error('ヒントや解説を使った記録を選んでください。');r.rating=patch.rating;}
       if(patch.note!==undefined)r.note=String(patch.note).slice(0,2000);
       if(patch.step!==undefined){if(![0,1].includes(patch.step))throw Error('段階の形式が違います。');s.step=patch.step;}
       if(event)s.events.push({at:now,step:step,action:event,answer:r.answer||'',rating:r.rating||''});
@@ -62,9 +64,12 @@
       if(![0,1].includes(step))throw Error('問題が見つかりません。');
       const next=copy(data),s=next.sessions.find(s=>s.id===id);if(!s)throw Error('記録が見つかりません。');
       const q=s.lesson.questions[step],r=s.responses[step];if(!q.choices||!q.choices.includes(r.answer))throw Error('先に答えを選んでね。');
+      const last=(r.attempts||[]).slice(-1)[0];if(r.check&&last&&last.answer===r.answer)return {correct:r.check.correct,repeat:true};
       const correct=r.answer===q.choices[q.correctChoice],now=new Date().toISOString();
       if(!r.initial)r.initial={answer:r.answer,at:now};
-      r.check={correct,at:now};(r.attempts||(r.attempts=[])).push({answer:r.answer,correct,at:now});
+      const assisted=!!(r.hintSeen||r.solutionSeen);
+      r.check={correct,at:now,assisted};(r.attempts||(r.attempts=[])).push({answer:r.answer,correct,at:now,assisted});
+      r.solutionSeen=true;r.feedbackSeen=true;
       let p;if(!correct){r.hadMistake=true;p=practiceFor(next,s,step);}
       s.updatedAt=now;commit(next);return {correct,practice:p&&p.id};
     }
@@ -105,13 +110,14 @@
     }
     var i=s.step,q=s.lesson.questions[i],r=s.responses[i],choiceMode=!!q.choices;
     const feedback=r.check?(r.check.correct?'<div class="lc-correct"><span class="lc-correct-circle">○</span><strong>正解！ よくできたね。</strong></div>':'<div class="lc-retry">もう一度考えてみよう。'+(Adaptive.titles[s.lesson.skill||s.lesson.id]?'この考え方の類題を一覧に追加したよ。':'')+'</div>'):'';
-    host.innerHTML='<button data-rs-back>一覧にもどる</button><header><p>'+esc(s.lesson.subject)+' · '+(i+1)+' / 2問</p><h2>'+esc(s.lesson.title)+'</h2></header><nav class="rs-steps">'+[0,1].map(n=>'<button data-rs-step="'+n+'" aria-current="'+(i===n?'step':'false')+'">'+(n+1)+'問目</button>').join('')+'</nav><article class="rs-question">'+questionHtml(q)+(choiceMode?'<div class="lc-choices" role="group" aria-label="答えを選ぼう">'+q.choices.map((c,n)=>'<button data-rs-choice="'+n+'" aria-pressed="'+(r.answer===c)+'">'+(n+1)+'. '+esc(c)+'</button>').join('')+'</div><button data-rs-check>答え合わせ</button><div role="status" aria-live="polite">'+feedback+'</div>':'<p>以前の記録です。選択式で復習すると、前の記録を残して新しく始められます。</p><p>前の答え：'+esc(r.answer||'文字の答えなし')+'</p><div data-old-drawing></div><button data-rs-upgrade>選択式で復習する</button>')+'<div class="rs-actions"><button data-rs-hint>小さなヒント</button><button data-rs-solution>答え・解説</button></div>'+(r.hintSeen?'<aside class="rs-hint">'+esc(q.hint)+'</aside>':'')+(r.solutionSeen?'<section class="rs-solution"><h3>'+esc(q.answer)+'</h3><p>'+esc(q.explanation)+'</p></section>':'')+(choiceMode?'<fieldset><legend>ふり返り</legend>'+Object.keys(ratings).map(k=>'<button data-rs-rating="'+k+'" '+(k==='self'&&(r.hintSeen||r.solutionSeen||r.hadMistake)?'disabled':'')+' aria-pressed="'+(r.rating===k)+'">'+ratings[k]+'</button>').join('')+'</fieldset>':'')+'<p role="status" data-rs-status>'+esc(message)+'</p></article><div class="rs-actions">'+(!i?'<button data-rs-step="1">次の1問</button>':'')+'<button data-rs-back>今日はここまで</button></div><details><summary>おうちの人へ・記録と印刷</summary><p>最初の答え：'+esc(r.initial?r.initial.answer:'まだ答え合わせしていません')+'</p><p>答え合わせ '+(r.attempts||[]).length+'回</p><p>'+esc(r.note||'')+'</p><button data-rs-print="questions">問題を印刷</button><button data-rs-print="answers">解答・解説を印刷</button></details>';
+    host.innerHTML='<button data-rs-back>一覧にもどる</button><header><p>'+esc(s.lesson.subject)+' · '+(i+1)+' / 2問</p><h2>'+esc(s.lesson.title)+'</h2></header><nav class="rs-steps">'+[0,1].map(n=>'<button data-rs-step="'+n+'" aria-current="'+(i===n?'step':'false')+'">'+(n+1)+'問目</button>').join('')+'</nav><article class="rs-question">'+questionHtml(q)+'<button data-rs-learn>まだ知らない・わからない → 先に学ぼう</button>'+(choiceMode?'<div class="lc-choices" role="group" aria-label="答えを選ぼう">'+q.choices.map((c,n)=>'<button data-rs-choice="'+n+'" aria-pressed="'+(r.answer===c)+'">'+(n+1)+'. '+esc(c)+'</button>').join('')+'</div><button data-rs-check>答え合わせ</button><div role="status" aria-live="polite">'+feedback+'</div><div data-rs-celebration></div>':'<p>以前の記録です。選択式で復習すると、前の記録を残して新しく始められます。</p><p>前の答え：'+esc(r.answer||'文字の答えなし')+'</p><div data-old-drawing></div><button data-rs-upgrade>選択式で復習する</button>')+'<div class="rs-actions"><button data-rs-hint>小さなヒント</button><button data-rs-solution>答え・解説</button></div>'+(r.hintSeen?'<aside class="rs-hint">'+esc(q.hint)+'</aside>':'')+(r.solutionSeen?Experience.explanationHtml(q,{subject:s.lesson.subject,title:s.lesson.title,skill:s.lesson.skill||s.lesson.id}):'')+(choiceMode?'<fieldset><legend>ふり返り</legend>'+Object.keys(ratings).map(k=>'<button data-rs-rating="'+k+'" '+(k==='self'&&!canRateSelf(r)?'disabled':'')+' aria-pressed="'+(r.rating===k)+'">'+ratings[k]+'</button>').join('')+'</fieldset>':'')+'<p role="status" data-rs-status>'+esc(message)+'</p></article><div class="rs-actions">'+(!i?'<button data-rs-step="1">次の1問</button>':'')+'<button data-rs-back>今日はここまで</button></div><details><summary>おうちの人へ・記録と印刷</summary><p>最初の答え：'+esc(r.initial?r.initial.answer:'まだ答え合わせしていません')+'</p><p>答え合わせ '+(r.attempts||[]).length+'回</p><p>'+esc(r.note||'')+'</p><button data-rs-print="questions">問題を印刷</button><button data-rs-print="answers">解答・解説を印刷</button></details>';
     host.querySelectorAll('[data-rs-choice]').forEach(b=>b.onclick=()=>act(()=>{db.update(s.id,i,{answer:q.choices[Number(b.dataset.rsChoice)]},'choice');message='この端末に保存しました';}));
-    const check=host.querySelector('[data-rs-check]');if(check)check.onclick=()=>act(()=>{db.check(s.id,i);message='答え合わせを保存しました';});
+    const check=host.querySelector('[data-rs-check]');if(check)check.onclick=function(){try{const result=db.check(s.id,i);message='答え合わせと学んだ記録を保存しました';draw();if(!result.repeat)Experience.celebrate(host.querySelector('[data-rs-celebration]'),result.correct);}catch(e){notice('保存できませんでした：'+e.message);}};
     host.querySelectorAll('[data-rs-back]').forEach(b=>b.onclick=()=>{selected=null;message='';draw();});
     host.querySelectorAll('[data-rs-step]').forEach(b=>b.onclick=()=>act(()=>{db.update(s.id,i,{step:Number(b.dataset.rsStep)},'step');message='';}));
     host.querySelector('[data-rs-hint]').onclick=()=>act(()=>db.update(s.id,i,{hintSeen:true},'hint'));
     host.querySelector('[data-rs-solution]').onclick=()=>act(()=>db.update(s.id,i,{solutionSeen:true},'solution'));
+    host.querySelector('[data-rs-learn]').onclick=function(){try{db.update(s.id,i,{solutionSeen:true},'solution');message='先に学んでから答えても大丈夫。解説のあとでためした記録が残るよ。';draw();var teaching=host.querySelector('.lx-explanation');if(teaching){teaching.setAttribute('tabindex','-1');teaching.focus({preventScroll:true});teaching.scrollIntoView({block:'start'});}}catch(e){notice('保存できませんでした：'+e.message);}};
     host.querySelectorAll('[data-rs-rating]').forEach(b=>b.onclick=()=>act(()=>db.update(s.id,i,{rating:b.dataset.rsRating},'rating')));
     const upgrade=host.querySelector('[data-rs-upgrade]');if(upgrade)upgrade.onclick=()=>act(()=>{const p=packs.find(p=>p.id===s.pack.id),l=p&&p.lessons.find(l=>l.id===s.lesson.id);if(!l||!l.questions.every(q=>q.choices))throw Error('この追加教材には選択肢がありません。保護者画面から選択式の新版を取り込んでください。');selected=db.start(p,l,true).id;});
     if(!choiceMode&&r.drawing&&r.drawing.length&&root.LessonDrawing)root.LessonDrawing.mount(host.querySelector('[data-old-drawing]'),r.drawing,()=>{});
@@ -128,6 +134,6 @@
     host.querySelector('[data-rs-import-file]').onchange=async function(e){var f=e.target.files[0];if(!f)return;if(f.size>300000){notice('教材は300KB以内にしてください。');return;}try{take(await f.text());}catch(err){notice('ファイルを読み込めませんでした。');}};
     host.querySelector('[data-rs-export]').onclick=function(){exportText=JSON.stringify(db.exportData(),null,2);host.querySelector('[data-rs-export-text]').value=exportText;host.querySelector('[data-rs-export-box]').open=true;var url=URL.createObjectURL(new Blob([exportText],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='塾の復習記録.json';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);notice('保存できない場合は、表示した記録をコピーしてこのチャットへ渡せます。');};
   }
-  var api={createStore:createStore,validatePack:validatePack,printHtml:printHtml,diagram:diagram,mount:function(el,parent){if(!el)return;host=el;parentMode=!!parent;draw();},isWorking:function(){return !!selected&&!parentMode;}};
+  var api={canRateSelf:canRateSelf,createStore:createStore,validatePack:validatePack,printHtml:printHtml,diagram:diagram,mount:function(el,parent){if(!el)return;host=el;parentMode=!!parent;draw();},isWorking:function(){return !!selected&&!parentMode;}};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.ReviewStudy=api;
 })(typeof window!=='undefined'?window:globalThis);

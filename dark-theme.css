@@ -34,6 +34,6 @@ body.dark-mode :is(.hc-bubble,.reward-card,.sticker-album>div,.adventure-treasur
 body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
 .display-settings{margin:12px 20px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--card)}
 .display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
-.settings-topbar{position:sticky;top:0;z-index:20;background:var(--bg-parent)}
+.settings-topbar{position:sticky;top:0;z-index:1000;background:var(--bg-parent)}
 .settings-topbar .icon-btn{width:44px;height:44px;flex-shrink:0}
 @media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar{display:none!important}}
