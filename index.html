@@ -1595,7 +1595,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.26.7</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.26.8</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -5566,8 +5566,8 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
     var steps=(rewards||[]).map(function(r,i){return diceFor(r.date,i+1);});
     return {steps:steps,total:steps.reduce(function(a,b){return a+b;},0)};
   }
-  // 絵は12場面。先のレベルでも最初の姿へ戻さず、最新の絵を保つ。
-  function lookFor(level){return Math.min(12,Math.max(1,Math.floor(Number(level)||1)));}
+  // Lv.5〜12は従来どおり。旧Lv.1〜4の絵をLv.13〜16で再登場させ、以後は16の絵を保つ。
+  function lookFor(level){var value=Math.min(16,Math.max(1,Math.floor(Number(level)||1)));return value>12?value-12:value;}
   function imageFor(level){return 'rihoko-scene-'+String(lookFor(level)).padStart(2,'0')+'-v2.webp';}
   function portrait(compact,level){
     return '<img class="level-portrait'+(compact?' level-portrait--compact':'')+'" src="'+imageFor(level)+'" alt="Rihoko Lv. '+(level||1)+'の姿">';
@@ -5578,7 +5578,7 @@ if(typeof module!=="undefined")module.exports=exports;else window.RihokoChess=ex
   }
   function titleFor(level){
     var titles=['草原の旅人','森の探検家','海辺の発見者','図書館の探究者','空をかける冒険者','夕焼けの旅人','光をみつける人','雪と星の冒険者','花あかりの踊り手','星空の観測者','海の世界の探検家','虹の花園の冒険者'];
-    return titles[Math.min(titles.length-1,Math.max(0,level-1))];
+    return titles[lookFor(level)-1];
   }
   function status(rewards,stats){
     rewards=rewards||[];stats=stats||{};
