@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const L=require('./learning-content.js'),M=require('./problem-metadata.js');
+function storage(){return {data:{},fail:false,getItem(k){return this.data[k]||null;},setItem(k,v){if(this.fail)throw Error('quota');this.data[k]=v;}};}
+let now=new Date('2026-11-26T08:15:30Z');const s=storage(),db=L.create(s,[],()=>now);
+const weekly=db.packs()[0];assert(!weekly.createdAt);assert(M.compactHtml(weekly).includes('記録なし'));
+const created=db.addPractice();assert.equal(created.createdAt,now.toISOString());assert.equal(created.generatorVersion,'growth-v1');assert.equal(created.revision,1);const made=created.createdAt;
+now=new Date('2026-11-27T09:20:00Z');const lesson=created.lessons[0],q=lesson.questions[0];db.save(created,lesson,q,{answer:q.answer});db.check(created,lesson,q);assert.equal(db.packs().find(p=>p.id===created.id).createdAt,made);
+const reloaded=L.create(s,[],()=>now);assert.equal(reloaded.packs().find(p=>p.id===created.id).createdAt,made);assert.equal(reloaded.exportResults().packs.find(p=>p.id===created.id).createdAt,made);
+const print=L.printHtml(created,lesson,false);assert(print.includes('2026/11/26'));assert(print.includes('17:15'));assert(print.includes('v1'));
+const copy=JSON.parse(JSON.stringify(created));copy.id='imported-metadata';copy.createdAt='2026-11-20T18:00:00+09:00';copy.updatedAt='2026-11-21T19:00:00+09:00';delete copy.importedAt;
+const imported=db.importPack(JSON.stringify(copy));assert.equal(imported.createdAt,'2026-11-20T09:00:00.000Z');assert.equal(imported.updatedAt,'2026-11-21T10:00:00.000Z');assert.equal(imported.importedAt,now.toISOString());
+now=new Date('2026-11-28T10:00:00Z');const importedLesson=imported.lessons[0],importedQ=importedLesson.questions[0];db.save(imported,importedLesson,importedQ,{answer:importedQ.answer});const firstCreated=imported.createdAt;copy.revision=2;copy.updatedAt='2026-11-28T09:00:00Z';db.importPack(JSON.stringify(copy));const exported=db.exportResults();const versions=exported.packs.filter(p=>p.id===copy.id);assert.equal(versions.length,2);assert(versions.every(p=>p.createdAt===firstCreated));assert.equal(exported.responses[[imported.id,imported.revision,importedLesson.id,importedQ.id].join('/')].answer,importedQ.answer);
+const before=JSON.stringify(s.data);const invalid={...copy,id:'invalid-date',createdAt:'2026-02-30T00:00:00Z'};assert.throws(()=>db.importPack(JSON.stringify(invalid)));assert.equal(JSON.stringify(s.data),before);
+s.fail=true;assert.throws(()=>db.addPractice());assert.throws(()=>db.importPack(JSON.stringify({...copy,id:'quota-date'})));assert.equal(JSON.stringify(s.data),before);s.fail=false;
+// A pre-feature saved practice must remain honestly undated after ordinary writes.
+const old=storage(),oldPack=JSON.parse(JSON.stringify(created));delete oldPack.createdAt;delete oldPack.generatorVersion;old.data['rihoko-learning-content-v1']=JSON.stringify({packs:[oldPack],responses:{}});const oldDB=L.create(old,[],()=>now);const oldLive=oldDB.packs().find(p=>p.id===oldPack.id);assert(!oldLive.createdAt);oldDB.save(oldLive,oldLive.lessons[0],oldLive.lessons[0].questions[0],{answer:'test'});assert(!oldDB.exportResults().packs.find(p=>p.id===oldPack.id).createdAt);
+const ui=fs.readFileSync('learning-content.js','utf8');assert(ui.includes('Metadata.detailsHtml(p,l.id,q.id)'));assert(ui.includes('Metadata.compactHtml(pack)'));assert(ui.includes('Metadata.detailsHtml(pack)'));
+console.log('PASS: new practice creation timestamps, stable dates across answers/reload/export, JST print, import vs author dates, revision history, invalid dates, atomic failure, undated legacy packs and visible metadata wiring.');

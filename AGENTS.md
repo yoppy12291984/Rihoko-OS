@@ -1,5 +1,14 @@
 # Rihoko OS 公開版の申し送り
 
+## 2026-11-26 問題の作成日時・版・識別情報（v2026.11.26.4）
+- 基点main `4ddae3b`。作業元は引き続き `learning-update/`。`node bundle-learning.cjs`で公開HTMLを更新する。旧ルートindex.htmlやプレビュー用の認証スタブを公開しない。
+- `problem-metadata.js/css`を追加。探偵団・塾の一覧と問題画面に教材の版と作成日時を表示。「問題セットの情報」で作成/更新/取り込み日時、対象週、出題ルールの版、教材ID/版/レッスン/問題IDを確認できる。日本時間で表示し、元データはタイムゾーン付きISO日時をUTCに正規化する。
+- 新たな塾の類題と探偵団の個別練習は、実際の生成時にcreatedAtとgeneratorVersion（adaptive-lessons-v1 / growth-v1）を固定保存。再読込や回答で書き換えない。塾のセッションにも当時の教材情報を保存し、新版取り込み後も旧版の記録を維持する。
+- 旧教材・既存の週次カリキュラムは作成日時が記録されていないため「記録なし」と表示。週の開始日や解答日時を作成日時へ流用しない。週次の公開対象週と生成ルールの版は既知IDから表示する。
+- 教材取り込みは提供されたcreatedAt/updatedAt/版を維持し、取り込み時刻をimportedAtとして別記録。存在しない日付やタイムゾーン不明の日時を拒否。書き出し、保護者の教材/取り組み一覧、印刷にも日時と版を残す。変更は既存の端末内保存範囲で、GAS/認証/共有処理は変更しない。
+- 検証：problem-metadata / detective-metadata / review-metadata の各テストで日時検証、日本時間、実生成時刻の固定、再読込/書き出し、改訂後の旧回答保持、旧問題の日時不明、取り込み失敗時の原子性、問題IDと印刷を確認。既存の continuing-learning / adaptive-lessons / learning-experience / curriculum-display と合わせて7テスト成功。公開HTML全スクリプト構文も成功。
+- 通信を遮断したローカルChromeで、探偵の新規作成/再読込後の日時一致、塾の誤答から類題追加/日時表示、問題情報のID、390pxライト/ダークでの読みやすさを確認。console errorなし。確認画像metadata-preview-20261126.pngは非公開。iPad実機は未確認。
+
 ## 2026-11-26 初めてでも学べる解説・ごほうび・継続出題（v2026.11.26.3）
 - 基点main `c4b4788`。作業元は `learning-update/`、公開HTMLは `node bundle-learning.cjs` で生成する。旧ルートindex.htmlを使用しない。
 - `science-guides.js` / `social-guides.js` に各52テーマの基礎説明・具体例・考える3手順・誤解しやすい点・応用3択を追加。`learning-experience.js/css`が安全にエスケープして表示。塾の6単元・誤答類題にも専用解説を追加。問題・正答・旧セッションの内容は変更しない。

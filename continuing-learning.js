@@ -72,7 +72,7 @@
       lessons.push({id:subject==='理科'?'science':'social',week:1,subject,title:subject+' · じぶんに合う調査 '+serial,level:'基礎から・たしかめる・考えを深める',time:'5〜10分',mission:'知らないことは「先に学ぼう」で読んでから。わかったことを少しずつ増やそう。',source:'解答記録に合わせて確認済みの問題から構成。学力の目安は初回解答と補助の利用から計算。',questions});
     }
     if(!lessons.length)throw Error('理科と社会が両方お休み中です。設定で一つ以上を再開してください。');
-    return {format:'rihoko-lesson-pack',version:1,id:'growth-v1-'+stamp+'-'+serial,revision:1,title:stamp+'の週 · じぶんに合う練習 '+serial,description:'学び直しと次の一歩を組み合わせた練習。出題後の内容は変わらず、復習に残ります。',lessons};
+    return {format:'rihoko-lesson-pack',version:1,id:'growth-v1-'+stamp+'-'+serial,revision:1,createdAt:new Date(now).toISOString(),generatorVersion:'growth-v1',title:stamp+'の週 · じぶんに合う練習 '+serial,description:'学び直しと次の一歩を組み合わせた練習。出題後の内容は変わらず、復習に残ります。',lessons};
   }
   const api={subjects,rows,preferences,topicFor,evidence,levelFor,summary,build};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.ContinuingLearning=api;
 })(typeof window!=='undefined'?window:globalThis);
