@@ -1580,6 +1580,91 @@ body.dark-mode :is(.growth-panel,.study-settings,.lx-learn-first){background:var
 })(typeof window!=='undefined'?window:globalThis);
 
 </script>
+<style id="invnote-dark-palette">
+/* Invnote dark palette, matched to research/mobile-preview/workspace.css.
+   Screen-only; illustrations, region fills and printed worksheets retain their colours. */
+@media screen {
+/* ダークモードは保護者画面限定・手動トグル(こども画面は常に明るい配色) */
+  .app--parent.dark-mode{
+    --bg: #12171c;
+    --bg-parent: #12171c;
+    --card: #1b2229;
+    --border: #2b343d;
+    --ink: #e6eaee;
+    --ink-soft: #8a96a3;
+    --coral-soft: #3A2723;
+    --yellow-soft: #3A331C;
+    --teal-soft: #232c35;
+    color-scheme: dark;
+  }
+/* Explicit dark palette: illustrations, maps and game piece colours stay intact. */
+body[class].dark-mode, body[class].dark-mode #app{
+  --bg:#12171c;--bg-parent:#12171c;--card:#1b2229;--border:#2b343d;
+  --ink:#e6eaee;--ink-soft:#8a96a3;--teal:#6e9bd6;--teal-soft:#232c35;
+  --coral:#ffac94;--coral-soft:#51392f;--yellow:#f5d47d;--yellow-soft:#443e2a;
+  --hero-bg:#232c35;--shadow:0 2px 10px #0004;color-scheme:dark;
+  color:var(--ink);background:var(--bg);background-image:none;
+body[class].dark-mode #app :is(button[aria-pressed="true"],button[aria-current="step"],.ptab.active){background:#6e9bd6;color:#12171c;border-color:#6e9bd6;box-shadow:none}
+body[class].dark-mode #app :is(button[aria-pressed="true"],button[aria-current="step"],.ptab.active){background:#6e9bd6;color:#12171c;border-color:#6e9bd6;box-shadow:none}
+}
+body[class].dark-mode :is(.lc-detective-hero){background:#232c35;color:#e6eaee}
+body[class].dark-mode .lc-detective-hero :is(h2,p,span){color:#e6eaee}
+body[class].dark-mode button{background:#232c35}
+body[class].dark-mode button:hover{background:#2b343d;color:var(--ink)}
+body[class].dark-mode :is(input,select,textarea){background:#12171c}
+body[class].dark-mode :is(.icon-btn,.ptab,.backlink,.lc-choices button,.lc-subjects button,.lc-ratings button,.rs-steps button,.rs-actions button,.rs-quiet,.lc-actions button,.lc-step-nav button,.lc-mission-steps button,.lc-answer-check button,.rs-question button,.rs-card button){background:#232c35;color:var(--ink);border:1px solid var(--border)}
+body[class].dark-mode :is(button[aria-pressed="true"],.ptab.active,.tab-item.active){background:#6e9bd6;color:#12171c;border-color:#6e9bd6}
+body[class].dark-mode .lc-answer-check{background:#232c35;border-color:#6e9bd6}
+body[class].dark-mode :is(.hero-start,.btn-primary){background:#6e9bd6;color:#fff}
+body[class].dark-mode .rally-stop :is(small,span){background:#232c35;color:#8a96a3}
+body[class].dark-mode a{color:#6e9bd6}
+html.dark-mode{background:#12171c;color-scheme:dark;scrollbar-color:#2b343d #12171c}
+body[class].dark-mode .level-meter{background:#12171c;border-color:#2b343d}
+body[class].dark-mode .level-meter>i{border-color:#6e9bd6}
+body[class].dark-mode .adventure-board{background:#12171c;border-color:#2b343d}
+body[class].dark-mode .adventure-space{background:#232c35;border-color:#2b343d}
+body[class].dark-mode .adventure-space small{color:#8a96a3}
+body[class].dark-mode .adventure-treasures span{background:#232c35;color:var(--ink-soft)}
+body[class].dark-mode .rally-stop span{border-color:#2b343d}
+body[class].dark-mode .rally-stop.stamped span{background:#232c35;border-color:#6e9bd6;color:#e6eaee}
+body[class].dark-mode :is(.day-navigation button,.day-navigation input,.game-choices button:disabled){background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .game-choices button:disabled{background:#232c35;color:#8a96a3}
+body[class].dark-mode .nav-art--home{background:#232c35;color:#6e9bd6}
+body[class].dark-mode .nav-art--review{background:#232c35;color:#6e9bd6}
+body[class].dark-mode :is(.family-days input:checked+span,.todo-card.done .check){background:#6e9bd6;color:#12171c;border-color:#6e9bd6}
+body[class].dark-mode progress::-webkit-progress-bar{background:#12171c}
+body[class].dark-mode :is(.review-study,.learning-content) button{background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode :is(.review-study,.learning-content) button:not(:disabled):hover{background:#2b343d;color:var(--ink)}
+body[class].dark-mode :is(.review-study,.learning-content) button:is([aria-pressed=true],[aria-current=step]){background:#6e9bd6;color:#12171c;border-color:#6e9bd6}
+body[class].dark-mode .lc-mission-steps [aria-current=step]{box-shadow:0 0 0 4px #232c35}
+body[class].dark-mode :is(.review-study,.learning-content) :is(textarea,input,select){background:#12171c;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .review-study blockquote{background:#232c35;color:var(--ink);border-color:#6e9bd6}
+body[class].dark-mode .learning-content .lc-case-file:hover{background:#232c35}
+/* Map sea becomes dark; region colours and selected prefecture remain unchanged. */
+body[class].dark-mode .learning-content .jq-map-wrap{background:#12171c;border-color:#2b343d}
+body[class].dark-mode .learning-content .jq-north{color:#8a96a3}
+body[class].dark-mode .learning-content .jq-pref.is-muted{fill:#8a96a3;opacity:.65}
+body[class].dark-mode .learning-content .jq-finish li{background:#232c35;color:var(--ink)}
+body[class].dark-mode :is(.rg-top button,.rg-footer button,.rg-promotion button){background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .rg-card{background:#232c35;color:#fff;border-color:#6e9bd6}
+body[class].dark-mode .rg-card.up{background:#232c35;border-color:#6e9bd6}
+body[class].dark-mode .rg-card.matched{background:#232c35;border-color:#6e9bd6}
+body[class].dark-mode :is(#familyLogin,#familyLogout){background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .sync-brand .app-version{background:#232c35;color:var(--ink-soft);border-color:var(--border)}
+body[class].dark-mode .header-actions .header-mode-button{background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .header-actions .header-mode-button:hover{background:#2b343d}
+body[class].dark-mode .lx-guide,body[class].dark-mode .lx-worked{background:#232c35;color:#e6eaee;border-color:#2b343d}
+body[class].dark-mode .lx-answer{background:#12171c;color:#e6eaee}
+body[class].dark-mode .lx-effort{background:#232c35;color:#e6eaee;border-color:#6e9bd6}
+body[class].dark-mode .learning-content :is([data-rs-learn],[data-learn-first]){background:#232c35;color:#e6eaee;border-color:#6e9bd6}
+body[class].dark-mode .pm-details{background:var(--card,#1b2229);color:var(--ink,#e6eaee);border-color:var(--border,#2b343d)}
+body[class].dark-mode .pm-compact{color:var(--ink-soft,#8a96a3)}
+body[class].dark-mode .learning-content .jq-app button{background:#232c35;color:var(--ink);border-color:var(--border)}
+body[class].dark-mode .learning-content .jq-app button[aria-pressed=true]{background:#232c35;color:var(--ink);border-color:var(--teal)}
+body[class].dark-mode #app :is(.hero-start,.btn-primary){background:#6e9bd6;color:#12171c}
+body[class].dark-mode #app .tabbar{background:#12171cf5}
+}
+</style>
 </head>
 <body>
 <style>
@@ -1595,7 +1680,7 @@ body.app--parent-active .sync-bar{display:grid!important}
 @media(max-width:380px){.sync-bar{gap:3px 8px}.sync-now{min-width:92px}.sync-brand strong{display:none}}
 </style>
 <section id="familyAuthGate" hidden aria-label="家族の端末登録"><h1>Rihoko Study</h1><p>家族だけの、まなびの場所。</p><p id="familyAuthMessage" role="status">最初の一回だけ、家族の招待コードで登録します。</p><label>この端末の名前<input id="familyDeviceName" maxlength="40" placeholder="例：RihokoのiPad" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><label>招待コード<input id="familyInvite" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを貼り付け" style="display:block;width:100%;padding:12px;box-sizing:border-box"></label><button id="familyPair" class="btn-primary" style="margin:16px 0">この端末で使い始める</button><p style="font-size:14px">最初にこのページをホーム画面へ追加し、追加したアイコンから開いて登録してください。次からはそのアイコンだけで開けます。Safariで使う場合は別に一度登録します。</p><details><summary>保護者の初期設定・復旧</summary><p>最初の管理端末を登録するときだけ使います。</p><button id="familyLogin">Googleで管理端末を登録</button></details></section>
-<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.26.8</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
+<div id="keepsakeSharing" class="sync-bar no-print"><div class="sync-brand"><strong>Rihoko Study</strong><span id="appVersion" class="app-version">v2026.11.26.9</span></div><p id="globalSyncStatus" class="global-sync-status" role="status">同期状態を確認中…</p><button id="refreshKeepsakes" class="sync-now" type="button">↻ 同期する</button><details class="sync-details"><summary>同期の詳細</summary><span id="deviceAccessStatus" role="status"></span><span id="familySyncStatusGlobal" role="status">予定・ToDo：確認中</span><span id="keepsakeSyncStatus" role="status">日記・プリント・スタンプ：共有を確認中</span></details></div>
 <button id="familyLogout" hidden>この端末の登録解除</button>
 <div id="app"></div>
 <audio id="soraAudio" autoplay style="display:none;"></audio>
@@ -6947,7 +7032,7 @@ window.ReviewPacks=[
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.26.8";
+  var APP_VERSION = "2026.11.26.9";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
