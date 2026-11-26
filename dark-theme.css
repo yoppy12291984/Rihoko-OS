@@ -32,6 +32,69 @@ body.dark-mode a{color:#9adee8}
 body.dark-mode :is(.sync-brand,.sync-brand strong,.hc-character span,.hc-bubble small){color:var(--ink-soft)}
 body.dark-mode :is(.hc-bubble,.reward-card,.sticker-album>div,.adventure-treasures){background:var(--card);background-image:none;color:var(--ink);border-color:var(--border)}
 body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
+/* Screen-only surfaces. Drawn ink, prefecture fills and board-game pieces keep their meaning. */
+@media screen{
+html.dark-mode{background:#111d22;color-scheme:dark;scrollbar-color:#49616a #111d22}
+body.dark-mode{--danger:#ffaaa5}
+body.dark-mode :is(.daily-check,.level-hero,.adventure-map,.game-unlock,.reward-game,.worksheet-print,.lc-scratchpad){background:var(--card);color:var(--ink);border-color:var(--border);background-image:none;box-shadow:0 4px 14px #0003}
+body.dark-mode :is(.daily-check-heading,.level-copy strong,.adventure-head h3){color:var(--ink)}
+body.dark-mode :is(.level-copy span,.adventure-head p,.adventure-note,.adventure-treasures small,.worksheet-meta,.worksheet-answerline,.rs-eyebrow,.rs-note,.rs-card small){color:var(--ink-soft)}
+body.dark-mode .level-meter{background:#14252b;border-color:#57716c}
+body.dark-mode .level-meter>i{border-color:#8ad4c5}
+body.dark-mode .adventure-board{background:#142a28;border-color:#577568}
+body.dark-mode .adventure-space{background:#243b36;border-color:#557064}
+body.dark-mode .adventure-space small{color:#b9cebf}
+body.dark-mode .adventure-space.is-event{background:#494227;border-color:#8b7c43}
+body.dark-mode .adventure-space.is-current{background:#573c30;border-color:#ffac94;box-shadow:inset 0 0 0 2px #9e7158}
+body.dark-mode .adventure-distance b{color:#ffbc8c}
+body.dark-mode .adventure-result b{background:#473b28;color:#ffe3a6;box-shadow:0 3px 0 #8b7041}
+body.dark-mode .adventure-treasures span{background:#20363b;color:var(--ink-soft)}
+body.dark-mode .adventure-treasures span.is-owned{background:#443e2a;color:#ffedb4;border-color:#8f7b42}
+body.dark-mode .rally-track:before{border-color:#685f43}
+body.dark-mode .rally-stop span{border-color:#708578}
+body.dark-mode .rally-stop.stamped span{background:#264a3e;border-color:#8ad4b5;color:#d8f4e4}
+body.dark-mode .rally-stop.next span{border-color:#c49f60;color:#ffe3a3}
+body.dark-mode :is(.day-navigation button,.day-navigation input,.game-choices button:disabled){background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode .game-choices button:disabled{background:#25383d;color:#9cafb0}
+body.dark-mode .nav-art--home{background:#29463b;color:#b5dbbf}
+body.dark-mode .nav-art--review{background:#33462c;color:#cfdfa7}
+body.dark-mode .nav-art--manabu{background:#39344d;color:#d0bfe8}
+body.dark-mode .nav-art--dekita{background:#4d4027;color:#f4d285}
+body.dark-mode .nav-art--sora{background:#294653;color:#b9ddee}
+body.dark-mode .nav-art--calendar{background:#4e3340;color:#efc1d0}
+body.dark-mode :is(.family-days input:checked+span,.todo-card.done .check){background:#315c52;color:#effff9;border-color:#8ad4c5}
+body.dark-mode progress::-webkit-progress-bar{background:#12262c}
+body.dark-mode :is(.review-study,.learning-content) button{background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode :is(.review-study,.learning-content) button:not(:disabled):hover{background:#304c54;color:var(--ink)}
+body.dark-mode :is(.review-study,.learning-content) button:is([aria-pressed=true],[aria-current=step]){background:#315c52;color:#effff9;border-color:#8ad4c5}
+body.dark-mode .lc-mission-steps [aria-current=step]{box-shadow:0 0 0 4px #28473e}
+body.dark-mode :is(.review-study,.learning-content) :is(textarea,input,select){background:#15262d;color:var(--ink);border-color:var(--border)}
+body.dark-mode .review-study blockquote{background:#213b38;color:var(--ink);border-color:#81b5a3}
+body.dark-mode .lc-scratchpad.lc-drawing-expanded{background:var(--bg);color:var(--ink)}
+body.dark-mode .lc-card-game [data-card-total]{color:#bddaea}
+body.dark-mode .learning-content .lc-case-file:hover{background:#25443f}
+body.dark-mode .learning-content [data-check-answer]{background:#80432e;color:#fff0e7;border-color:#c68a71}
+body.dark-mode .learning-content [data-check-answer]:hover{background:#99543c;color:#fff}
+body.dark-mode .lc-badge-symbol,body.dark-mode .lc-reward-medal{background:radial-gradient(circle,#725f2c,#41371f);color:#ffe5a1;border-color:#bd9e50;box-shadow:0 3px 0 #0004}
+/* Map sea becomes dark; region colours and selected prefecture remain unchanged. */
+body.dark-mode .learning-content .jq-map-wrap{background:#152d39;border-color:#496471}
+body.dark-mode .learning-content .jq-north{color:#bfd9e4}
+body.dark-mode .learning-content .jq-pref.is-muted{fill:#526b73;opacity:.65}
+body.dark-mode .learning-content .jq-finish li{background:#213b43;color:var(--ink)}
+body.dark-mode .learning-content .jq-finish small{color:var(--ink-soft)}
+body.dark-mode .reward-game::backdrop{background:#061015cc}
+body.dark-mode :is(.rg-top button,.rg-footer button,.rg-promotion button){background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode .rg-card{background:#28544c;color:#fff;border-color:#7ab5a5}
+body.dark-mode .rg-card.up{background:#243e46;border-color:#8ad4c5}
+body.dark-mode .rg-card.matched{background:#354d34;border-color:#91ae78}
+body.dark-mode .rg-chess .light{background:#b6c4ab}
+body.dark-mode .rg-chess .dark{background:#748e78}
+body.dark-mode .rg-chess small{color:#233a30}
+body.dark-mode #familyAuthGate{background:var(--card);color:var(--ink);box-shadow:0 10px 40px #0004}
+body.dark-mode :is(#familyLogin,#familyLogout){background:#213b43;color:var(--ink);border-color:var(--border)}
+body.dark-mode .sync-brand .app-version{background:#213b43;color:var(--ink-soft);border-color:var(--border)}
+body.dark-mode .calendar-achievement{filter:none}
+}
 .display-settings{margin:12px 20px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--card)}
 .display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
 .settings-topbar{position:sticky;top:0;z-index:1000;background:var(--bg-parent)}
@@ -54,4 +117,4 @@ body.dark-mode .app-version{color:var(--ink-soft)}
 body.dark-mode .header-actions .header-mode-button{background:#213b43;color:var(--ink);border-color:var(--border)}
 body.dark-mode .header-actions .header-mode-button:hover{background:#304c54}
 @media(max-width:360px){.topbar{gap:8px;padding-left:16px;padding-right:16px}.topbar .app-brand h1{font-size:14px;letter-spacing:.02em}.header-actions{gap:6px}.header-actions .header-mode-button{padding-left:9px;padding-right:9px}.header-mode-status{margin-left:16px;margin-right:16px}}
-@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar,.header-mode-status{display:none!important}}
+@media print{html.dark-mode,body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important;color-scheme:light}.display-settings,.settings-topbar,.header-mode-status{display:none!important}}

@@ -5,7 +5,7 @@ for(const [file,marker] of modules){let found=0;html=html.replace(/<script\b[^>]
 if(!html.includes('id="adaptive-lessons-v1"'))html=html.replace('<script>\n/* Reviewed lesson packs','<script id="adaptive-lessons-v1">\n'+fs.readFileSync('adaptive-lessons.js','utf8')+'\n</script>\n<script>\n/* Reviewed lesson packs');
 else html=html.replace(/<script id="adaptive-lessons-v1">[\s\S]*?<\/script>/,'<script id="adaptive-lessons-v1">\n'+fs.readFileSync('adaptive-lessons.js','utf8')+'\n</script>');
 // Bump this version for each published app update. Both visible labels use it.
-const appVersion='2026.11.26.6';
+const appVersion='2026.11.26.7';
 html=html.replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "'+appVersion+'"');
 html=html.replace(/(<span id="appVersion" class="app-version">)[^<]+/,'$1v'+appVersion);
 for(const [id,file,tag] of [['weekly-curriculum-v2','weekly-curriculum.js','script'],['display-settings','display-settings.js','script'],['dark-theme','dark-theme.css','style'],['science-guides','science-guides.js','script'],['social-guides','social-guides.js','script'],['learning-experience','learning-experience.js','script'],['learning-experience-style','learning-experience.css','style'],['continuing-learning','continuing-learning.js','script'],['continuing-learning-style','continuing-learning.css','style'],['problem-metadata','problem-metadata.js','script'],['problem-metadata-style','problem-metadata.css','style'],['detective-guide','detective-guide.js','script']]){
