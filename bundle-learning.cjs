@@ -4,7 +4,12 @@ const modules=[['learning-content.js','/* Reviewed lesson packs'],['review-study
 for(const [file,marker] of modules){let found=0;html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,block=>{if(!block.includes(marker))return block;found++;let body=fs.readFileSync(file,'utf8');if(file.endsWith('.json'))body='window.ReviewPacks='+body+';';return '<script>\n'+body+'\n</script>';});if(found!==1)throw Error(file+' found '+found);}
 if(!html.includes('id="adaptive-lessons-v1"'))html=html.replace('<script>\n/* Reviewed lesson packs','<script id="adaptive-lessons-v1">\n'+fs.readFileSync('adaptive-lessons.js','utf8')+'\n</script>\n<script>\n/* Reviewed lesson packs');
 else html=html.replace(/<script id="adaptive-lessons-v1">[\s\S]*?<\/script>/,'<script id="adaptive-lessons-v1">\n'+fs.readFileSync('adaptive-lessons.js','utf8')+'\n</script>');
-html=html.replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "2026.11.26.1"');
+html=html.replace(/var APP_VERSION = "[^"]+"/,'var APP_VERSION = "2026.11.26.2"');
+for(const [id,file,tag] of [['weekly-curriculum-v2','weekly-curriculum.js','script'],['display-settings','display-settings.js','script'],['dark-theme','dark-theme.css','style']]){
+  const block='<'+tag+' id="'+id+'">\n'+fs.readFileSync(file,'utf8')+'\n</'+tag+'>';
+  const re=new RegExp('<'+tag+' id="'+id+'">[\\s\\S]*?</'+tag+'>');
+  html=re.test(html)?html.replace(re,()=>block):html.replace('</head>',()=>block+'\n</head>');
+}
 if(!html.includes('id="choice-learning-style"'))html=html.replace('</head>','<style id="choice-learning-style">.lc-choices{display:grid;grid-template-columns:1fr;gap:10px}.lc-choices button{min-height:52px;text-align:left;padding:14px;font-size:1rem;line-height:1.6;white-space:normal;overflow-wrap:anywhere}.lc-choices button[aria-pressed="true"]{background:#d9eee8;border:2px solid #25796e;color:#163e38}.lc-past{margin:24px 0}.lc-past summary{font-size:1.05rem;font-weight:bold;padding:14px;cursor:pointer}.rs-list details>summary{padding:14px}.rs-question p,.rs-question blockquote{white-space:pre-wrap}.rs-question fieldset button{margin:4px;min-height:44px}</style>\n</head>');
 for(const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))if(m[1].trim())new vm.Script(m[1]);
 fs.writeFileSync('index.html',html);console.log('Bundled and parsed all inline scripts.');

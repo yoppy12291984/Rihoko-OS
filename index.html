@@ -311,6 +311,199 @@
 .jq-app .jq-regions button[aria-pressed="true"],.jq-app .jq-names button[aria-pressed="true"]{color:#244c45;background:#e2efe8}
 </style>
 <style id="choice-learning-style">.lc-choices{display:grid;grid-template-columns:1fr;gap:10px}.lc-choices button{min-height:52px;text-align:left;padding:14px;font-size:1rem;line-height:1.6;white-space:normal;overflow-wrap:anywhere}.lc-choices button[aria-pressed="true"]{background:#d9eee8;border:2px solid #25796e;color:#163e38}.lc-past{margin:24px 0}.lc-past summary{font-size:1.05rem;font-weight:bold;padding:14px;cursor:pointer}.rs-list details>summary{padding:14px}.rs-question p,.rs-question blockquote{white-space:pre-wrap}.rs-question fieldset button{margin:4px;min-height:44px}</style>
+<script id="weekly-curriculum-v2">
+/* Immutable curriculum v2: 52 distinct weekly topics per subject, with spaced review.
+   Each row: title | question | correct | distractor | distractor | explanation (twice).
+   New editions must use new IDs; never rewrite a released week's questions. */
+(function(root){
+  'use strict';
+  const science=[
+['たねと発芽','多くの植物のたねが芽を出すために必要な組合せは？','水・空気・適した温度','光だけ','肥料だけ','たねの発芽には、水・空気と適した温度が必要。','発芽に水が必要か調べるなら、変える条件は？','水を与えるかどうか','たねの種類も温度も全部','容器の色だけ','水以外の条件をそろえて比べる。'],
+['根・くき・葉','植物が土から水を取り入れる主な部分は？','根','花びら','実','根から取り入れた水は、くきなどを通って運ばれる。','葉を全部取る実験より先に、植物を傷つけず調べる方法は？','葉やくきの形をよく観察する','根を全部切る','水を何日も止める','まず観察して記録する。植物を傷つける実験は必要性を考える。'],
+['花から実へ','花がさいた後、実の中にできることがあるものは？','たね','石','金属','植物はたねをつくって仲間を増やす。','花から実になる変化を調べるよい方法は？','同じ花に印を付け、日をあけて観察する','毎回別の植物だけ見る','一度見ただけで決める','同じ場所を追うと変化の順番が分かる。'],
+['こん虫の育ち方','モンシロチョウの育つ順番は？','卵→幼虫→さなぎ→成虫','卵→成虫→幼虫','さなぎ→卵→幼虫','チョウはさなぎの時期を通って成虫になる。','バッタの育ち方について正しいのは？','さなぎにならず成虫になる','必ずチョウになる','卵を産まない','こん虫でも育ち方は同じではない。'],
+['こん虫の体','こん虫のあし6本は、どこについている？','むね','頭','はら','こん虫の体は頭・むね・はらに分かれる。','クモをこん虫と区別する手がかりは？','あしが8本ある','小さい','地面を歩く','小ささや歩き方だけでなく体のつくりを見る。'],
+['動物のすみか','池で見つけた生き物を調べるとき、記録するとよいのは？','見つけた場所と周りの様子','名前の予想だけ','好きな色だけ','すみか・水・草なども生き物を知る手がかり。','ダンゴムシを観察した後は？','見つけた場所へ戻す','別の遠い公園へ放す','乾いた箱に閉じ込める','生き物の生活場所を大切にして観察する。'],
+['季節と生き物','同じ木の季節による変化を調べるには？','同じ木を春夏秋冬に観察する','毎回別の木を一度ずつ見る','枝の数だけ想像する','同じ対象を続けて見ると季節の変化を比べられる。','冬に虫を見かけなくても「全部死んだ」と言える？','言えない。卵などで冬を越すものもいる','言える','虫は冬には必ず鳥になる','卵・幼虫・成虫など、冬を越す姿は種類で異なる。'],
+['食べ物でつながる生き物','草→バッタ→カエルの矢印を「食べられる側から食べる側」とすると、バッタを食べるのは？','カエル','草','どちらでもない','食べる・食べられる関係をたどったつながり。','生き物のつながりを調べる時に大切なのは？','一種類だけでなく周りの生き物も見る','大きさだけで決める','全部同じ物を食べると決める','生き物は食べ物やすみかを通して関わり合う。'],
+['日光と影','物の影は、日光が来る側から見てどちらにできる？','反対側','必ず真下','光が来る側だけ','物が光をさえぎった所が影になる。','同じ棒の影が時間で動くのは何と関係する？','太陽の見える位置の変化','棒の名前','雲の数だけ','太陽の見える方向が変わると影の方向も変わる。'],
+['太陽の一日の動き','日本で太陽はおおよそどちらからのぼる？','東','西','北だけ','季節で位置は変わるが、東側からのぼる。','太陽を調べる時の安全な行動は？','直接見ず、影などを観察する','望遠鏡でそのまま見る','サングラスだけで長く見つめる','太陽を直接見ると目を傷める危険がある。'],
+['月の形','月の明るく見える形は日によってどうなる？','変わる','いつも満月','いつも三日月','月の光って見える部分の形は日を追って変わる。','月の形を比べる記録に必要なのは？','日付・時刻・形','好きな月の名前だけ','雲の色だけ','いつ観察した形か残して比べる。'],
+['星と星座','同じ星座を数時間後に見ると、星の並びはおおよそ？','同じ並びのまま位置が変わる','毎回ばらばらになる','地面に落ちる','星座の形を保ったまま、見える位置が変わる。','星空を比べる時、目印に役立つのは？','方角や建物の位置','昼に食べた物','服の模様','方角と時刻を記録して位置の変化を見る。'],
+['晴れの日の気温','気温を比べる測り方として適切なのは？','風通しのよい日かげで測る','温度計に直射日光を当てる','地面に押しつける','空気の温度を測るため、日光や地面の影響を避ける。','同じ日に朝と昼の気温を比べるには？','同じ場所・同じ測り方にする','昼だけ室内にする','温度の目盛を変える','時刻以外の条件をそろえる。'],
+['雲と天気','雲の量の変化を調べるよい方法は？','同じ場所で時刻を決め、空の様子を記録する','昨日の記憶だけで決める','一つの雲の名前だけ書く','時刻と空全体の様子をそろえて記録する。','黒っぽい雲を一度見ただけで、必ず雨が降ると言える？','言い切れない','必ず言える','雲と天気は全く無関係','雲は手がかりだが、観察一つだけで断定しない。'],
+['水たまりのゆくえ','晴れた日に水たまりが小さくなる理由の一つは？','水が水蒸気となって空気中へ出る','水が石に変わる','水が光になる','水が水蒸気になることを蒸発という。','同じ量の水で蒸発を比べるなら？','容器などをそろえて比べる','水の量も容器も変える','測らずに決める','何の条件を比べるか決めて、それ以外をそろえる。'],
+['水滴はどこから','冷たいコップの外側につく水滴の主なもとは？','空気中の水蒸気','ガラスの中の金属','コップの外で生まれた石','空気中の水蒸気が冷やされ、水になる。','外側の水滴を調べる時、最初にするとよいことは？','コップの外側をふいておく','外側に水をかける','コップを割る','初めからついていた水と区別できるようにする。'],
+['水・氷・水蒸気','水を冷やしてこおらせると何になる？','氷','空気そのもの','砂','同じ水でも温度によって姿が変わる。','水蒸気について正しいのは？','気体で目に見えない','白い粒そのもの','氷のかけら','白く見える湯気は、主に小さな水の粒。'],
+['水の温まり方','水を下から温めると、温まった水は主に？','上へ動く','必ず底にとどまる','石になる','温まった水が動くことで全体へ熱が伝わる。','熱い水の実験をする時は？','大人と安全な道具で行う','手で温度を確かめる','顔を容器に近づける','やけどを防ぎ、安全な観察方法を使う。'],
+['金属の温まり方','金属の棒の一端を温めると、熱は？','温めた所から順に伝わる','反対側だけ先に熱くなる','全く伝わらない','金属では熱が物の中を伝わる。','見た目が変わらない金属の棒は？','熱いこともあるので触らない','必ず冷たい','必ず氷より冷たい','見た目だけで温度は判断できない。'],
+['空気を閉じ込める','空気を閉じ込めた注射器の先をふさぎ、ピストンを押すと？','空気の体積が小さくなる','空気が必ず水になる','体積が無限に増える','閉じ込めた空気は押すと縮む。針のない実験器具を使う。','押したピストンから手をゆるめると戻ろうとするのは？','縮めた空気が押し返すため','空気がなくなったため','重さがゼロになったため','縮めた空気には押し返すはたらきがある。'],
+['水を閉じ込める','空気と水を別々の容器に閉じ込めて押すと、水は空気より？','体積が変わりにくい','簡単に半分になる','必ず気体になる','水は空気と比べて押し縮めにくい。','空気と水の違いを比べるなら？','同じ大きさの実験器具を使う','片方だけ穴を開ける','片方だけ熱する','器具などをそろえ、中の物の違いを比べる。'],
+['音とふるえ','音が出ているトライアングルは？','ふるえている','絶対に動かない','必ず光る','音を出す物は振動している。','鳴っているトライアングルを手で押さえると音が小さくなるのは？','ふるえが止まりやすくなるため','色が変わるため','重さが消えるため','振動を抑えると音も弱くなる。'],
+['糸電話のひみつ','糸電話で声を伝えるため、糸は？','ぴんと張る','たるませる','途中で切る','張った糸を通して振動が伝わる。','糸を手で強くつまむと聞こえにくいのは？','ふるえが伝わりにくくなるため','声が光に変わるため','紙コップが消えるため','振動の伝わり方に注目する。'],
+['鏡で光を返す','鏡に日光を当てると、光は？','はね返る','必ず消える','必ず音になる','鏡は光を反射する。','鏡で返した日光はどこに向けてはいけない？','人の目','観察用の紙','地面の目印','反射光でも目を傷めるので人に向けない。'],
+['光を通す物','透明なガラスと厚い段ボールでは、光を通しやすいのは？','透明なガラス','厚い段ボール','必ず同じ','物によって光の通し方が違う。','はっきりした影を作りやすいのは？','光を通しにくい物','光を全部通す物','何も置かない時','光をさえぎる物の向こう側に影ができる。'],
+['電気の通り道','乾電池で豆電球をつけるには？','電気の通り道を輪につなぐ','線を途中で切る','電池を近くに置くだけ','電池の両極と豆電球をつなぐ回路を作る。','電気の実験で使うものは？','学校用の乾電池と実験器具','家庭のコンセントへ針金','切れた電源コード','家庭用電源は危険。決められた低電圧の器具を使う。'],
+['電気を通す物','乾電池の実験で、電気を通しやすい物は？','金属の銅線','乾いたプラスチック','乾いたゴム','金属は一般に電気を通しやすい。','銅線がプラスチックでおおわれている理由の一つは？','周りへ電気が流れないようにする','銅をなくすため','必ず明るく光らせるため','電気を通しにくい物でおおっている。'],
+['乾電池の向き','乾電池で回るモーターの回路で、電池の向きを逆にすると？','回る向きが逆になる','いつも同じ向きのまま','必ず壊れる','電流の向きが変わるとモーターの回転方向が変わる。','電池を線だけで直接つなぐのは？','熱くなる危険があるのでしない','いつも安全','電池が長持ちする方法','ショートさせないようにする。'],
+['直列と並列','乾電池2本を同じ向きで一列につなぐのは？','直列つなぎ','並列つなぎ','つながない方法','乾電池を順につなぐ方法を直列という。','同じ乾電池2本の並列つなぎは、1本と比べて電圧が？','おおよそ同じ','必ず2倍','ゼロになる','並列は同じ極どうしをつなぐ。指定の器具で実験する。'],
+['磁石の極','磁石のN極とN極を近づけると？','しりぞけ合う','引き合う','必ず消える','同じ極どうしはしりぞけ合う。','N極とS極では？','引き合う','しりぞけ合う','全く力がはたらかない','違う極どうしは引き合う。'],
+['磁石と方位','自由に回れるようにした方位磁針のN極は、おおよそ？','北を指す','南だけを指す','毎回でたらめ','方位磁針を使って方角を調べられる。','方位磁針の近くに強い磁石がある時は？','正しく方位を示さないことがある','いつも正確になる','必ず電球がつく','磁石や鉄の影響を避けて使う。'],
+['形と重さ','粘土を丸から細長い形へ変え、こぼさなければ重さは？','変わらない','必ず軽くなる','必ず重くなる','物の量が同じなら形を変えても重さは同じ。','形による違いを調べる前後で気を付けるのは？','粘土を足したり減らしたりしない','途中で水を足す','一部を捨てる','量を変えると、形だけの比較にならない。'],
+['体積と重さ','同じ体積の木と鉄は、重さが？','違うことがある','必ず同じ','どちらもゼロ','同じ体積でも物の種類で重さは異なる。','種類による重さを公平に比べるなら？','体積を同じにする','片方だけ大きくする','一方だけ水にぬらす','体積をそろえて種類の違いを調べる。'],
+['水にとける食塩','食塩を水にとかして見えなくなった時、食塩は？','水の中にある','なくなった','必ず砂になった','見えなくても、とけた食塩は水の中にある。','水と食塩をこぼさずとかした全体の重さは？','とかす前の合計と同じ','必ず食塩分だけ減る','ゼロ','とけても物がなくなるわけではない。'],
+['とける量の限界','同じ温度・同じ量の水に食塩を入れ続けると？','とけ残ることがある','どれだけでもとける','水が全部鉄になる','水にとける量には限りがある。','水の量ととける量の関係を調べるなら？','温度をそろえ、水の量を変える','水の量も温度も変える','食塩の色だけ見る','変える条件を一つにする。'],
+['風で動く車','同じ車に弱い風と強い風を当てて比べるとき、同じにするのは？','車と床と出発位置','風の強さだけ','走らせる物を毎回変える','風の強さ以外をそろえる。','強い風で遠くへ進んだ記録から言えるのは？','その実験では風の強さで進み方が変わった','どんな車でも永久に走る','風は車に力を及ぼさない','実験で確かめた範囲と、まだ分からないことを分ける。'],
+['ゴムの力','ゴムをのばしてから放すと？','もとの長さへ戻ろうとする','必ず長いまま','水になる','ゴムには元へ戻ろうとする性質がある。','ゴムで車を動かす実験の安全な方法は？','人に向けず、決めた範囲で動かす','顔に向けて放す','限界まで強く引く','ゴムが切れたり物が飛んだりする危険を防ぐ。'],
+['てこのつり合い','支点から同じ距離に同じ重さを左右につるすと？','つり合う','必ず左が下がる','必ず右が下がる','同じ条件なら左右のはたらきが等しくなる。','小さな力で持ち上げたい時、力を加える位置は支点から？','遠くする','必ず近くする','位置は全く関係ない','支点から遠い所ほど、小さな力で動かしやすい。'],
+['ふりこの一往復','ふりこが左端→右端→左端へ動くのは？','一往復','半往復','三往復','出発した端へ戻るまでを一往復と数える。','ふりこの長さと時間の関係を調べるなら？','長さ以外の条件をそろえる','おもりも振れ幅も全部変える','回数を数えない','同じ往復数にかかる時間を比較する。'],
+['筋肉と骨','うでを曲げる時、骨を動かすはたらきをするのは？','筋肉','髪の毛','爪','筋肉の縮むはたらきで骨が動く。','骨と骨のつなぎ目で曲がる所は？','関節','葉','回路','関節があることで体を曲げられる。'],
+['呼吸と空気','人が呼吸で主に取り入れる必要がある気体は？','酸素','水素','ヘリウム','体は酸素を使って生命活動を続ける。','吐く息は吸う空気より、一般に多く含むのは？','二酸化炭素','砂','鉄の粒','呼吸で酸素を使い、二酸化炭素を出す。'],
+['食べ物の通り道','食べ物が口から胃へ通る管は？','食道','気管','血管','食道は食べ物を運ぶ。気管は空気の通り道。','食べ物が細かく分解されることは？','消化','蒸発','発電','消化によって栄養を取り入れやすくする。'],
+['川の流れ','流れる水には地面をどうするはたらきがある？','けずる・運ぶ・積もらせる','必ず岩を増やすだけ','一切変えない','流れる水は土や砂の位置を変える。','大雨の後の川を調べるため、近づくのは？','危険なので近づかず安全な資料で調べる','いつでも安全','流れの中へ入ればよい','増水した川には近づかない。'],
+['石・砂・泥','石・砂・泥を粒の大きさで比べると、一般に最も細かいのは？','泥','石','大きな小石','粒の大きさを比べて分類する。','地面を調べるときの記録に役立つのは？','粒の大きさ・色・採取場所','好き嫌いだけ','名前の響きだけ','見た特徴と場所を記録して比べる。'],
+['雨水の流れ','地面に傾きがある時、水は主に？','高い所から低い所へ流れる','低い所から高い所へ自然に流れる','必ず同じ場所で止まる','雨水の行き先と地面の高さには関係がある。','水たまりが残りやすい場所を調べるなら？','地面のくぼみや水のしみ込み方を見る','空の色だけ見る','靴の色だけ比べる','傾きだけでなく地面の性質も関係する。'],
+['火山の土地','火山から出る物に含まれるのは？','火山灰や溶岩','雪だけ','紙だけ','火山の活動によって土地の様子が変わる。','火山を調べるための行動として適切なのは？','立入規制を守り、安全な資料も使う','規制区域へ入る','噴火口へ勝手に近づく','観察は安全情報と規制を守って行う。'],
+['地震と地面','地震で起こることがあるのは？','地面の揺れやずれ','月がなくなること','必ず雨になること','地震は地面や建物に影響を及ぼす。','地震の記録を調べる時、大切なのは？','時刻・場所・揺れの記録を比べる','一つのうわさだけ信じる','日付を消す','記録の出所と条件を確かめる。'],
+['化石から分かること','海の貝の化石が地層から見つかった時の手がかりは？','昔その場所が海だった可能性','必ず昨日まで海だった','貝が金属だった','化石は昔の環境を考える手がかりになる。','化石一つだけで年代を正確に決められる？','他の資料や調査も必要','必ず今日と分かる','見た人の年齢で決まる','地層など複数の証拠を合わせて考える。'],
+['光と植物の育ち','同じ種類の植物で光の影響を比べるには？','光以外の水や土などをそろえる','水の量も全部変える','違う種類だけ比べる','光の条件以外をそろえると影響を考えやすい。','結果をまとめる時に大切なのは？','予想と違っても記録をそのまま残す','予想に合う数へ直す','うまくいかない記録を全部消す','観察の事実と考えを分けて残す。'],
+['電気を作る','手回し発電機は何を電気へ変える？','手で回す運動','文字の形','音の名前','運動のエネルギーを電気へ変える。','発電した電気をためる器具の例は？','コンデンサー','木の葉だけ','紙の箱だけ','実験用のコンデンサーに電気をためて使える。'],
+['水の循環','海などから蒸発した水は、空で冷えると？','雲の水滴や氷の粒になる','全部なくなる','必ず鉄になる','雲から雨や雪になり、地上へ戻る水もある。','山に降った雨が海へ戻る経路の一つは？','川を流れる','いつも宇宙へ飛ぶ','すべて石になる','水は地上・地下・空気中を巡る。'],
+['調べ方の総まとめ','実験の結果が予想と違ったら？','条件と記録を確かめ、考え直す','結果を書き換える','必ず失敗と決める','予想と違う結果も新しい発見の手がかり。','「見たこと」と「考え」を分けた記録は？','葉がしおれた。水不足かもしれない','見ずに水不足と決めた','友だちが言ったので絶対正しい','観察事実を根拠に考え、必要なら確かめる。']
+  ];
+  const social=[
+['地図の方位','上が北の地図で、右はどの方角？','東','西','南','北を上にすると右は東、左は西。','学校の北に図書館があります。図書館から見た学校は？','南','北','東','見る場所が変わると相手の方角も変わる。'],
+['地図記号','地図記号を使う目的は？','場所の特徴を分かりやすく示す','全ての建物の写真を載せる','距離を必ずなくす','記号で施設や土地の様子を簡潔に表す。','知らない地図記号があったら？','凡例や記号表で確かめる','形だけで決めつける','地図を捨てる','地図の説明を使って読み取る。'],
+['縮尺と距離','同じ町を、小さな範囲まで詳しく描いた地図は何に便利？','近所の道を詳しく調べる','世界全部を一度に見る','必ず天気を知る','目的に合わせた範囲の地図を選ぶ。','地図上の長さを実際の距離に直す手がかりは？','縮尺','紙の色だけ','方位の文字の大きさ','縮尺は実際の長さを縮めた割合。'],
+['町を高い所から見る','町の土地の使われ方を調べる方法は？','地図や空中写真で比べる','建物の名前だけ暗記する','一つの店だけで全部決める','住宅・田畑・工場などの分布を見る。','写真に写らない建物の中の仕事は？','見学や聞き取りで確かめる','屋根の色だけで断定','全部同じと決める','資料だけで分からないことは別の方法で調べる。'],
+['農家の仕事','野菜を育てる農家の仕事に含まれるのは？','土づくりや水の管理','魚を毎回海で捕るだけ','電車の運転だけ','作物に合った環境を整えて育てる。','収穫の時期が作物で違うのは？','育ち方や適した季節が違うため','袋の色だけで決まる','全作物が同じ日に実るため','種類や地域によって収穫時期が変わる。'],
+['米づくり','田植えで田に植えるものは？','稲の苗','木の板','魚の卵','育てた稲の苗を田に植えて米を育てる。','米づくりで水の管理が大切なのは？','稲の成長に合わせるため','米を必ず青くするため','田を道路にするため','時期に応じて水の量などを調整する。'],
+['畑と温室','温室を使う理由の一つは？','温度などを調整しやすくする','作物に光を絶対当てない','水を永久に不要にする','育つ環境を調整して栽培する。','温室の作物にも必要なのは？','水や光など適した環境','名前だけ','何も必要ない','施設があっても作物に必要な条件はある。'],
+['漁業の仕事','漁業の仕事の例は？','魚や貝をとったり育てたりする','米だけを作る','鉄道だけを運転する','漁業には漁獲や養殖がある。','小さい魚をとりすぎない工夫は何のため？','資源を守り、将来もとれるようにする','海を空にするため','魚を全部なくすため','魚が育ち、増えることも考える。'],
+['魚を育てる養殖','養殖とは？','管理した環境で魚や貝などを育てる','海の水を全部なくす','魚を紙で作る','えさや水の状態などを管理して育てる。','養殖で気を付けることは？','水の環境や生き物の健康','池の名前だけ','容器の模様だけ','生き物が育つ条件を管理する。'],
+['酪農と牛乳','酪農で主に育て、牛乳を得る動物は？','乳牛','ニワトリ','カイコ','乳牛を育てて乳をしぼる仕事。','牛乳を運ぶ時に温度管理が必要なのは？','品質を保つため','必ず量を増やすため','色を変えるため','食品は適した条件で保管・輸送する。'],
+['工場の流れ作業','工場で仕事を分担する利点は？','工程ごとに協力して作れる','誰も確認しなくてよい','材料が不要になる','役割を分けながら全体をつなぐ。','製品の検査は何のため？','決められた品質か確かめる','見た目だけで必ず値上げする','工場を止めることだけ','安全や品質を確認して出荷する。'],
+['食品工場','食品工場で手や道具を清潔にする目的は？','食品を衛生的に作る','包装を重くする','味を全て同じにするだけ','異物や微生物などの混入を防ぐ。','原料の情報を記録しておく理由は？','どこから来た原料か追えるようにする','文字を増やすだけ','原料を隠すため','問題が起きた際の確認にも役立つ。'],
+['自動車づくり','自動車一台を作る仕事は？','多くの部品工場や人が関わる','必ず一人だけで全部作る','部品を使わない','部品を作る工場と組み立てる工場などが協力する。','必要な時に部品が届くことが大切なのは？','組み立てを進めるため','部品を使わずに済むため','車の色だけのため','生産と輸送を合わせて計画する。'],
+['伝統工芸','伝統工芸で受け継がれてきたものは？','地域の技術や作り方','全く使われない秘密だけ','必ず海外の最新機械だけ','技術を学び、次の世代へ伝える。','伝統を守りながら新しい製品を作ることは？','今の暮らしに合わせる工夫にもなる','絶対にできない','歴史が全て消える','技術を生かし用途や形を工夫できる。'],
+['店の品ぞろえ','店が季節に合わせて品物を変える理由の一つは？','客が必要とする物が変わるため','全ての客が同じ物だけ買うため','季節は何にも関係しないため','暮らしや需要に合わせて品ぞろえする。','売れた数の記録は何に役立つ？','仕入れる量を考える','天気を必ず当てる','客の気持ちを完全に読む','記録は計画の手がかりになる。'],
+['産地から店へ','野菜が農家から店に届くまでには？','運送や市場などが関わることがある','必ず農家が全店へ歩く','瞬間移動する','流通にはさまざまな経路や仕事がある。','品物の産地は何を示す？','作られたりとれたりした場所','買った人の家','店員の年齢','表示の意味を確かめて選ぶ。'],
+['食べ物の表示','食品の原材料表示で分かるのは？','何を材料に使ったか','買う人全員の好み','必ず明日の天気','食品を選ぶための情報になる。','表示で分からないことがあったら？','店や製造元に確かめる','見た目だけで断定する','全て同じと決める','確認できる相手や情報を使う。'],
+['水道の仕組み','水道水をきれいにする施設は？','浄水場','消防署','図書館','水源から取った水を処理して届ける。','水道を支える仕事は？','水質の確認や管の点検','水を売るだけで点検不要','雨が降るのを待つだけ','安全に供給するため管理や点検を続ける。'],
+['使った水のゆくえ','下水道で集めた汚れた水を処理する施設は？','下水処理場','郵便局','駅','使った水を処理して環境を守る。','油をそのまま流さない工夫の目的は？','管や水環境への負担を減らす','水を必ず増やす','川を油で満たす','家庭の行動も水環境に関わる。'],
+['ごみの分別','ごみの分け方を確かめる先は？','住んでいる地域の案内','別の町のうわさだけ','袋の色を想像するだけ','分別や回収方法は地域で異なる。','分別する理由の一つは？','資源として使える物を分ける','全部同じ場所へ捨てるだけ','ごみを増やす','再利用や安全な処理につながる。'],
+['リサイクル','使用済みの紙を原料に新しい紙を作るのは？','リサイクル','買いだめ','投げ捨て','使い終えた物を原料として利用する。','ごみを減らすため、再資源化の前にもできることは？','必要な量を買い、長く使う','使える物もすぐ捨てる','余分に大量に買う','まずごみを出す量を減らす工夫がある。'],
+['消防署の仕事','消防署の仕事に含まれるのは？','消火や救助、防火の呼びかけ','本の貸出しだけ','米の栽培だけ','火災を防ぐ活動も行う。','火事を知らせる電話で大切なのは？','場所と何が起きているかを伝える','好きな歌だけ歌う','場所を隠す','落ち着いて必要な情報を伝え、指示を聞く。'],
+['警察の仕事','警察が行う仕事の例は？','交通の安全や事件への対応','天気を変える','食品を全て作る','地域の安全を守る仕事をしている。','町の安全を調べる時に役立つ資料は？','交番の活動や交通安全の案内','うわさ一つだけ','店の色だけ','具体的な活動を調べる。'],
+['災害への備え','家族で避難場所を確かめるのはいつがよい？','災害が起きる前','必ず災害の後だけ','一度も確かめない','日頃の備えが大切。','ハザードマップが示すのは？','災害の危険が想定される場所など','全ての災害の正確な発生日','好きな観光地だけ','想定や避難情報を確認する資料。'],
+['地域で助け合う','避難訓練に地域で参加する目的は？','動き方や協力の仕方を確かめる','災害を必ずなくす','競争で勝つことだけ','役割や経路を確認して備える。','困っている人を見つけたら？','自分の安全も守り、大人や係の人に知らせる','危険な場所へ一人で入る','必ず見ないふりをする','無理をせず協力できる方法を考える。'],
+['市役所の仕事','市役所などが関わる仕事の例は？','住民の暮らしを支える手続きや施設管理','全ての買い物を代わりにする','天気を決める','自治体は地域の暮らしを支える。','地域の困りごとを伝える方法の一つは？','担当の窓口へ相談する','出所不明のうわさだけ流す','資料を全部捨てる','担当部署や相談先を確かめる。'],
+['公共施設','図書館をみんなで使う時に大切なのは？','本や利用の決まりを大切にする','本を自分だけの物にする','他の人の利用を妨げる','公共施設は多くの人が使う。','公園の遊具が壊れていたら？','使わず、管理する人に知らせる','そのまま無理に遊ぶ','勝手に大きく作り変える','安全に使えるよう管理者へ伝える。'],
+['税と暮らし','税金の使い道の例は？','道路や学校などを支える','個人の好きな玩具だけを買う','全部海へ捨てる','公共サービスを支える財源になる。','税の使い道を知る方法は？','自治体などが公開する予算資料を見る','誰かの想像だけで決める','全く調べられない','公開資料で収入や支出を確かめられる。'],
+['話し合いと決定','クラスで案を決める時に大切なのは？','理由を聞き、違う意見も考える','一番大きな声だけ採用する','少数の意見を聞かない','立場や理由を比べて話し合う。','多数決で決めた後も必要なのは？','少数の意見や困りごとを尊重する','反対した人を排除する','理由を全部忘れる','多数決だけで全ての問題が解消するわけではない。'],
+['都道府県','日本の都道府県はいくつ？','47','12','100','1都1道2府43県で47。','都道府県の位置を覚えるのに役立つのは？','周りの県や海との関係を見る','名前の長さだけ見る','全部同じ場所と思う','位置関係も合わせると地図を読みやすい。'],
+['山地と平野','平野について合う説明は？','比較的平らな土地が広がる','海の中だけにある','必ず高い山頂','土地の高さや広がりに注目する。','土地の形が暮らしに関わる例は？','平らな土地に田畑や町が広がることがある','全地域の暮らしが必ず同じ','山には人が住めない','地形は土地利用の条件の一つ。'],
+['海と島','日本の国土の特徴は？','多くの島からできている','大陸の真ん中だけにある','海に全く面していない','海に囲まれた島々からなる。','海に面した地域で見られる仕事の例は？','漁業や港での輸送','必ず雪だけを運ぶ','全地域で同じ農業だけ','海や港を生かした仕事がある。'],
+['地域の気候','同じ日本でも気候は？','地域や季節によって違う','一年中全国同じ','山も海も関係しない','緯度や地形なども関係する。','気候を比べる資料に適するのは？','長い期間の気温や雨の記録','一日の気分','一枚の服の色','一日だけの天気と、長期の傾向を区別する。'],
+['雪国の暮らし','雪が多い地域の道路で必要になる仕事は？','除雪','道路を必ず畑にする','毎日海水で満たす','通行を保つため雪を取り除く。','雪を利用した地域の工夫の例は？','雪まつりや雪を使った保存','全ての雪を無くすことだけ','雪を必ず危険な所へ積む','負担を減らしながら資源として活用する工夫もある。'],
+['暖かい地域の暮らし','暖かい気候を生かす仕事の例は？','その気候に合った作物を育てる','全ての作物を同時に育てる','気候を全く調べない','気温や雨などに合う作物を選ぶ。','台風への備えが必要な地域で大切なのは？','地域の案内を確認し早めに準備する','毎回必ず被害がないと思う','海へ様子を見に行く','天気や地域の情報を確認して安全に備える。'],
+['森林の仕事','森林を育てる仕事に含まれるのは？','植林や間伐など','木を全て切るだけ','海の魚を育てるだけ','長い期間をかけて森林を管理する。','森林のはたらきの一つは？','生き物のすみかになる','必ず雨を完全に止める','空気を全部なくす','森林には木材生産以外の役割もある。'],
+['運輸と物流','多くの荷物を遠くへ運ぶ手段は？','船・鉄道・トラックなど','人の声だけ','地図だけ','距離や量、時間に合わせて手段を組み合わせる。','輸送手段を選ぶ時に比べることは？','速さ・量・費用など','色だけ','名前だけ','目的に合う条件を総合して選ぶ。'],
+['港と貿易','外国から品物を買って国内へ入れることは？','輸入','輸出','除雪','輸入は外国から入れること、輸出は外国へ出すこと。','港で多く使われる大きな荷物の箱は？','コンテナ','鉢植え','本棚だけ','コンテナで積み替えや運搬をしやすくする。'],
+['世界の国々','世界にはどんな国々がある？','言葉や暮らしなどが多様な国々','全員が同じ言葉だけの国々','日本しかない','国の中にも多様な人や暮らしがある。','外国の暮らしを調べる姿勢として適切なのは？','違いの理由や共通点も調べる','一つの例で全員を決めつける','違いを全て間違いとする','一部だけで全体を決めず、複数の資料で学ぶ。'],
+['昔の道具','洗濯板と電気洗濯機を比べる視点は？','仕事の手間や使うエネルギー','名前の長さだけ','全く同じ物と考える','道具の変化と暮らしの変化をつなげる。','昔の道具の使い方を知る方法は？','資料館や使った人に確かめる','形だけで用途を断定','勝手に壊す','実物・記録・聞き取りを組み合わせる。'],
+['町の移り変わり','昔と今の地図を比べる時にそろえたいのは？','同じ場所の範囲','紙の古さだけ','地図の題名だけ','同じ場所で何が変わったか読む。','地図で道路が増えた理由まで分かる？','他の資料や聞き取りも必要','必ず一目で全部分かる','道路には理由がない','変化の事実と理由を分けて調べる。'],
+['昔の人の工夫','用水路は主に何のために作られた？','田畑などへ水を届ける','水を必ず捨てるだけ','山を全てなくす','地域の水を利用するための工夫。','昔の工事を調べるときに見る資料は？','当時の記録や残る施設','今のうわさだけ','天気予報だけ','地域の人の努力や工夫を資料から学ぶ。'],
+['縄文の暮らし','縄文時代の暮らしを知る手がかりの一つは？','土器や貝塚','新幹線の切符','スマートフォン','遺跡や遺物から当時の暮らしを考える。','貝塚から貝殻や骨が出ると、何の手がかりになる？','食べ物や暮らし','未来の天気','全員の名前','残された物から分かることを考える。'],
+['弥生と米づくり','弥生時代に広まった暮らしの変化の一つは？','水田での米づくり','飛行機での旅行','電気での工場生産','米づくりが広まり、暮らしや集落が変わった。','米をたくわえる工夫を調べる資料は？','倉庫の跡や当時の道具','現代の広告だけ','星座だけ','遺跡などの証拠から考える。'],
+['古墳と当時の社会','古墳はどのようなもの？','昔の有力者などの墓','現代の遊園地だけ','米を植える苗','大きな墓や副葬品は当時の社会の手がかり。','大きな古墳の工事から考えられることは？','多くの人の労力が必要だった','一人が一瞬で作った','道具は一切不要だった','大きさと工事に必要な仕事を結び付けて考える。'],
+['都と文化','昔の都に集まったものの例は？','政治の仕事や文化','全ての海の魚','日本中の山そのもの','都は政治や文化の中心となった。','昔の文化を知る資料になるものは？','建物・絵・文章など','日付のない想像だけ','今の気分だけ','残された複数の資料から学ぶ。'],
+['武士の時代','武士の時代を調べる資料の例は？','古い文書や城の跡','現代のゲームだけ','未来の予定表','創作と歴史資料を区別する。','歴史の物語を読んだ時に大切なのは？','史実と創作を資料で確かめる','書いてあれば全て事実とする','資料は不要とする','物語には作者の創作が含まれることがある。'],
+['江戸の町と街道','街道の役割は？','人や物の移動をつなぐ','海をなくす','天気を決める','街道と宿場が交通を支えた。','宿場で行われた仕事の例は？','旅人の宿泊や荷物の運搬を支える','飛行機の整備だけ','発電だけ','移動を支える人々の仕事があった。'],
+['近代の交通','鉄道が広がることで変わったことは？','多くの人や物を運びやすくなった','移動が全てなくなった','全道路が消えた','交通の変化は生活や産業に影響した。','便利になった点だけでなく調べたいのは？','地域や人々へのさまざまな影響','良い点だけ','機械の色だけ','変化には利点と課題の両方がある。'],
+['情報を届ける仕事','ニュースを読む時に確かめたいのは？','発信元・日付・根拠','文字の大きさだけ','自分に都合がよいかだけ','誰がいつ何を根拠に伝えたか確認する。','同じ出来事で説明が違ったら？','複数の確かな資料を比べる','最初のうわさだけ信じる','全部同じと決める','共通する事実と意見の違いを整理する。'],
+['文化を受け継ぐ','地域の祭りを調べる方法は？','由来や準備を地域の人に聞く','見た目だけで理由を決める','全ての祭りを同じとする','人々の思いや歴史も学ぶ。','文化を大切にする姿勢は？','決まりを尊重し、意味を知ろうとする','違う文化を笑う','古い物を勝手に壊す','自分と異なる文化にも敬意を持つ。'],
+['持続可能な暮らし','資源を将来にも残す工夫は？','必要な量を使い、再利用も考える','使える物を大量に捨てる','資源は無限と決める','今の暮らしと将来の両方を考える。','地域の課題を調べて提案する時に必要なのは？','事実を調べ、関係する人の意見も聞く','想像だけで全て決める','一人の好みだけで決める','資料と人々の立場を踏まえて考える。']
+  ];
+  function packs(now,adaptive){
+    const start=Date.parse('2026-11-23T00:00:00Z'),last=Date.parse(adaptive.monday(now)+'T00:00:00Z'),out=[];
+    const count=Math.min(science.length,Math.floor((last-start)/604800000)+1);
+    for(let i=0;i<count;i++){
+      const stamp=new Date(start+i*604800000).toISOString().slice(0,10);
+      const lessons=[['理科',science],['社会',social]].map(([subject,rows])=>{
+        const row=rows[i];
+        function question(r,offset,id,review){const q=adaptive.choice((review?'【前のテーマのおさらい】':'')+r[offset],r[offset+1],[r[offset+2],r[offset+3]],r[offset+4],stamp+subject+id);return {...q,id,hint:review?'前のテーマで学んだことを思い出そう。':'選択肢を一つずつ、問いに合うか考えよう。'};}
+        const q3=i?question(rows[i-1],1,'q3',true):subject==='理科'?{...adaptive.choice('調べた結果が予想と違ったときは？','記録を残し、条件を確かめる',['予想に合う数へ変える','結果を全部消す'],'予想と違う結果も、考えるための大切な手がかり。',stamp+subject),id:'q3'}:{...adaptive.choice('町について調べたことを伝えるときに大切なのは？','資料の出所と調べた日も残す',['うわさを必ず事実として書く','分からないことも断定する'],'どこでいつ確かめた情報か、後から確認できるようにする。',stamp+subject),id:'q3'};
+        return {id:subject==='理科'?'science':'social',week:i+1,subject,title:row[0],level:'新しいテーマ＋おさらい',time:'5〜10分',mission:'新しいテーマを2問。そのあと前の学びを1問おさらい。',source:'オリジナルの52週カリキュラム v2。事実・理由・調べ方を選択式で学ぶ。',questions:[question(row,1,'q1'),question(row,6,'q2'),q3]};
+      });
+      out.unshift({format:'rihoko-lesson-pack',version:1,id:'weekly-v2-'+stamp,revision:1,title:stamp+'の週の調査',description:'毎週違うテーマを学ぶ、全52週の理科と社会。',lessons});
+    }
+    // Preserve the only v1 week released before the v2 curriculum, with its original IDs.
+    return out.concat(adaptive.weekly(new Date('2026-11-26T00:00:00Z')));
+  }
+  const api={science,social,packs,start:'2026-11-23',end:'2027-11-15'};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.WeeklyCurriculum=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script id="display-settings">
+(function(root){
+  'use strict';
+  const KEY='rihoko-color-mode-v1';
+  function read(storage){try{const saved=storage.getItem(KEY);if(['light','dark','system'].includes(saved))return saved;return storage.getItem('riho-study-parent-dark')==='1'?'dark':'light';}catch(_){return 'light';}}
+  function save(storage,mode){if(!['light','dark','system'].includes(mode))throw Error('表示設定を確認してください');storage.setItem(KEY,mode);}
+  function isDark(mode,systemDark){return mode==='dark'||mode==='system'&&systemDark;}
+  function toggle(state,visible,fallback,scroll){
+    if(state.view==='parent'){state.view=visible.includes(state.settingsReturnView)?state.settingsReturnView:fallback;return {closing:true,scroll:state.settingsReturnScroll||0};}
+    state.settingsReturnView=state.view;state.settingsReturnScroll=scroll||0;state.view='parent';state.parentTab='family';state.parentAdvanced=false;return {closing:false,scroll:0};
+  }
+  const api={KEY,read,save,isDark,toggle};
+  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.DisplaySettings=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<style id="dark-theme">
+/* Explicit dark palette: illustrations, maps and game piece colours stay intact. */
+body.dark-mode, body.dark-mode #app {
+  --bg:#111d22;--bg-parent:#111d22;--card:#1b2d33;--border:#40565e;
+  --ink:#edf6f5;--ink-soft:#b9cecf;--teal:#8ad4c5;--teal-soft:#244842;
+  --coral:#ffac94;--coral-soft:#51392f;--yellow:#f5d47d;--yellow-soft:#443e2a;
+  --hero-bg:#213c3e;--shadow:0 2px 10px #0004;color-scheme:dark;
+  color:var(--ink);background:var(--bg);background-image:none;
+}
+body.dark-mode .topbar,body.dark-mode .parent-header{background:var(--bg);color:var(--ink)}
+body.dark-mode :is(.panel,.todo-card,.event-card,.tabbar,.tabbar-inner,.home-shortcuts button,.calendar,.cal-grid,.sync-bar,.family-card,.rs-card,.rs-question,.rs-hero,.lc-library,.lc-question,.lc-passage,.lc-case-file,.lc-album,.lc-album-body,.lc-lesson-reward,.lc-today,.lc-mission,.lc-card-game,.lc-friend,.lc-badge-list li,.lc-solution,.lc-hint,.rs-solution,.rs-hint,.jq-panel,.jq-card,.hc-card){background:var(--card);color:var(--ink);border-color:var(--border);background-image:none}
+body.dark-mode :is(h1,h2,h3,h4,p,legend,label,summary,.todo-title,.ri-sub,.section-label,.lc-note,.lc-eyebrow,.lc-subject-title,.lc-case-label,.lc-partner-line,.rs-note,.greeting .hello,.greeting .date){color:inherit}
+body.dark-mode :is(.lc-detective-hero){background:#224b49;color:#f0faf6}
+body.dark-mode .lc-detective-hero :is(h2,p,span){color:#f0faf6}
+body.dark-mode :is(button,input,select,textarea){color:var(--ink);border-color:var(--border)}
+body.dark-mode button{background:#213b43}
+body.dark-mode button:hover{background:#304c54;color:var(--ink)}
+body.dark-mode :is(input,select,textarea){background:#15262d}
+body.dark-mode :is(.icon-btn,.ptab,.backlink,.lc-choices button,.lc-subjects button,.lc-ratings button,.rs-steps button,.rs-actions button,.rs-quiet,.lc-actions button,.lc-step-nav button,.lc-mission-steps button,.lc-answer-check button,.rs-question button,.rs-card button){background:#213b43;color:var(--ink);border:1px solid var(--border)}
+body.dark-mode :is(button[aria-pressed="true"],.ptab.active,.tab-item.active){background:#315c52;color:#effff9;border-color:#8ad4c5}
+body.dark-mode .lc-answer-check{background:#203b38;border-color:#65968a}
+body.dark-mode :is(.lc-correct,.lc-correct strong,.lc-correct p,.lc-correct small,.lc-correct-circle){color:#ffa9b1}
+body.dark-mode .lc-retry{background:#473b28;color:#ffe4a1}
+body.dark-mode :is(.learning-content,.lc-detective-question p,.lc-partner-line,.lc-mission-cheer,.learning-content header,.lc-subjects,.jq-home,.jq-result,.rs-hero,.home-history-nav,.empty){background:var(--card);background-image:none;color:var(--ink);border-color:var(--border)}
+body.dark-mode :is(.lc-case-file small,.lc-case-file span,.lc-album small,.lc-friend small,.lc-badge-list small){color:var(--ink-soft)}
+body.dark-mode :is(.rg-dialog,.rg-panel,.rg-header,.rg-overlay .rg-card,.rg-status){background:var(--card);color:var(--ink)}
+body.dark-mode :is(.hero-start,.btn-primary){background:#356e63;color:#fff}
+body.dark-mode .icon-btn svg *{stroke:var(--teal)}
+body.dark-mode :is(.cal-cell,.cal-day,.rally-cell,.rally-board,.rally-stamp,.rally-paper){background:var(--card);color:var(--ink);border-color:var(--border)}
+body.dark-mode .rally-stop :is(small,span){background:#23383d;color:#c6d9d6}
+body.dark-mode .rally-stop.next span{background:#55452c;color:#ffe3a3}
+body.dark-mode a{color:#9adee8}
+body.dark-mode :is(.sync-brand,.sync-brand strong,.hc-character span,.hc-bubble small){color:var(--ink-soft)}
+body.dark-mode :is(.hc-bubble,.reward-card,.sticker-album>div,.adventure-treasures){background:var(--card);background-image:none;color:var(--ink);border-color:var(--border)}
+body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
+.display-settings{margin:12px 20px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--card)}
+.display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
+.settings-topbar{position:sticky;top:0;z-index:20;background:var(--bg-parent)}
+.settings-topbar .icon-btn{width:44px;height:44px;flex-shrink:0}
+@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar{display:none!important}}
+
+</style>
 </head>
 <body>
 <style>
@@ -4839,6 +5032,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
 (function(root){
   'use strict';
   var KEY='rihoko-learning-content-v1';
+  var Curriculum=typeof module!=='undefined'&&module.exports?require('./weekly-curriculum.js'):root.WeeklyCurriculum;
   var Adaptive=typeof module!=='undefined'&&module.exports?require('./adaptive-lessons.js'):root.AdaptiveLessons;
   var companions=[
     {id:'rihoko',name:'里穂子',at:0,image:'detective-girl-v1.png',role:'ひらめき探偵団のリーダー',line:'気づいたことが、次の手がかりになるよ。'},
@@ -4883,7 +5077,7 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
   function create(storage,bundled,clock){
     clock=clock||function(){return new Date();};
     var weekCache=null,weekPacks=[];
-    function weekly(){var key=Adaptive.monday(clock());if(key!==weekCache){weekPacks=Adaptive.weekly(clock()).map(validate);weekCache=key;}return weekPacks;}
+    function weekly(){var key=Adaptive.monday(clock());if(key!==weekCache){weekPacks=Curriculum.packs(clock(),Adaptive).map(validate);weekCache=key;}return weekPacks;}
     var base=(bundled||[]).map(validate),retired=new Set(base.filter(function(p){return p.archived;}).map(function(p){return p.id;}));
     function read(){var s=JSON.parse(storage.getItem(KEY)||'{"packs":[],"responses":{}}');if(!s||!Array.isArray(s.packs)||!s.responses||typeof s.responses!=='object'||Array.isArray(s.responses))throw Error('学習記録を読み込めません。');return s;}
     function write(s){storage.setItem(KEY,JSON.stringify(s));}
@@ -4963,9 +5157,9 @@ window.RihokoLessonPacks = [{"format":"rihoko-lesson-pack","version":1,"id":"thi
         var subjects=['理科','社会'],icons=['葉','地図'];
         if(!subjects.includes(subjectSelection))subjectSelection='理科';
         var entries=[];packs.forEach(function(pack){pack.lessons.forEach(function(lesson){entries.push({pack:pack,lesson:lesson});});});
-        var available=entries.filter(function(e){return e.lesson.subject===subjectSelection;}),thisWeek='weekly-v1-'+Adaptive.monday();
+        var available=entries.filter(function(e){return e.lesson.subject===subjectSelection;}),thisWeek='weekly-v2-'+Adaptive.monday();
         function fileCards(list){return list.map(function(entry,i){var pack=entry.pack,lesson=entry.lesson,n=lesson.questions.filter(function(q){return !!store.response(pack,lesson,q).rating;}).length;return '<button class="lc-lesson lc-case-file" data-pack="'+esc(pack.id)+'" data-lesson="'+esc(lesson.id)+'"><small>'+esc(pack.title)+'</small><strong>'+esc(lesson.title)+'</strong><span>'+lesson.questions.length+'問 · 記録 '+n+'/'+lesson.questions.length+(store.progress(pack,lesson).earned?' · ★ 獲得済み':'')+'</span></button>';}).join('');}
-        host.innerHTML='<section class="lc-library"><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>毎週月曜に理科・社会を1セットずつ追加。答えを選んで調査しよう。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+' · 今週の調査</h3><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id===thisWeek))+'</div><details class="lc-past" open><summary>これまでの問題を復習</summary><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id!==thisWeek))+'</div></details><div>'+'</div>'+(available.length?'':'<p>この教科の教材は、まだありません。</p>')+(subjectSelection==='社会'?'<div data-japan-quest></div>':'')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></section>'+albumHtml();
+        host.innerHTML='<section class="lc-library"><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>毎週、理科と社会の新しいテーマを調査。2問で学んで、1問おさらい。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+' · 今週の調査</h3><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id===thisWeek))+'</div><details class="lc-past" open><summary>これまでの問題を復習</summary><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id!==thisWeek))+'</div></details><div>'+'</div>'+(available.some(e=>e.pack.id===thisWeek)?'':'<p>この年度の52週の教材がそろいました。これまでのテーマを選んで復習しよう。</p>')+(subjectSelection==='社会'?'<div data-japan-quest></div>':'')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></section>'+albumHtml();
         var todayButton=host.querySelector('[data-start-today]');if(todayButton)todayButton.onclick=function(){startToday();mount(host,false);host.scrollIntoView({block:'start'});};
         bindAlbum(host);
         if(subjectSelection==='社会'&&root.JapanQuest)root.JapanQuest.mount(host.querySelector('[data-japan-quest]'));
@@ -5613,7 +5807,7 @@ window.ReviewPacks=[
 (function(){
   "use strict";
 
-  var APP_VERSION = "2026.11.26.1";
+  var APP_VERSION = "2026.11.26.2";
 
   var STORAGE_KEY = "riho-study-state-v1";
   var state = {
@@ -5624,7 +5818,7 @@ window.ReviewPacks=[
     learningLogs: null, learningLogsLoading: false, quizLogs: null,
     usage: null, usageLoading: false,
     printLoading: false, printError: null, printExtract: null,
-    parentDarkMode: false,
+    colorMode: "light", settingsReturnView: "home", settingsReturnScroll: 0,
     childTheme: "gentle", showReading: true, focusedTaskId: null,
     calendarEvents: null, calendarLoading: false,
     weeklyReport: null, weeklyReportLoading: false,
@@ -5649,7 +5843,7 @@ window.ReviewPacks=[
         state.routines = parsed.routines || [];
         state.routineDone = parsed.routineDone || {};
       }
-      state.parentDarkMode = localStorage.getItem("riho-study-parent-dark") === "1";
+      state.colorMode = DisplaySettings.read(localStorage);
       var appearance = {};
       try { appearance = JSON.parse(localStorage.getItem("riho-study-appearance-v1") || "{}") || {}; } catch(e3) { /* 表示設定が壊れていても学習データの読み込みを続ける */ }
       if (["gentle", "calm", "planner"].indexOf(appearance.theme) !== -1) state.childTheme = appearance.theme;
@@ -5862,6 +6056,17 @@ window.ReviewPacks=[
     }catch(e){rewardError="スタンプを保存できませんでした。記録はそのままに、画面を開き直すともう一度ためします。";}
     finally{reconcilingRewards=false;}
   }
+  function applyColorMode(){
+    var dark=DisplaySettings.isDark(state.colorMode,window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.body.classList.toggle('dark-mode',dark);
+    document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#111d22':'#2F8F86');
+  }
+  function toggleSettings(){
+    var result=DisplaySettings.toggle(state,getVisibleTabs(),startupView(),window.scrollY);
+    render();requestAnimationFrame(function(){window.scrollTo(0,result.scroll);var b=document.getElementById('gotoParent');if(b)b.focus({preventScroll:true});});
+  }
+  function renderDisplaySettings(){return '<section class="display-settings"><label for="colorModeSelect">画面の明るさ</label><select id="colorModeSelect">'+[{id:'light',name:'ライト'},{id:'dark',name:'ダーク'},{id:'system',name:'端末の設定に合わせる'}].map(function(m){return '<option value="'+m.id+'" '+(state.colorMode===m.id?'selected':'')+'>'+m.name+'</option>';}).join('')+'</select><p>子ども画面と設定画面の両方に適用します。この端末に保存されます。</p><p id="colorModeStatus" role="status"></p></section>';}
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){if(state.colorMode==='system')applyColorMode();});
   function render(){
     reconcileRewards();
     if(state.view === "review" && window.ReviewStudy && ReviewStudy.isWorking() && document.querySelector("#reviewContent .rs-question")) return;
@@ -5873,8 +6078,8 @@ window.ReviewPacks=[
     if(state.view !== 'parent' && getVisibleTabs().indexOf(state.view) === -1) state.view = getVisibleTabs()[0];
     var app = document.getElementById("app");
     var isParent = state.view === "parent";
-    app.className = isParent ? ("app--parent" + (state.parentDarkMode ? " dark-mode" : "")) : "";
-    document.body.classList.toggle("parent-dark-bg", isParent && state.parentDarkMode);
+    app.className = isParent ? "app--parent" : "";
+    applyColorMode();
     document.body.classList.toggle("app--parent-active", isParent);
     document.body.dataset.theme = isParent ? "parent" : state.childTheme;
     document.body.classList.toggle("hide-reading", !isParent && !state.showReading);
@@ -6293,7 +6498,7 @@ window.ReviewPacks=[
   }
 
   function renderParent(){
-    var html = '<div class="parent-header"><button class="backlink" id="backToChild">← こどもの画面へ</button></div>';
+    var html = '<div class="topbar settings-topbar"><h1>設定</h1><button class="icon-btn" id="gotoParent" aria-label="設定を閉じて元の画面に戻る" aria-expanded="true" title="元の画面に戻る"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.2 2.2m8.4 8.4l2.2 2.2M5.6 18.4l2.2-2.2m8.4-8.4l2.2-2.2" stroke="currentColor" stroke-width="1.8"/></svg></button></div><div class="parent-header"><button class="backlink" id="backToChild">元の画面へ戻る</button></div>'+renderDisplaySettings();
     html += '<div class="parent-header" style="padding-top:2px;"><h1>おうちの人のページ</h1></div>';
     html += '<div class="parent-tabs">' + ptab('family','かんたん設定') + '<button class="ptab" id="parentAdvanced" aria-expanded="' + state.parentAdvanced + '">詳しい設定 ' + (state.parentAdvanced ? '−' : '＋') + '</button></div>';
     if (state.parentAdvanced || state.parentTab !== 'family') html += '<div class="parent-tabs">' +
@@ -6741,11 +6946,6 @@ window.ReviewPacks=[
       [{id:"gentle", name:"やさしい", text:"大きな文字とクエスト"}, {id:"calm", name:"すっきり", text:"落ち着いた色とシンプルな表示"}, {id:"planner", name:"手帳", text:"予定を見渡せるコンパクトな表示"}].map(function(t){
         return '<button data-theme-choice="' + t.id + '" aria-pressed="' + (state.childTheme === t.id) + '"><b>' + t.name + '</b><small>' + t.text + '</small></button>';
       }).join('') + '</div><label class="reading-setting"><input type="checkbox" id="readingToggle" ' + (state.showReading ? 'checked' : '') + '> ふりがなを表示する</label><p class="ri-sub">この端末に保存されます。ふりがなは登録済みの単語とAIが読みを付けた文章に対応します。</p><button class="btn-primary" data-tab="home">こども画面で確認する</button></div>';
-    html += '<div class="panel"><h2>表示設定</h2>' +
-      '<div class="form-row" style="flex-direction:row;align-items:center;justify-content:space-between;">' +
-      '<label style="margin:0;">保護者画面をダークモードにする</label>' +
-      '<input type="checkbox" id="darkModeToggle" ' + (state.parentDarkMode ? "checked" : "") + ' style="width:20px;height:20px;">' +
-      '</div><div class="ri-sub">こどもの画面には影響しません。</div></div>';
     html += renderTabOrderPanel();
     html += '<div class="panel"><h2>今後追加する機能</h2>' +
       '<div class="future-note">・ お直し（写真で撮影した答案のAI採点とヒント）<br>' +
@@ -6861,9 +7061,9 @@ window.ReviewPacks=[
       b.onclick = function(){ state.focusedTaskId = b.getAttribute("data-focus-task"); render(); };
     });
     var gp = document.getElementById("gotoParent");
-    if (gp) gp.onclick = function(){ state.view = "parent"; state.parentTab = 'family'; state.parentAdvanced = false; render(); };
+    if (gp) gp.onclick = toggleSettings;
     var back = document.getElementById("backToChild");
-    if (back) back.onclick = function(){ state.view = "home"; render(); };
+    if (back) back.onclick = toggleSettings;
 
     app.querySelectorAll("[data-tab]").forEach(function(b){
       b.onclick = function(){ state.view = b.getAttribute("data-tab"); render(); };
@@ -7008,13 +7208,8 @@ window.ReviewPacks=[
       };
     });
 
-    var darkModeToggle = document.getElementById("darkModeToggle");
-    if (darkModeToggle) darkModeToggle.onchange = function(){
-      state.parentDarkMode = darkModeToggle.checked;
-      try { localStorage.setItem("riho-study-parent-dark", state.parentDarkMode ? "1" : "0"); } catch(e){}
-      render();
-    };
-
+    var colorSelect=document.getElementById('colorModeSelect');
+    if(colorSelect)colorSelect.onchange=function(){try{DisplaySettings.save(localStorage,colorSelect.value);state.colorMode=colorSelect.value;applyColorMode();document.getElementById('colorModeStatus').textContent='この端末に保存しました';}catch(e){colorSelect.value=state.colorMode;document.getElementById('colorModeStatus').textContent='設定を保存できませんでした。もう一度ためしてください。';}};
     var loadUsage = document.getElementById("loadUsage");
     if (loadUsage) loadUsage.onclick = function(){
       state.usageLoading = true;

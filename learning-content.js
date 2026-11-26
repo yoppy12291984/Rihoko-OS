@@ -2,6 +2,7 @@
 (function(root){
   'use strict';
   var KEY='rihoko-learning-content-v1';
+  var Curriculum=typeof module!=='undefined'&&module.exports?require('./weekly-curriculum.js'):root.WeeklyCurriculum;
   var Adaptive=typeof module!=='undefined'&&module.exports?require('./adaptive-lessons.js'):root.AdaptiveLessons;
   var companions=[
     {id:'rihoko',name:'里穂子',at:0,image:'detective-girl-v1.png',role:'ひらめき探偵団のリーダー',line:'気づいたことが、次の手がかりになるよ。'},
@@ -46,7 +47,7 @@
   function create(storage,bundled,clock){
     clock=clock||function(){return new Date();};
     var weekCache=null,weekPacks=[];
-    function weekly(){var key=Adaptive.monday(clock());if(key!==weekCache){weekPacks=Adaptive.weekly(clock()).map(validate);weekCache=key;}return weekPacks;}
+    function weekly(){var key=Adaptive.monday(clock());if(key!==weekCache){weekPacks=Curriculum.packs(clock(),Adaptive).map(validate);weekCache=key;}return weekPacks;}
     var base=(bundled||[]).map(validate),retired=new Set(base.filter(function(p){return p.archived;}).map(function(p){return p.id;}));
     function read(){var s=JSON.parse(storage.getItem(KEY)||'{"packs":[],"responses":{}}');if(!s||!Array.isArray(s.packs)||!s.responses||typeof s.responses!=='object'||Array.isArray(s.responses))throw Error('学習記録を読み込めません。');return s;}
     function write(s){storage.setItem(KEY,JSON.stringify(s));}
@@ -126,9 +127,9 @@
         var subjects=['理科','社会'],icons=['葉','地図'];
         if(!subjects.includes(subjectSelection))subjectSelection='理科';
         var entries=[];packs.forEach(function(pack){pack.lessons.forEach(function(lesson){entries.push({pack:pack,lesson:lesson});});});
-        var available=entries.filter(function(e){return e.lesson.subject===subjectSelection;}),thisWeek='weekly-v1-'+Adaptive.monday();
+        var available=entries.filter(function(e){return e.lesson.subject===subjectSelection;}),thisWeek='weekly-v2-'+Adaptive.monday();
         function fileCards(list){return list.map(function(entry,i){var pack=entry.pack,lesson=entry.lesson,n=lesson.questions.filter(function(q){return !!store.response(pack,lesson,q).rating;}).length;return '<button class="lc-lesson lc-case-file" data-pack="'+esc(pack.id)+'" data-lesson="'+esc(lesson.id)+'"><small>'+esc(pack.title)+'</small><strong>'+esc(lesson.title)+'</strong><span>'+lesson.questions.length+'問 · 記録 '+n+'/'+lesson.questions.length+(store.progress(pack,lesson).earned?' · ★ 獲得済み':'')+'</span></button>';}).join('');}
-        host.innerHTML='<section class="lc-library"><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>毎週月曜に理科・社会を1セットずつ追加。答えを選んで調査しよう。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+' · 今週の調査</h3><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id===thisWeek))+'</div><details class="lc-past" open><summary>これまでの問題を復習</summary><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id!==thisWeek))+'</div></details><div>'+'</div>'+(available.length?'':'<p>この教科の教材は、まだありません。</p>')+(subjectSelection==='社会'?'<div data-japan-quest></div>':'')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></section>'+albumHtml();
+        host.innerHTML='<section class="lc-library"><header class="lc-detective-hero"><img src="detective-girl-v1.png" alt="女の子の探偵" width="112" height="112"><div><span class="lc-case-label">RIHOKO DETECTIVE NOTE</span><h2>ひらめき探偵ノート</h2><p>毎週、理科と社会の新しいテーマを調査。2問で学んで、1問おさらい。</p></div></header><nav class="lc-subjects" aria-label="教科を選ぶ">'+subjects.map(function(subject,i){return '<button data-subject="'+subject+'" aria-pressed="'+(subject===subjectSelection)+'"><span aria-hidden="true">'+icons[i]+'</span>'+subject+'</button>';}).join('')+'</nav><h3 class="lc-subject-title">'+esc(subjectSelection)+' · 今週の調査</h3><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id===thisWeek))+'</div><details class="lc-past" open><summary>これまでの問題を復習</summary><div class="lc-file-list">'+fileCards(available.filter(e=>e.pack.id!==thisWeek))+'</div></details><div>'+'</div>'+(available.some(e=>e.pack.id===thisWeek)?'':'<p>この年度の52週の教材がそろいました。これまでのテーマを選んで復習しよう。</p>')+(subjectSelection==='社会'?'<div data-japan-quest></div>':'')+'<p class="lc-note">一度に全部やらなくて大丈夫。気になるファイルを一つ開こう。</p></section>'+albumHtml();
         var todayButton=host.querySelector('[data-start-today]');if(todayButton)todayButton.onclick=function(){startToday();mount(host,false);host.scrollIntoView({block:'start'});};
         bindAlbum(host);
         if(subjectSelection==='社会'&&root.JapanQuest)root.JapanQuest.mount(host.querySelector('[data-japan-quest]'));

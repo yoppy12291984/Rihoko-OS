@@ -1,0 +1,39 @@
+/* Explicit dark palette: illustrations, maps and game piece colours stay intact. */
+body.dark-mode, body.dark-mode #app {
+  --bg:#111d22;--bg-parent:#111d22;--card:#1b2d33;--border:#40565e;
+  --ink:#edf6f5;--ink-soft:#b9cecf;--teal:#8ad4c5;--teal-soft:#244842;
+  --coral:#ffac94;--coral-soft:#51392f;--yellow:#f5d47d;--yellow-soft:#443e2a;
+  --hero-bg:#213c3e;--shadow:0 2px 10px #0004;color-scheme:dark;
+  color:var(--ink);background:var(--bg);background-image:none;
+}
+body.dark-mode .topbar,body.dark-mode .parent-header{background:var(--bg);color:var(--ink)}
+body.dark-mode :is(.panel,.todo-card,.event-card,.tabbar,.tabbar-inner,.home-shortcuts button,.calendar,.cal-grid,.sync-bar,.family-card,.rs-card,.rs-question,.rs-hero,.lc-library,.lc-question,.lc-passage,.lc-case-file,.lc-album,.lc-album-body,.lc-lesson-reward,.lc-today,.lc-mission,.lc-card-game,.lc-friend,.lc-badge-list li,.lc-solution,.lc-hint,.rs-solution,.rs-hint,.jq-panel,.jq-card,.hc-card){background:var(--card);color:var(--ink);border-color:var(--border);background-image:none}
+body.dark-mode :is(h1,h2,h3,h4,p,legend,label,summary,.todo-title,.ri-sub,.section-label,.lc-note,.lc-eyebrow,.lc-subject-title,.lc-case-label,.lc-partner-line,.rs-note,.greeting .hello,.greeting .date){color:inherit}
+body.dark-mode :is(.lc-detective-hero){background:#224b49;color:#f0faf6}
+body.dark-mode .lc-detective-hero :is(h2,p,span){color:#f0faf6}
+body.dark-mode :is(button,input,select,textarea){color:var(--ink);border-color:var(--border)}
+body.dark-mode button{background:#213b43}
+body.dark-mode button:hover{background:#304c54;color:var(--ink)}
+body.dark-mode :is(input,select,textarea){background:#15262d}
+body.dark-mode :is(.icon-btn,.ptab,.backlink,.lc-choices button,.lc-subjects button,.lc-ratings button,.rs-steps button,.rs-actions button,.rs-quiet,.lc-actions button,.lc-step-nav button,.lc-mission-steps button,.lc-answer-check button,.rs-question button,.rs-card button){background:#213b43;color:var(--ink);border:1px solid var(--border)}
+body.dark-mode :is(button[aria-pressed="true"],.ptab.active,.tab-item.active){background:#315c52;color:#effff9;border-color:#8ad4c5}
+body.dark-mode .lc-answer-check{background:#203b38;border-color:#65968a}
+body.dark-mode :is(.lc-correct,.lc-correct strong,.lc-correct p,.lc-correct small,.lc-correct-circle){color:#ffa9b1}
+body.dark-mode .lc-retry{background:#473b28;color:#ffe4a1}
+body.dark-mode :is(.learning-content,.lc-detective-question p,.lc-partner-line,.lc-mission-cheer,.learning-content header,.lc-subjects,.jq-home,.jq-result,.rs-hero,.home-history-nav,.empty){background:var(--card);background-image:none;color:var(--ink);border-color:var(--border)}
+body.dark-mode :is(.lc-case-file small,.lc-case-file span,.lc-album small,.lc-friend small,.lc-badge-list small){color:var(--ink-soft)}
+body.dark-mode :is(.rg-dialog,.rg-panel,.rg-header,.rg-overlay .rg-card,.rg-status){background:var(--card);color:var(--ink)}
+body.dark-mode :is(.hero-start,.btn-primary){background:#356e63;color:#fff}
+body.dark-mode .icon-btn svg *{stroke:var(--teal)}
+body.dark-mode :is(.cal-cell,.cal-day,.rally-cell,.rally-board,.rally-stamp,.rally-paper){background:var(--card);color:var(--ink);border-color:var(--border)}
+body.dark-mode .rally-stop :is(small,span){background:#23383d;color:#c6d9d6}
+body.dark-mode .rally-stop.next span{background:#55452c;color:#ffe3a3}
+body.dark-mode a{color:#9adee8}
+body.dark-mode :is(.sync-brand,.sync-brand strong,.hc-character span,.hc-bubble small){color:var(--ink-soft)}
+body.dark-mode :is(.hc-bubble,.reward-card,.sticker-album>div,.adventure-treasures){background:var(--card);background-image:none;color:var(--ink);border-color:var(--border)}
+body.dark-mode .hc-bubble:before{border-right-color:var(--card)}
+.display-settings{margin:12px 20px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--card)}
+.display-settings label{display:block;font-weight:700;margin-bottom:8px}.display-settings select{width:100%;min-height:48px}.display-settings p{font-size:14px;line-height:1.6}
+.settings-topbar{position:sticky;top:0;z-index:20;background:var(--bg-parent)}
+.settings-topbar .icon-btn{width:44px;height:44px;flex-shrink:0}
+@media print{body.dark-mode,body.dark-mode #app{color:#222!important;background:#fff!important}.display-settings,.settings-topbar{display:none!important}}
